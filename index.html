@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Quality Dashboard</title>
+    <style>
+        /* --- Reset & Base Styles --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f4f7fe;
+            color: #333;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* --- Sidebar Navigation --- */
+        .sidebar {
+            width: 250px;
+            background-color: #1a2035;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .nav-links a {
+            display: block;
+            color: #a0aec0;
+            text-decoration: none;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background-color: #2d3748;
+            color: #fff;
+            padding-left: 20px;
+        }
+
+        /* --- Main Content Area --- */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 24px;
+            color: #2d3748;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        .status-badge {
+            background-color: #48bb78;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        /* --- Dashboard Grid --- */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        /* --- Metric Cards --- */
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border-left: 5px solid transparent;
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            color: #718096;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .metric-unit {
+            font-size: 1rem;
+            color: #718096;
+            font-weight: 400;
+        }
+
+        .metric-status {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Specific Card Colors */
+        .ph-card { border-left-color: #4299e1; }
+        .ph-card .metric-value { color: #4299e1; }
+
+        .turbidity-card { border-left-color: #ed8936; }
+        .turbidity-card .metric-value { color: #ed8936; }
+
+        .tds-card { border-left-color: #9f7aea; }
+        .tds-card .metric-value { color: #9f7aea; }
+
+        /* --- Data Table Section --- */
+        .recent-data {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .recent-data h3 {
+            margin-bottom: 20px;
+            color: #2d3748;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            color: #718096;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* --- Mobile Responsive --- */
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; padding: 15px; }
+            .sidebar h2 { margin-bottom: 15px; text-align: left; }
+            .nav-links { display: flex; gap: 10px; overflow-x: auto; }
+            .nav-links a { white-space: nowrap; margin-bottom: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <h2>AquaMonitor</h2>
+        <div class="nav-links">
+            <a href="#" class="active">Overview</a>
+            <a href="#">History Logs</a>
+            <a href="#">Calibration</a>
+            <a href="#">Settings</a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <header>
+            <div>
+                <h1>Dashboard Overview</h1>
+                <p style="color: #718096; font-size: 0.9rem;">Real-time water quality monitoring</p>
+            </div>
+            <div class="user-profile">
+                <span>System Status:</span>
+                <span class="status-badge">Online</span>
+            </div>
+        </header>
+
+        <section class="dashboard-grid">
+            
+            <div class="card ph-card">
+                <div class="card-header">
+                    <span>pH Level</span>
+                    <span>💧</span>
+                </div>
+                <div class="metric-value">
+                    7.4 <span class="metric-unit">pH</span>
+                </div>
+                <div class="metric-status" style="color: #48bb78;">
+                    ● Optimal Range
+                </div>
+            </div>
+
+            <div class="card turbidity-card">
+                <div class="card-header">
+                    <span>Turbidity</span>
+                    <span>🌫️</span>
+                </div>
+                <div class="metric-value">
+                    2.1 <span class="metric-unit">NTU</span>
+                </div>
+                <div class="metric-status" style="color: #ed8936;">
+                    ● Slightly Elevated
+                </div>
+            </div>
+
+            <div class="card tds-card">
+                <div class="card-header">
+                    <span>TDS (Total Dissolved Solids)</span>
+                    <span>⚗️</span>
+                </div>
+                <div class="metric-value">
+                    145 <span class="metric-unit">ppm</span>
+                </div>
+                <div class="metric-status" style="color: #48bb78;">
+                    ● Safe Level
+                </div>
+            </div>
+
+        </section>
+
+        <section class="recent-data">
+            <h3>Recent Readings</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>pH Level</th>
+                        <th>Turbidity (NTU)</th>
+                        <th>TDS (ppm)</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>10:45 AM</td>
+                        <td>7.4</td>
+                        <td>2.1</td>
+                        <td>145</td>
+                        <td style="color: green;">Normal</td>
+                    </tr>
+                    <tr>
+                        <td>10:30 AM</td>
+                        <td>7.3</td>
+                        <td>1.9</td>
+                        <td>142</td>
+                        <td style="color: green;">Normal</td>
+                    </tr>
+                    <tr>
+                        <td>10:15 AM</td>
+                        <td>7.5</td>
+                        <td>2.5</td>
+                        <td>148</td>
+                        <td style="color: orange;">Check Filter</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+</body>
+</html>
