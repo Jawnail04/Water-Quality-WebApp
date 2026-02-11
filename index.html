@@ -491,129 +491,160 @@
     }
 
     // --- MAIN GENERATOR FUNCTION ---
-    window.generateAndSend = function() {
-        const tester = document.getElementById('testerName').value;
-        const school = document.getElementById('currentSchoolName').value;
-        const email = document.getElementById('currentSchoolEmail').value;
+            window.generateAndSend = async function() {
+                const tester = document.getElementById('testerName').value;
+                const school = document.getElementById('currentSchoolName').value;
+                const email = document.getElementById('currentSchoolEmail').value;
 
-        if(!tester) { alert("Please enter the name."); return; }
+                if(!tester) { alert("Please enter the name."); return; }
 
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
 
-        // --- PAGE 1 ---
-        addHeader(doc);
-        
-        doc.setFontSize(12);
-        doc.setFont(undefined, 'bold');
-        doc.text("I. Guide in Descriptive Values", 14, 60);
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'normal');
-        doc.text(`Reference for: ${school}`, 14, 65);
+                // ... (Keep all your existing PDF generation tables/content here) ...
+                // --- PAGE 1 ---
+                addHeader(doc);
+                
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.text("I. Guide in Descriptive Values", 14, 60);
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                doc.text(`Reference for: ${school}`, 14, 65);
 
-        doc.autoTable({
-            startY: 70,
-            head: [['Denomination', 'pH Range']],
-            body: [
-                ['Ultra acidic', '< 3.5'], ['Extremely acidic', '3.5-4.4'], ['Very strongly acidic', '4.5-5.0'],
-                ['Strongly acidic', '5.1-5.5'], ['Moderately acidic', '5.6-6.0'], ['Slightly acidic', '6.1-6.5'],
-                ['Neutral', '6.6-7.3'], ['Slightly alkaline', '7.4-7.8'], ['Moderately alkaline', '7.9-8.4'],
-                ['Strongly alkaline', '8.5-9.0'], ['Very strongly alkaline', '> 9.0'],
-            ],
-            theme: 'grid',
-            styles: { fontSize: 8, cellPadding: 1 },
-            tableWidth: 80,
-            margin: { left: 14 }
-        });
-        let finalY_pH = doc.lastAutoTable.finalY;
+                doc.autoTable({
+                    startY: 70,
+                    head: [['Denomination', 'pH Range']],
+                    body: [
+                        ['Ultra acidic', '< 3.5'], ['Extremely acidic', '3.5-4.4'], ['Very strongly acidic', '4.5-5.0'],
+                        ['Strongly acidic', '5.1-5.5'], ['Moderately acidic', '5.6-6.0'], ['Slightly acidic', '6.1-6.5'],
+                        ['Neutral', '6.6-7.3'], ['Slightly alkaline', '7.4-7.8'], ['Moderately alkaline', '7.9-8.4'],
+                        ['Strongly alkaline', '8.5-9.0'], ['Very strongly alkaline', '> 9.0'],
+                    ],
+                    theme: 'grid',
+                    styles: { fontSize: 8, cellPadding: 1 },
+                    tableWidth: 80,
+                    margin: { left: 14 }
+                });
+                let finalY_pH = doc.lastAutoTable.finalY;
 
-        doc.autoTable({
-            startY: 70, 
-            head: [['Level of TDS (mg/L)', 'Rating']],
-            body: [
-                ['<300', 'Excellent'], ['300-600', 'Good'], ['601-900', 'Fair'],
-                ['900-1200', 'Poor'], ['>1200', 'Unacceptable'],
-            ],
-            theme: 'grid',
-            styles: { fontSize: 8, cellPadding: 1 },
-            tableWidth: 80,
-            margin: { left: 110 } 
-        });
-        let finalY_TDS = doc.lastAutoTable.finalY;
+                doc.autoTable({
+                    startY: 70, 
+                    head: [['Level of TDS (mg/L)', 'Rating']],
+                    body: [
+                        ['<300', 'Excellent'], ['300-600', 'Good'], ['601-900', 'Fair'],
+                        ['900-1200', 'Poor'], ['>1200', 'Unacceptable'],
+                    ],
+                    theme: 'grid',
+                    styles: { fontSize: 8, cellPadding: 1 },
+                    tableWidth: 80,
+                    margin: { left: 110 } 
+                });
+                let finalY_TDS = doc.lastAutoTable.finalY;
 
-        let bottomStartY = Math.max(finalY_pH, finalY_TDS) + 10;
-        doc.autoTable({
-            startY: bottomStartY,
-            head: [
-                [
-                    { content: 'Turbidity Level', colSpan: 3, styles: { halign: 'center', fillColor: [220, 220, 220], textColor: 0 } }, 
-                    { content: 'TDS Level', colSpan: 2, styles: { halign: 'center', fillColor: [220, 220, 220], textColor: 0 } },
-                    { content: 'Hardness Level', colSpan: 2, styles: { halign: 'center', fillColor: [220, 220, 220], textColor: 0 } }
-                ],
-                ['Range (NTU)', 'Rating', 'Description', 'Range (mg/L)', 'Rating', 'Range (mg/L)', 'Rating']
-            ],
-            body: [
-                ['< 5', 'Excellent', 'Very clear', '<300', 'Excellent', '0-25', 'Very soft'],
-                ['5-10', 'Good', 'Clear', '300-600', 'Good', '25-50', 'Soft'],
-                ['10-25', 'Fair', 'Slightly clear', '600-900', 'Fair', '50-100', 'Mod. soft'],
-                ['25-50', 'Marginal', 'Mod. cloudy', '900-1,200', 'Marginal', '100-150', 'Slightly hard'],
-                ['50-100', 'Poor', 'Cloudy', '1,200-1,500', 'Poor', '150-200', 'Mod. hard'],
-                ['100-500', '', 'Very cloudy', '>1,500', 'Unacceptable', '200-300', 'Hard'],
-                ['500-1000', 'Unacceptable', 'Muddy', '', '', '300-600', 'Very hard'],
-                ['>1000', '', 'Very muddy', '', '', '>600', 'Ext. hard']
-            ],
-            theme: 'grid',
-            styles: { fontSize: 7, cellPadding: 1.5 },
-            margin: { left: 10, right: 10 }
-        });
+                let bottomStartY = Math.max(finalY_pH, finalY_TDS) + 10;
+                doc.autoTable({
+                    startY: bottomStartY,
+                    head: [
+                        [
+                            { content: 'Turbidity Level', colSpan: 3, styles: { halign: 'center', fillColor: [220, 220, 220], textColor: 0 } }, 
+                            { content: 'TDS Level', colSpan: 2, styles: { halign: 'center', fillColor: [220, 220, 220], textColor: 0 } },
+                            { content: 'Hardness Level', colSpan: 2, styles: { halign: 'center', fillColor: [220, 220, 220], textColor: 0 } }
+                        ],
+                        ['Range (NTU)', 'Rating', 'Description', 'Range (mg/L)', 'Rating', 'Range (mg/L)', 'Rating']
+                    ],
+                    body: [
+                        ['< 5', 'Excellent', 'Very clear', '<300', 'Excellent', '0-25', 'Very soft'],
+                        ['5-10', 'Good', 'Clear', '300-600', 'Good', '25-50', 'Soft'],
+                        ['10-25', 'Fair', 'Slightly clear', '600-900', 'Fair', '50-100', 'Mod. soft'],
+                        ['25-50', 'Marginal', 'Mod. cloudy', '900-1,200', 'Marginal', '100-150', 'Slightly hard'],
+                        ['50-100', 'Poor', 'Cloudy', '1,200-1,500', 'Poor', '150-200', 'Mod. hard'],
+                        ['100-500', '', 'Very cloudy', '>1,500', 'Unacceptable', '200-300', 'Hard'],
+                        ['500-1000', 'Unacceptable', 'Muddy', '', '', '300-600', 'Very hard'],
+                        ['>1000', '', 'Very muddy', '', '', '>600', 'Ext. hard']
+                    ],
+                    theme: 'grid',
+                    styles: { fontSize: 7, cellPadding: 1.5 },
+                    margin: { left: 10, right: 10 }
+                });
 
-        addFooter(doc, 1);
+                addFooter(doc, 1);
 
-        // --- PAGE 2 ---
-        doc.addPage();
-        addHeader(doc);
+                // --- PAGE 2 ---
+                doc.addPage();
+                addHeader(doc);
 
-        doc.setFontSize(12);
-        doc.setFont(undefined, 'bold');
-        doc.text(`II. Water Quality Test Results - ${school}`, 14, 60);
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.text(`II. Water Quality Test Results - ${school}`, 14, 60);
 
-        const tableData = [
-            ["pH Level", "7.4 pH", "Slightly Alkaline"],
-            ["Total Dissolved Solid", "145 mg/L", "Excellent"],
-            ["Turbidity Level", "2.1 NTU", "Excellent"]
-        ];
+                const tableData = [
+                    ["pH Level", "7.4 pH", "Slightly Alkaline"],
+                    ["Total Dissolved Solid", "145 mg/L", "Excellent"],
+                    ["Turbidity Level", "2.1 NTU", "Excellent"]
+                ];
 
-        doc.autoTable({
-            startY: 65,
-            head: [['Parameter', 'Result', 'Descriptive Value']],
-            body: tableData,
-            theme: 'grid',
-            headStyles: { fillColor: [50, 50, 50], textColor: [255, 255, 255] },
-            styles: { fontSize: 10, cellPadding: 3 }
-        });
+                doc.autoTable({
+                    startY: 65,
+                    head: [['Parameter', 'Result', 'Descriptive Value']],
+                    body: tableData,
+                    theme: 'grid',
+                    headStyles: { fillColor: [50, 50, 50], textColor: [255, 255, 255] },
+                    styles: { fontSize: 10, cellPadding: 3 }
+                });
 
-        let sigY = doc.lastAutoTable.finalY + 20;
-        doc.setFont(undefined, 'normal');
-        doc.text("REMARKS : _________________________________________________", 14, sigY);
-        doc.text("Tested by:", 14, sigY + 25);
-        doc.setFont(undefined, 'bold');
-        doc.text(tester.toUpperCase(), 14, sigY + 35); 
-        doc.line(14, sigY + 36, 80, sigY + 36); 
+                let sigY = doc.lastAutoTable.finalY + 20;
+                doc.setFont(undefined, 'normal');
+                doc.text("REMARKS : _________________________________________________", 14, sigY);
+                doc.text("Tested by:", 14, sigY + 25);
+                doc.setFont(undefined, 'bold');
+                doc.text(tester.toUpperCase(), 14, sigY + 35); 
+                doc.line(14, sigY + 36, 80, sigY + 36); 
 
-        addFooter(doc, 2);
+                addFooter(doc, 2);
+                // ... (End of PDF generation content) ...
 
-        const filename = `${school}_Water_Report.pdf`;
-        doc.save(filename);
+                // -----------------------------------------------------------
+                // NEW LOGIC: WEB SHARE API (Mobile) vs DOWNLOAD (Desktop)
+                // -----------------------------------------------------------
+                const filename = `${school}_Water_Report.pdf`;
+                const subject = `Water Quality Report: ${school}`;
+                const bodyText = `Hello,\n\nPlease find the attached Water Quality Report for ${school}.\n\nTested by: ${tester}`;
 
-        isWaitingForReturn = true;
-        const subject = `Water Quality Report: ${school}`;
-        const body = `Hello,\n\nPlease find the attached Water Quality Report for ${school}.\n\nTested by: ${tester}\n\n(Note: Attached manually)`;
-        const gmailURL = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-        window.open(gmailURL, '_blank');
-        
-        const btnElement = document.querySelector('.modal .btn-primary');
-        btnElement.innerText = "Check New Tab...";
-    }
+                // 1. Generate the PDF as a Blob (Virtual File)
+                const pdfBlob = doc.output('blob');
+                const file = new File([pdfBlob], filename, { type: "application/pdf" });
+
+                // 2. Check if the browser supports sharing FILES (Mobile/Tablet usually)
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    try {
+                        await navigator.share({
+                            title: subject,
+                            text: bodyText,
+                            files: [file] // This attaches the PDF automatically!
+                        });
+                        
+                        // After successful share
+                        alert("Report shared successfully!");
+                        closeModal();
+                        
+                    } catch (err) {
+                        // User cancelled the share or an error occurred
+                        console.log("Share cancelled/failed", err);
+                    }
+                } 
+                // 3. Fallback for Desktop (or browsers that don't support sharing files)
+                else {
+                    doc.save(filename); // Download the file
+                    
+                    isWaitingForReturn = true;
+                    const gmailURL = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText + "\n\n(Note: Please attach the downloaded PDF manually)")}`;
+                    window.open(gmailURL, '_blank');
+                    
+                    const btnElement = document.querySelector('.modal .btn-primary');
+                    if(btnElement) btnElement.innerText = "Check New Tab...";
+                }
+            }
     </script>
 </body>
 </html>
