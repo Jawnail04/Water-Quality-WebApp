@@ -4,191 +4,165 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Water Quality Dashboard</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+
     <style>
-        /* --- Reset & Base Styles --- */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        /* --- CSS STYLES --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        body { 
+            background: linear-gradient(135deg, #f4f7fe 0%, #e2e8f0 100%); 
+            color: #333; 
+            display: flex; 
+            min-height: 100vh; 
+            overflow-x: hidden; /* Prevent horizontal scroll on body */
+        }
+        
+        /* --- SIDEBAR --- */
+        .sidebar { 
+            width: 250px; 
+            background-color: #1a2035; 
+            color: #fff; 
+            display: flex; 
+            flex-direction: column; 
+            padding: 20px; 
+            transition: all 0.3s ease;
+            flex-shrink: 0; /* Prevent sidebar from shrinking */
+        }
+        .sidebar h2 { text-align: center; margin-bottom: 40px; font-weight: 600; letter-spacing: 1px; }
+        .nav-links a { display: block; color: #a0aec0; text-decoration: none; padding: 15px; margin-bottom: 10px; border-radius: 8px; transition: 0.3s; }
+        .nav-links a:hover, .nav-links a.active { background-color: #2d3748; color: #fff; padding-left: 20px; }
+        
+        /* --- MAIN CONTENT --- */
+        .main-content { 
+            flex: 1; 
+            padding: 30px; 
+            overflow-y: auto; 
+            position: relative; 
+            width: 100%; /* Ensure it takes full width remaining */
+        }
+        
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }
+        header h1 { font-size: 24px; color: #2d3748; }
+        
+        .user-profile { display: flex; align-items: center; gap: 10px; font-weight: 500; }
+        .status-badge { background-color: #48bb78; color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; white-space: nowrap; }
+        
+        .dashboard-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 25px; 
+            margin-bottom: 30px; 
         }
 
-        body {
-            background-color: #f4f7fe;
-            color: #333;
-            display: flex;
-            min-height: 100vh;
+        /* --- CARD STYLES --- */
+        .card { 
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+            border-radius: 20px; 
+            padding: 25px; 
+            position: relative; 
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between; 
+            min-height: 180px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.15); }
+        .card-content { position: relative; z-index: 10; }
+
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: #4a5568; font-size: 0.9rem; text-transform: uppercase; font-weight: 700; }
+        .metric-value { font-size: 2.5rem; font-weight: 800; margin-bottom: 5px; }
+        .metric-unit { font-size: 1rem; color: #4a5568; font-weight: 500; }
+        .metric-status { margin-top: 15px; font-size: 0.9rem; font-weight: 600; }
+        
+        /* --- WAVE ANIMATION --- */
+        .wave-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 45%; overflow: hidden; border-radius: 0 0 20px 20px; }
+        .wave { position: absolute; bottom: 0; left: 0; width: 200%; height: 100%; transform-origin: center bottom; }
+
+        /* FIX: Corrected URL Encoded SVG for Cross-Browser Compatibility */
+        .wave-mask {
+            -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 120' xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none'%3E%3Cpath d='M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z' fill='%23000000'/%3E%3C/svg%3E");
+            mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 120' xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none'%3E%3Cpath d='M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z' fill='%23000000'/%3E%3C/svg%3E");
+            -webkit-mask-size: 50% 100%; mask-size: 50% 100%;
+            -webkit-mask-repeat: repeat-x; mask-repeat: repeat-x;
+            transform: scaleY(-1);
         }
 
-        /* --- Sidebar Navigation --- */
-        .sidebar {
-            width: 250px;
-            background-color: #1a2035;
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            transition: all 0.3s;
-        }
+        .wave1 { opacity: 0.3; animation: moveWave 12s linear infinite; }
+        .wave2 { opacity: 0.5; animation: moveWave 7s linear infinite; bottom: -5px; }
+        @keyframes moveWave { 0% { transform: translateX(0) scaleY(-1); } 100% { transform: translateX(-50%) scaleY(-1); } }
 
-        .sidebar h2 {
-            text-align: center;
-            margin-bottom: 40px;
-            font-weight: 600;
-            letter-spacing: 1px;
-        }
+        .ph-card .wave-mask { background-color: #4299e1; } .ph-card .metric-value { color: #2b6cb0; }
+        .turbidity-card .wave-mask { background-color: #ed8936; } .turbidity-card .metric-value { color: #c05621; }
+        .tds-card .wave-mask { background-color: #9f7aea; } .tds-card .metric-value { color: #6b46c1; }
 
-        .nav-links a {
-            display: block;
-            color: #a0aec0;
-            text-decoration: none;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            transition: 0.3s;
-        }
-
-        .nav-links a:hover, .nav-links a.active {
-            background-color: #2d3748;
-            color: #fff;
-            padding-left: 20px;
-        }
-
-        /* --- Main Content Area --- */
-        .main-content {
-            flex: 1;
-            padding: 30px;
-            overflow-y: auto;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        header h1 {
-            font-size: 24px;
-            color: #2d3748;
-        }
-
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 500;
-        }
-
-        .status-badge {
-            background-color: #48bb78;
-            color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-        }
-
-        /* --- Dashboard Grid --- */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            margin-bottom: 30px;
-        }
-
-        /* --- Metric Cards --- */
-        .card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            border-left: 5px solid transparent;
-            transition: transform 0.2s;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            color: #718096;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            font-weight: 700;
-        }
-
-        .metric-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .metric-unit {
-            font-size: 1rem;
-            color: #718096;
-            font-weight: 400;
-        }
-
-        .metric-status {
-            margin-top: 15px;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        /* Specific Card Colors */
-        .ph-card { border-left-color: #4299e1; }
-        .ph-card .metric-value { color: #4299e1; }
-
-        .turbidity-card { border-left-color: #ed8936; }
-        .turbidity-card .metric-value { color: #ed8936; }
-
-        .tds-card { border-left-color: #9f7aea; }
-        .tds-card .metric-value { color: #9f7aea; }
-
-        /* --- Data Table Section --- */
-        .recent-data {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        }
-
-        .recent-data h3 {
-            margin-bottom: 20px;
-            color: #2d3748;
-        }
-
-        table {
+        /* --- DATA SECTION --- */
+        .data-section { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); margin-bottom: 30px; }
+        
+        /* Table Responsiveness */
+        .table-wrapper {
             width: 100%;
-            border-collapse: collapse;
+            overflow-x: auto; /* Enables horizontal scroll on mobile */
+            -webkit-overflow-scrolling: touch;
         }
 
-        th, td {
-            text-align: left;
-            padding: 15px;
-            border-bottom: 1px solid #e2e8f0;
-        }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; /* Forces table to keep shape and scroll */ }
+        th, td { text-align: left; padding: 15px; border-bottom: 1px solid #e2e8f0; }
+        th { color: #718096; font-weight: 600; font-size: 0.9rem; white-space: nowrap; }
+        
+        .add-school-form { background-color: #f7fafc; padding: 15px; border-radius: 10px; margin-bottom: 20px; display: flex; gap: 15px; align-items: flex-end; border: 1px solid #e2e8f0; flex-wrap: wrap; }
+        .form-group { flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 200px; }
+        .form-group label { font-size: 0.85rem; color: #4a5568; font-weight: 600; }
+        .form-group input { padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; outline: none; width: 100%; }
+        .form-group input:focus { border-color: #4299e1; }
+        
+        .btn { padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: opacity 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 5px; white-space: nowrap; }
+        .btn:hover { opacity: 0.9; }
+        .btn-primary { background-color: #3182ce; color: white; }
+        .btn-email { background-color: #4299e1; color: white; font-size: 0.8rem; padding: 6px 12px; }
+        .btn-delete { background-color: #e53e3e; color: white; font-size: 0.8rem; padding: 6px 12px; }
+        .action-cell { display: flex; gap: 8px; }
 
-        th {
-            color: #718096;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
+        /* --- MODAL --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
+        .modal { background: white; padding: 30px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .modal-buttons { margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px; }
+        .btn-cancel { background-color: #718096; color: white; }
 
-        /* --- Mobile Responsive --- */
-        @media (max-width: 768px) {
+        /* --- MEDIA QUERIES (RESPONSIVE) --- */
+        @media (max-width: 900px) {
             body { flex-direction: column; }
-            .sidebar { width: 100%; padding: 15px; }
-            .sidebar h2 { margin-bottom: 15px; text-align: left; }
-            .nav-links { display: flex; gap: 10px; overflow-x: auto; }
-            .nav-links a { white-space: nowrap; margin-bottom: 0; }
+            
+            /* Turn Sidebar into Top Bar */
+            .sidebar { 
+                width: 100%; 
+                flex-direction: row; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 15px 20px;
+            }
+            .sidebar h2 { margin-bottom: 0; font-size: 1.2rem; }
+            .nav-links { display: flex; gap: 10px; margin-top: 0; }
+            .nav-links a { margin-bottom: 0; padding: 8px 12px; font-size: 0.9rem; }
+            .nav-links a:hover, .nav-links a.active { padding-left: 12px; } /* Reset hover animation */
+            
+            .main-content { padding: 20px; }
+            .add-school-form { flex-direction: column; align-items: stretch; }
+            .btn { width: 100%; } /* Full width buttons on mobile */
+            .action-cell .btn { width: auto; } /* Keep table buttons normal */
+        }
+
+        @media (max-width: 480px) {
+            .sidebar { flex-direction: column; gap: 15px; }
+            header { flex-direction: column; align-items: flex-start; }
+            .user-profile { width: 100%; justify-content: space-between; }
         }
     </style>
 </head>
@@ -199,8 +173,6 @@
         <div class="nav-links">
             <a href="#" class="active">Overview</a>
             <a href="#">History Logs</a>
-            <a href="#">Calibration</a>
-            <a href="#">Settings</a>
         </div>
     </nav>
 
@@ -219,84 +191,429 @@
         <section class="dashboard-grid">
             
             <div class="card ph-card">
-                <div class="card-header">
-                    <span>pH Level</span>
-                    <span>💧</span>
+                <div class="wave-container">
+                    <div class="wave wave-mask wave1"></div>
+                    <div class="wave wave-mask wave2"></div>
                 </div>
-                <div class="metric-value">
-                    7.4 <span class="metric-unit">pH</span>
-                </div>
-                <div class="metric-status" style="color: #48bb78;">
-                    ● Optimal Range
+                
+                <div class="card-content">
+                    <div class="card-header"><span>pH Level</span><span>💧</span></div>
+                    <div class="metric-value">7.4 <span class="metric-unit">pH</span></div>
+                    <div class="metric-status" style="color: #2f855a;">● Optimal Range</div>
                 </div>
             </div>
 
             <div class="card turbidity-card">
-                <div class="card-header">
-                    <span>Turbidity</span>
-                    <span>🌫️</span>
+                <div class="wave-container">
+                    <div class="wave wave-mask wave1"></div>
+                    <div class="wave wave-mask wave2"></div>
                 </div>
-                <div class="metric-value">
-                    2.1 <span class="metric-unit">NTU</span>
-                </div>
-                <div class="metric-status" style="color: #ed8936;">
-                    ● Slightly Elevated
+
+                <div class="card-content">
+                    <div class="card-header"><span>Turbidity</span><span>🌫️</span></div>
+                    <div class="metric-value">2.1 <span class="metric-unit">NTU</span></div>
+                    <div class="metric-status" style="color: #c05621;">● Slightly Elevated</div>
                 </div>
             </div>
 
             <div class="card tds-card">
-                <div class="card-header">
-                    <span>TDS (Total Dissolved Solids)</span>
-                    <span>⚗️</span>
+                <div class="wave-container">
+                    <div class="wave wave-mask wave1"></div>
+                    <div class="wave wave-mask wave2"></div>
                 </div>
-                <div class="metric-value">
-                    145 <span class="metric-unit">ppm</span>
-                </div>
-                <div class="metric-status" style="color: #48bb78;">
-                    ● Safe Level
+
+                <div class="card-content">
+                    <div class="card-header"><span>TDS (Solids)</span><span>⚗️</span></div>
+                    <div class="metric-value">145 <span class="metric-unit">ppm</span></div>
+                    <div class="metric-status" style="color: #2f855a;">● Safe Level</div>
                 </div>
             </div>
 
         </section>
 
-        <section class="recent-data">
-            <h3>Recent Readings</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Time</th>
-                        <th>pH Level</th>
-                        <th>Turbidity (NTU)</th>
-                        <th>TDS (ppm)</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>10:45 AM</td>
-                        <td>7.4</td>
-                        <td>2.1</td>
-                        <td>145</td>
-                        <td style="color: green;">Normal</td>
-                    </tr>
-                    <tr>
-                        <td>10:30 AM</td>
-                        <td>7.3</td>
-                        <td>1.9</td>
-                        <td>142</td>
-                        <td style="color: green;">Normal</td>
-                    </tr>
-                    <tr>
-                        <td>10:15 AM</td>
-                        <td>7.5</td>
-                        <td>2.5</td>
-                        <td>148</td>
-                        <td style="color: orange;">Check Filter</td>
-                    </tr>
-                </tbody>
-            </table>
+        <section class="data-section">
+            <h3>Recent Sensor Readings</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr><th>Time</th><th>pH Level</th><th>Turbidity (NTU)</th><th>TDS (ppm)</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>10:45 AM</td><td>7.4</td><td>2.1</td><td>145</td><td style="color: green;">Normal</td></tr>
+                        <tr><td>10:30 AM</td><td>7.3</td><td>1.9</td><td>142</td><td style="color: green;">Normal</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="data-section">
+            <h3>School Testing Registry</h3>
+            <div class="add-school-form">
+                <div class="form-group"><label>Name of School</label><input type="text" id="newSchoolName" placeholder="e.g. Lincoln High"></div>
+                <div class="form-group"><label>School Head</label><input type="text" id="newSchoolHead" placeholder="e.g. Mr. Doe"></div>
+                <div class="form-group"><label>Email</label><input type="email" id="newSchoolEmail" placeholder="e.g. head@school.edu"></div>
+                <button class="btn btn-primary" onclick="addSchoolToDB()">+ Add School</button>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr><th>School Name</th><th>School Head</th><th>Email</th><th>Water Status</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody id="schoolTableBody">
+                        <tr><td colspan="5">Loading data from Firebase...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </section>
     </main>
 
+    <div class="modal-overlay" id="reportModal">
+        <div class="modal">
+            <h3>Generate Water Quality Report</h3>
+            <p style="margin-bottom: 15px; font-size: 0.9rem; color: #666;">
+                The PDF (2 Pages) will download, and Gmail will open in a <b>new tab</b>.
+                <br><br>
+                <b>Page 1:</b> Descriptive Guide<br>
+                <b>Page 2:</b> Test Results & Signatures
+            </p>
+            
+            <div class="form-group">
+                <label>Tested By (Name):</label>
+                <input type="text" id="testerName" placeholder="Juan Dela Cruz">
+            </div>
+
+            <input type="hidden" id="currentSchoolName">
+            <input type="hidden" id="currentSchoolEmail">
+
+            <div class="modal-buttons">
+                <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="generateAndSend()">Download & Open Gmail</button>
+            </div>
+        </div>
+    </div>
+
+    <img id="pdf-logo-hidden" src="/img/kagawaran_logo.png" style="display: none;" crossorigin="anonymous">
+    <img id="footer-logo-deped" src="img/deped_logo.png" style="display: none;" crossorigin="anonymous">
+    <img id="footer-logo-bagong" src="img/Bagong_Pilipinas_logo.png" style="display: none;" crossorigin="anonymous">
+    <img id="footer-logo-mabalacat" src="img/mabalacat_city_logo.png" style="display: none;" crossorigin="anonymous">
+
+    <script type="module">
+    // ---------------------------------------------------------
+    // 1. FIREBASE CONFIGURATION
+    // ---------------------------------------------------------
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAxWmm5YsLjnwatHOVImrpIHAxicbHWYuw",
+        authDomain: "water-quality-db-d2dff.firebaseapp.com",
+        projectId: "water-quality-db-d2dff",
+        storageBucket: "water-quality-db-d2dff.firebasestorage.app",
+        messagingSenderId: "499791448587",
+        appId: "1:499791448587:web:a11b55aa1af45bdf78550e",
+        measurementId: "G-5L40CDJPG5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const schoolsCol = collection(db, "Schools");
+
+    // ---------------------------------------------------------
+    // 2. REAL-TIME DATA LISTENER
+    // ---------------------------------------------------------
+    onSnapshot(schoolsCol, (snapshot) => {
+        const tbody = document.getElementById("schoolTableBody");
+        tbody.innerHTML = ""; 
+
+        if (snapshot.empty) {
+            tbody.innerHTML = "<tr><td colspan='5'>No schools found.</td></tr>";
+            return;
+        }
+
+        snapshot.forEach((docSnap) => {
+            const school = docSnap.data();
+            const schoolId = docSnap.id;
+            const statusHtml = `<td style="color: #48bb78; font-weight:bold;">Safe</td>`;
+
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${school.schoolName || "N/A"}</td>
+                <td>${school.schoolHead || "N/A"}</td>
+                <td>${school.email || "N/A"}</td>
+                ${statusHtml}
+                <td class="action-cell">
+                    <button class="btn btn-email" onclick="openReportModal('${school.schoolName}', '${school.email}')">📧 Send Report</button>
+                    <button class="btn btn-delete" onclick="deleteSchool('${schoolId}')">🗑️</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }, (error) => {
+        const tbody = document.getElementById("schoolTableBody");
+        tbody.innerHTML = `<tr><td colspan='5' style='color: red;'>Error: ${error.message}</td></tr>`;
+    });
+
+    // ---------------------------------------------------------
+    // 3. DATABASE FUNCTIONS
+    // ---------------------------------------------------------
+    window.addSchoolToDB = async function() {
+        const name = document.getElementById('newSchoolName').value;
+        const head = document.getElementById('newSchoolHead').value;
+        const email = document.getElementById('newSchoolEmail').value;
+
+        if(!name || !head || !email) { alert("Please fill in all fields."); return; }
+
+        try {
+            await addDoc(schoolsCol, {
+                schoolName: name, schoolHead: head, email: email, createdAt: new Date()
+            });
+            document.getElementById('newSchoolName').value = "";
+            document.getElementById('newSchoolHead').value = "";
+            document.getElementById('newSchoolEmail').value = "";
+            alert("School added successfully!");
+        } catch (e) {
+            alert("Error saving to database: " + e.message);
+        }
+    }
+
+    window.deleteSchool = async function(docId) {
+        if(confirm("Delete this school?")) {
+            try { await deleteDoc(doc(db, "Schools", docId)); } 
+            catch (e) { alert("Failed to delete: " + e.message); }
+        }
+    }
+
+    // ---------------------------------------------------------
+    // 4. REPORT LOGIC
+    // ---------------------------------------------------------
+    let isWaitingForReturn = false; 
+
+    window.openReportModal = function(schoolName, schoolEmail) {
+        document.getElementById('currentSchoolName').value = schoolName;
+        document.getElementById('currentSchoolEmail').value = schoolEmail;
+        document.getElementById('reportModal').style.display = 'flex';
+    }
+
+    window.closeModal = function() {
+        document.getElementById('reportModal').style.display = 'none';
+        document.getElementById('testerName').value = ''; 
+    }
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible" && isWaitingForReturn) {
+            isWaitingForReturn = false; 
+            setTimeout(() => {
+                alert("Welcome back!\n\nThe dashboard is ready for the next school.");
+                closeModal(); 
+                const btnElement = document.querySelector('.modal .btn-primary');
+                if(btnElement) btnElement.innerText = "Download & Open Gmail";
+            }, 500);
+        }
+    });
+
+    // --- HELPER: DRAW HEADER ---
+    function addHeader(doc) {
+        const imgElement = document.getElementById('pdf-logo-hidden');
+        if (imgElement && imgElement.complete && imgElement.naturalHeight !== 0) {
+            doc.addImage(imgElement, 'PNG', 95, 5, 20, 20); 
+        }
+
+        doc.setFontSize(10);
+        doc.text("Republic of the Philippines", 105, 30, null, null, "center");
+        doc.text("Department of Education", 105, 35, null, null, "center");
+        doc.text("Region III", 105, 40, null, null, "center");
+        doc.setFontSize(11);
+        doc.setFont(undefined, 'bold');
+        doc.text("Division of Mabalacat City", 105, 45, null, null, "center");
+        doc.setLineWidth(0.5); doc.line(10, 50, 200, 50); 
+        doc.setFont(undefined, 'normal');
+    }
+
+    // --- HELPER: DRAW FOOTER ---
+    function addFooter(doc, pageNum) {
+        const pageHeight = doc.internal.pageSize.height || doc.internal.pageSize.getHeight();
+        const footerY = pageHeight - 35; 
+
+        doc.setFontSize(9);
+        doc.setTextColor(50, 50, 50); 
+        doc.setFont(undefined, 'italic');
+        doc.text('"Serve with courtesy, act with integrity."', 105, footerY, null, null, "center");
+
+        doc.setDrawColor(50, 50, 50); 
+        doc.setLineWidth(0.7);
+        doc.line(10, footerY + 2, 200, footerY + 2);
+        
+        const logoY = footerY + 4;
+        const logoH = 12; 
+        
+        const logoDeped = document.getElementById('footer-logo-deped');
+        if (logoDeped && logoDeped.complete && logoDeped.naturalHeight !== 0) {
+            doc.addImage(logoDeped, 'PNG', 10, logoY, 22, logoH - 2); 
+        }
+
+        const logoBagong = document.getElementById('footer-logo-bagong');
+        if (logoBagong && logoBagong.complete && logoBagong.naturalHeight !== 0) {
+            doc.addImage(logoBagong, 'JPEG', 34, logoY, 10, 10); 
+        }
+
+        const logoMabalacat = document.getElementById('footer-logo-mabalacat');
+        if (logoMabalacat && logoMabalacat.complete && logoMabalacat.naturalHeight !== 0) {
+            doc.addImage(logoMabalacat, 'PNG', 46, logoY, 10, 10); 
+        }
+
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(7);
+        doc.setTextColor(0, 0, 0);
+
+        doc.text("P. Burgos St., Poblacion, Mabalacat City, Pampanga, 2010", 200, logoY + 3, null, null, "right");
+        doc.text("Telephone No.: (045) 402-7534", 200, logoY + 7, null, null, "right");
+
+        const bottomRowY = logoY + 12; 
+        
+        doc.setFillColor(66, 103, 178); 
+        doc.rect(58, bottomRowY - 2, 4, 4, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(7);
+        doc.text("f", 59.2, bottomRowY + 1); 
+        
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(7);
+        doc.text("DepEd Tayo Division of Mabalacat", 64, bottomRowY + 1);
+
+        doc.text("✉", 115, bottomRowY + 1); 
+        doc.text("mabalacat.city@deped.gov.ph", 118, bottomRowY + 1);
+
+        doc.text("🌐", 160, bottomRowY + 1);
+        doc.text("www.depedmabalacat.org", 164, bottomRowY + 1);
+
+        doc.text("Page " + pageNum + " of 3", 200, pageHeight - 5, null, null, "right");
+    }
+
+    // --- MAIN GENERATOR FUNCTION ---
+    window.generateAndSend = function() {
+        const tester = document.getElementById('testerName').value;
+        const school = document.getElementById('currentSchoolName').value;
+        const email = document.getElementById('currentSchoolEmail').value;
+
+        if(!tester) { alert("Please enter the name."); return; }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // --- PAGE 1 ---
+        addHeader(doc);
+        
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'bold');
+        doc.text("I. Guide in Descriptive Values", 14, 60);
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        doc.text(`Reference for: ${school}`, 14, 65);
+
+        doc.autoTable({
+            startY: 70,
+            head: [['Denomination', 'pH Range']],
+            body: [
+                ['Ultra acidic', '< 3.5'], ['Extremely acidic', '3.5-4.4'], ['Very strongly acidic', '4.5-5.0'],
+                ['Strongly acidic', '5.1-5.5'], ['Moderately acidic', '5.6-6.0'], ['Slightly acidic', '6.1-6.5'],
+                ['Neutral', '6.6-7.3'], ['Slightly alkaline', '7.4-7.8'], ['Moderately alkaline', '7.9-8.4'],
+                ['Strongly alkaline', '8.5-9.0'], ['Very strongly alkaline', '> 9.0'],
+            ],
+            theme: 'grid',
+            styles: { fontSize: 8, cellPadding: 1 },
+            tableWidth: 80,
+            margin: { left: 14 }
+        });
+        let finalY_pH = doc.lastAutoTable.finalY;
+
+        doc.autoTable({
+            startY: 70, 
+            head: [['Level of TDS (mg/L)', 'Rating']],
+            body: [
+                ['<300', 'Excellent'], ['300-600', 'Good'], ['601-900', 'Fair'],
+                ['900-1200', 'Poor'], ['>1200', 'Unacceptable'],
+            ],
+            theme: 'grid',
+            styles: { fontSize: 8, cellPadding: 1 },
+            tableWidth: 80,
+            margin: { left: 110 } 
+        });
+        let finalY_TDS = doc.lastAutoTable.finalY;
+
+        let bottomStartY = Math.max(finalY_pH, finalY_TDS) + 10;
+        doc.autoTable({
+            startY: bottomStartY,
+            head: [
+                [
+                    { content: 'Turbidity Level', colSpan: 3, styles: { halign: 'center', fillColor: [220, 220, 220], textColor: 0 } }, 
+                    { content: 'TDS Level', colSpan: 2, styles: { halign: 'center', fillColor: [220, 220, 220], textColor: 0 } },
+                    { content: 'Hardness Level', colSpan: 2, styles: { halign: 'center', fillColor: [220, 220, 220], textColor: 0 } }
+                ],
+                ['Range (NTU)', 'Rating', 'Description', 'Range (mg/L)', 'Rating', 'Range (mg/L)', 'Rating']
+            ],
+            body: [
+                ['< 5', 'Excellent', 'Very clear', '<300', 'Excellent', '0-25', 'Very soft'],
+                ['5-10', 'Good', 'Clear', '300-600', 'Good', '25-50', 'Soft'],
+                ['10-25', 'Fair', 'Slightly clear', '600-900', 'Fair', '50-100', 'Mod. soft'],
+                ['25-50', 'Marginal', 'Mod. cloudy', '900-1,200', 'Marginal', '100-150', 'Slightly hard'],
+                ['50-100', 'Poor', 'Cloudy', '1,200-1,500', 'Poor', '150-200', 'Mod. hard'],
+                ['100-500', '', 'Very cloudy', '>1,500', 'Unacceptable', '200-300', 'Hard'],
+                ['500-1000', 'Unacceptable', 'Muddy', '', '', '300-600', 'Very hard'],
+                ['>1000', '', 'Very muddy', '', '', '>600', 'Ext. hard']
+            ],
+            theme: 'grid',
+            styles: { fontSize: 7, cellPadding: 1.5 },
+            margin: { left: 10, right: 10 }
+        });
+
+        addFooter(doc, 1);
+
+        // --- PAGE 2 ---
+        doc.addPage();
+        addHeader(doc);
+
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'bold');
+        doc.text(`II. Water Quality Test Results - ${school}`, 14, 60);
+
+        const tableData = [
+            ["pH Level", "7.4 pH", "Slightly Alkaline"],
+            ["Total Dissolved Solid", "145 mg/L", "Excellent"],
+            ["Turbidity Level", "2.1 NTU", "Excellent"]
+        ];
+
+        doc.autoTable({
+            startY: 65,
+            head: [['Parameter', 'Result', 'Descriptive Value']],
+            body: tableData,
+            theme: 'grid',
+            headStyles: { fillColor: [50, 50, 50], textColor: [255, 255, 255] },
+            styles: { fontSize: 10, cellPadding: 3 }
+        });
+
+        let sigY = doc.lastAutoTable.finalY + 20;
+        doc.setFont(undefined, 'normal');
+        doc.text("REMARKS : _________________________________________________", 14, sigY);
+        doc.text("Tested by:", 14, sigY + 25);
+        doc.setFont(undefined, 'bold');
+        doc.text(tester.toUpperCase(), 14, sigY + 35); 
+        doc.line(14, sigY + 36, 80, sigY + 36); 
+
+        addFooter(doc, 2);
+
+        const filename = `${school}_Water_Report.pdf`;
+        doc.save(filename);
+
+        isWaitingForReturn = true;
+        const subject = `Water Quality Report: ${school}`;
+        const body = `Hello,\n\nPlease find the attached Water Quality Report for ${school}.\n\nTested by: ${tester}\n\n(Note: Attached manually)`;
+        const gmailURL = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        window.open(gmailURL, '_blank');
+        
+        const btnElement = document.querySelector('.modal .btn-primary');
+        btnElement.innerText = "Check New Tab...";
+    }
+    </script>
 </body>
 </html>
