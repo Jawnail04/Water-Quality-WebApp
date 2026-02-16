@@ -108,44 +108,66 @@
             bottom: 0; 
             left: 0; 
             width: 100%; 
-            height: 45%; 
+            height: 21%; /* Low water level */
             overflow: hidden; 
             border-radius: 0 0 20px 20px; 
             pointer-events: none; 
         }
 
-        /* Rise effect on hover */
+        /* No rise on hover, just card lift */
         .card:hover .wave-container {
-            height: 55%;
-            transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            /* height remains 30% */
         }
 
         .wave { 
             position: absolute; 
             left: 0; 
+            bottom: 0; 
             width: 200%; 
-            height: 100%; 
             background-repeat: repeat-x;
+            transform-origin: bottom center; /* FIX: Anchors animation to bottom */
         }
 
         .wave-mask {
-            -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 120' xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none'%3E%3Cpath d='M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z' fill='%23000000'/%3E%3C/svg%3E");
-            mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 120' xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none'%3E%3Cpath d='M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z' fill='%23000000'/%3E%3C/svg%3E");
+            -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 88.7'%3E%3Cpath d='M800 56.9c-155.5 0-204.9-50-405.5-49.9-200 0-250 49.9-394.5 49.9v31.8h800v-.2-31.6z' fill='%23000000'/%3E%3C/svg%3E");
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 88.7'%3E%3Cpath d='M800 56.9c-155.5 0-204.9-50-405.5-49.9-200 0-250 49.9-394.5 49.9v31.8h800v-.2-31.6z' fill='%23000000'/%3E%3C/svg%3E");
             -webkit-mask-size: 50% 100%; 
             mask-size: 50% 100%;
-            transform: scaleY(-1);
+            -webkit-mask-position: bottom;
+            mask-position: bottom;
+            -webkit-mask-repeat: repeat-x;
+            mask-repeat: repeat-x;
         }
 
         @keyframes moveWave { 
-            0% { transform: translateX(0) scaleY(-1) rotate(0deg); } 
-            50% { transform: translateX(-25%) scaleY(-1) rotate(1deg); }
-            100% { transform: translateX(-50%) scaleY(-1) rotate(0deg); } 
+            0% { transform: translateX(0) translateZ(0) scaleY(1); } 
+            50% { transform: translateX(-25%) translateZ(0) scaleY(0.95); } 
+            100% { transform: translateX(-50%) translateZ(0) scaleY(1); } 
         }
 
-        .wave1 { animation: moveWave 15s linear infinite; bottom: 12px; opacity: 1; z-index: 1; }
-        .wave2 { animation: moveWave 9s linear infinite; bottom: 6px; opacity: 1; z-index: 2; }
-        .wave3 { animation: moveWave 5s linear infinite; bottom: 0px; opacity: 1; z-index: 3; }
+        /* Heights slightly > 100% to effectively seal the bottom edge */
+        .wave1 { 
+            animation: moveWave 15s linear infinite; 
+            height: 130%; 
+            opacity: 1; 
+            z-index: 1;
+        }
 
+        .wave2 { 
+            animation: moveWave 9s linear infinite; 
+            height: 120%; 
+            opacity: 1; 
+            z-index: 2;
+        }
+
+        .wave3 { 
+            animation: moveWave 5s linear infinite; 
+            height: 105%; 
+            opacity: 1; 
+            z-index: 3;
+        }
+
+        /* --- COLOR PALETTES --- */
         .ph-card .wave1 { background-color: #bee3f8; } 
         .ph-card .wave2 { background-color: #90cdf4; } 
         .ph-card .wave3 { background-color: #4299e1; } 
@@ -163,7 +185,6 @@
 
         /* --- DATA SECTION --- */
         .data-section { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); margin-bottom: 30px; }
-        
         .table-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
         table { width: 100%; border-collapse: collapse; min-width: 600px; }
         th, td { text-align: left; padding: 15px; border-bottom: 1px solid #e2e8f0; }
@@ -184,25 +205,10 @@
 
         /* --- MODALS --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
-        
-        /* Modal Animation */
-        .modal { 
-            background: white; 
-            padding: 30px; 
-            border-radius: 12px; 
-            width: 100%; 
-            max-width: 400px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
-            animation: modalPop 0.3s ease-out;
-        }
-        @keyframes modalPop {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
+        .modal { background: white; padding: 30px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); animation: modalPop 0.3s ease-out; }
+        @keyframes modalPop { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .modal h3 { margin-bottom: 10px; color: #2d3748; }
         .modal p { color: #4a5568; line-height: 1.5; font-size: 0.95rem; margin-bottom: 20px; }
-        
         .modal-buttons { margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px; }
         .btn-cancel { background-color: #718096; color: white; }
 
@@ -457,7 +463,6 @@
             try { 
                 await deleteDoc(doc(db, "Schools", pendingDeleteId)); 
                 closeConfirm();
-                // Optional: show success toast/alert if desired, but row removal is visual enough
             } 
             catch (e) { 
                 closeConfirm();
@@ -470,7 +475,6 @@
     window.openShareModal = function(shareFunction) {
         document.getElementById('shareModal').style.display = 'flex';
         const shareBtn = document.getElementById('shareBtnAction');
-        // Clear previous listeners to prevent multiple firings
         const newBtn = shareBtn.cloneNode(true);
         shareBtn.parentNode.replaceChild(newBtn, shareBtn);
         
@@ -483,7 +487,6 @@
     window.closeShareModal = function() {
         document.getElementById('shareModal').style.display = 'none';
     }
-
 
     // ---------------------------------------------------------
     // 3. REAL-TIME DATA LISTENER
