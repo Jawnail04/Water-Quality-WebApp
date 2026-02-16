@@ -82,26 +82,63 @@
         .metric-unit { font-size: 1rem; color: #4a5568; font-weight: 500; }
         .metric-status { margin-top: 15px; font-size: 0.9rem; font-weight: 600; }
         
-        /* --- WAVE ANIMATION --- */
-        .wave-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 45%; overflow: hidden; border-radius: 0 0 20px 20px; }
-        .wave { position: absolute; bottom: 0; left: 0; width: 200%; height: 100%; transform-origin: center bottom; }
+        /* --- IMPROVED WAVE ANIMATION --- */
+        .wave-container { 
+            position: absolute; 
+            bottom: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 50%; 
+            overflow: hidden; 
+            border-radius: 0 0 20px 20px; 
+            pointer-events: none; 
+        }
 
-        /* FIX: Corrected URL Encoded SVG for Cross-Browser Compatibility */
+        .wave { 
+            position: absolute; 
+            bottom: -2px; 
+            left: 0; 
+            width: 200%; 
+            height: 100%; 
+        }
+
         .wave-mask {
             -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 120' xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none'%3E%3Cpath d='M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z' fill='%23000000'/%3E%3C/svg%3E");
             mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 120' xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none'%3E%3Cpath d='M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z' fill='%23000000'/%3E%3C/svg%3E");
-            -webkit-mask-size: 50% 100%; mask-size: 50% 100%;
-            -webkit-mask-repeat: repeat-x; mask-repeat: repeat-x;
-            transform: scaleY(-1);
+            -webkit-mask-size: 50% 100%; 
+            mask-size: 50% 100%;
+            -webkit-mask-repeat: repeat-x; 
+            mask-repeat: repeat-x;
+            transform: scaleY(-1); 
         }
 
-        .wave1 { opacity: 0.3; animation: moveWave 12s linear infinite; }
-        .wave2 { opacity: 0.5; animation: moveWave 7s linear infinite; bottom: -5px; }
-        @keyframes moveWave { 0% { transform: translateX(0) scaleY(-1); } 100% { transform: translateX(-50%) scaleY(-1); } }
+        /* Three distinct layers for depth */
+        .wave1 { opacity: 0.2; animation: moveWave 10s linear infinite; }
+        .wave2 { opacity: 0.4; animation: moveWave 7s linear infinite; bottom: 5px; }
+        .wave3 { opacity: 0.6; animation: moveWave 4s linear infinite; bottom: 0px; }
 
-        .ph-card .wave-mask { background-color: #4299e1; } .ph-card .metric-value { color: #2b6cb0; }
-        .turbidity-card .wave-mask { background-color: #ed8936; } .turbidity-card .metric-value { color: #c05621; }
-        .tds-card .wave-mask { background-color: #9f7aea; } .tds-card .metric-value { color: #6b46c1; }
+        /* Animation: Moves horizontal + Slight Slosh rotation */
+        @keyframes moveWave { 
+            0% { transform: translateX(0) scaleY(-1) rotate(0deg); } 
+            50% { transform: translateX(-25%) scaleY(-1) rotate(1deg); } 
+            100% { transform: translateX(-50%) scaleY(-1) rotate(0deg); } 
+        }
+
+        /* Card Specific Colors */
+        .ph-card .wave-mask { background-color: #4299e1; } 
+        .ph-card .metric-value { color: #2b6cb0; }
+
+        .turbidity-card .wave-mask { background-color: #ed8936; } 
+        .turbidity-card .metric-value { color: #c05621; }
+
+        .tds-card .wave-mask { background-color: #9f7aea; } 
+        .tds-card .metric-value { color: #6b46c1; }
+
+        /* Interactive Hover Effect: Water rises slightly */
+        .card:hover .wave-container {
+            height: 60%;
+            transition: height 0.5s ease-in-out;
+        }
 
         /* --- DATA SECTION --- */
         .data-section { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); margin-bottom: 30px; }
@@ -194,6 +231,7 @@
                 <div class="wave-container">
                     <div class="wave wave-mask wave1"></div>
                     <div class="wave wave-mask wave2"></div>
+                    <div class="wave wave-mask wave3"></div>
                 </div>
                 
                 <div class="card-content">
@@ -207,6 +245,7 @@
                 <div class="wave-container">
                     <div class="wave wave-mask wave1"></div>
                     <div class="wave wave-mask wave2"></div>
+                    <div class="wave wave-mask wave3"></div>
                 </div>
 
                 <div class="card-content">
@@ -220,6 +259,7 @@
                 <div class="wave-container">
                     <div class="wave wave-mask wave1"></div>
                     <div class="wave wave-mask wave2"></div>
+                    <div class="wave wave-mask wave3"></div>
                 </div>
 
                 <div class="card-content">
@@ -617,17 +657,15 @@ window.generateAndSend = async function() {
     // A. Check for Mobile Sharing Support
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
         
-        // STEP 1: Attempt to Copy Email (Separate try/catch)
-        // If this fails, we continue to Step 2 anyway.
+        // STEP 1: Attempt to Copy Email
         try {
             await navigator.clipboard.writeText(email);
             alert(`📧 Email Copied: ${email}\n\n1. Tap 'OK' to open Share Options.\n2. Select Gmail.\n3. Long-press 'To' field and PASTE.`);
         } catch (err) {
             console.warn("Clipboard failed (likely permission issue), skipping copy.", err);
-            // We do NOT stop here. We proceed to open the share sheet.
         }
 
-        // STEP 2: Open Share Sheet (The file is attached here)
+        // STEP 2: Open Share Sheet
         try {
             await navigator.share({
                 title: subject,
