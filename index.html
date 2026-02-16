@@ -17,7 +17,7 @@
             color: #333; 
             display: flex; 
             min-height: 100vh; 
-            overflow-x: hidden; /* Prevent horizontal scroll on body */
+            overflow-x: hidden; 
         }
         
         /* --- SIDEBAR --- */
@@ -29,7 +29,7 @@
             flex-direction: column; 
             padding: 20px; 
             transition: all 0.3s ease;
-            flex-shrink: 0; /* Prevent sidebar from shrinking */
+            flex-shrink: 0; 
         }
         .sidebar h2 { text-align: center; margin-bottom: 40px; font-weight: 600; letter-spacing: 1px; }
         .nav-links a { display: block; color: #a0aec0; text-decoration: none; padding: 15px; margin-bottom: 10px; border-radius: 8px; transition: 0.3s; }
@@ -41,7 +41,7 @@
             padding: 30px; 
             overflow-y: auto; 
             position: relative; 
-            width: 100%; /* Ensure it takes full width remaining */
+            width: 100%; 
         }
         
         header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }
@@ -59,7 +59,7 @@
 
         /* --- CARD STYLES --- */
         .card { 
-            background: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.9); /* Increased opacity for cleaner look */
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.8);
@@ -82,24 +82,50 @@
         .metric-unit { font-size: 1rem; color: #4a5568; font-weight: 500; }
         .metric-status { margin-top: 15px; font-size: 0.9rem; font-weight: 600; }
         
-        /* --- IMPROVED WAVE ANIMATION --- */
+        /* --- MEDIA ICON STYLES --- */
+        .icon-media {
+            width: 45px;
+            height: 45px;
+            object-fit: cover;
+            border-radius: 12px;
+            display: block;
+        }
+
+        /* --- STATIC FOG ANIMATION --- */
+        .anim-fog-img {
+            opacity: 0.8;
+            animation: fogDrift 6s ease-in-out infinite alternate;
+        }
+
+        @keyframes fogDrift {
+            0% { transform: translateX(-3px) scale(1); opacity: 0.7; filter: blur(0px); }
+            100% { transform: translateX(3px) scale(1.08); opacity: 1; filter: blur(1px); }
+        }
+
+        /* --- SOLID WAVE ANIMATION --- */
         .wave-container { 
             position: absolute; 
             bottom: 0; 
             left: 0; 
             width: 100%; 
-            height: 50%; 
+            height: 45%; 
             overflow: hidden; 
             border-radius: 0 0 20px 20px; 
             pointer-events: none; 
         }
 
+        /* Rise effect on hover */
+        .card:hover .wave-container {
+            height: 55%;
+            transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         .wave { 
             position: absolute; 
-            bottom: -2px; 
             left: 0; 
             width: 200%; 
             height: 100%; 
+            background-repeat: repeat-x;
         }
 
         .wave-mask {
@@ -107,50 +133,71 @@
             mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 120' xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none'%3E%3Cpath d='M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z' fill='%23000000'/%3E%3C/svg%3E");
             -webkit-mask-size: 50% 100%; 
             mask-size: 50% 100%;
-            -webkit-mask-repeat: repeat-x; 
-            mask-repeat: repeat-x;
-            transform: scaleY(-1); 
+            transform: scaleY(-1);
         }
 
-        /* Three distinct layers for depth */
-        .wave1 { opacity: 0.2; animation: moveWave 10s linear infinite; }
-        .wave2 { opacity: 0.4; animation: moveWave 7s linear infinite; bottom: 5px; }
-        .wave3 { opacity: 0.6; animation: moveWave 4s linear infinite; bottom: 0px; }
-
-        /* Animation: Moves horizontal + Slight Slosh rotation */
         @keyframes moveWave { 
             0% { transform: translateX(0) scaleY(-1) rotate(0deg); } 
-            50% { transform: translateX(-25%) scaleY(-1) rotate(1deg); } 
+            50% { transform: translateX(-25%) scaleY(-1) rotate(1deg); }
             100% { transform: translateX(-50%) scaleY(-1) rotate(0deg); } 
         }
 
-        /* Card Specific Colors */
-        .ph-card .wave-mask { background-color: #4299e1; } 
+        /* UPDATED WAVE LAYERS: 
+           - Opacity set to 1 (Solid).
+           - Different 'bottom' offsets to create stacking depth.
+           - Specific colors per card to simulate lighting depth without transparency.
+        */
+
+        /* Back Layer - Lightest Color, Sits Highest */
+        .wave1 { 
+            animation: moveWave 15s linear infinite; 
+            bottom: 12px; 
+            opacity: 1; 
+            z-index: 1;
+        }
+
+        /* Middle Layer - Medium Color */
+        .wave2 { 
+            animation: moveWave 9s linear infinite; 
+            bottom: 6px; 
+            opacity: 1; 
+            z-index: 2;
+        }
+
+        /* Front Layer - Main Color, Sits Lowest, Covers bottom area */
+        .wave3 { 
+            animation: moveWave 5s linear infinite; 
+            bottom: 0px; 
+            opacity: 1; 
+            z-index: 3;
+        }
+
+        /* --- COLOR PALETTES (Solid Colors) --- */
+        
+        /* pH Card (Blue) */
+        .ph-card .wave1 { background-color: #bee3f8; } /* Lightest Blue */
+        .ph-card .wave2 { background-color: #90cdf4; } /* Medium Blue */
+        .ph-card .wave3 { background-color: #4299e1; } /* Main Blue */
         .ph-card .metric-value { color: #2b6cb0; }
-
-        .turbidity-card .wave-mask { background-color: #ed8936; } 
+        
+        /* Turbidity Card (Orange) */
+        .turbidity-card .wave1 { background-color: #feebc8; } /* Lightest Orange */
+        .turbidity-card .wave2 { background-color: #fbd38d; } /* Medium Orange */
+        .turbidity-card .wave3 { background-color: #ed8936; } /* Main Orange */
         .turbidity-card .metric-value { color: #c05621; }
-
-        .tds-card .wave-mask { background-color: #9f7aea; } 
+        
+        /* TDS Card (Purple) */
+        .tds-card .wave1 { background-color: #e9d8fd; } /* Lightest Purple */
+        .tds-card .wave2 { background-color: #d6bcfa; } /* Medium Purple */
+        .tds-card .wave3 { background-color: #9f7aea; } /* Main Purple */
         .tds-card .metric-value { color: #6b46c1; }
 
-        /* Interactive Hover Effect: Water rises slightly */
-        .card:hover .wave-container {
-            height: 60%;
-            transition: height 0.5s ease-in-out;
-        }
 
         /* --- DATA SECTION --- */
         .data-section { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); margin-bottom: 30px; }
         
-        /* Table Responsiveness */
-        .table-wrapper {
-            width: 100%;
-            overflow-x: auto; /* Enables horizontal scroll on mobile */
-            -webkit-overflow-scrolling: touch;
-        }
-
-        table { width: 100%; border-collapse: collapse; min-width: 600px; /* Forces table to keep shape and scroll */ }
+        .table-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
         th, td { text-align: left; padding: 15px; border-bottom: 1px solid #e2e8f0; }
         th { color: #718096; font-weight: 600; font-size: 0.9rem; white-space: nowrap; }
         
@@ -173,29 +220,19 @@
         .modal-buttons { margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px; }
         .btn-cancel { background-color: #718096; color: white; }
 
-        /* --- MEDIA QUERIES (RESPONSIVE) --- */
+        /* --- MEDIA QUERIES --- */
         @media (max-width: 900px) {
             body { flex-direction: column; }
-            
-            /* Turn Sidebar into Top Bar */
-            .sidebar { 
-                width: 100%; 
-                flex-direction: row; 
-                align-items: center; 
-                justify-content: space-between; 
-                padding: 15px 20px;
-            }
+            .sidebar { width: 100%; flex-direction: row; align-items: center; justify-content: space-between; padding: 15px 20px; }
             .sidebar h2 { margin-bottom: 0; font-size: 1.2rem; }
             .nav-links { display: flex; gap: 10px; margin-top: 0; }
             .nav-links a { margin-bottom: 0; padding: 8px 12px; font-size: 0.9rem; }
-            .nav-links a:hover, .nav-links a.active { padding-left: 12px; } /* Reset hover animation */
-            
+            .nav-links a:hover, .nav-links a.active { padding-left: 12px; }
             .main-content { padding: 20px; }
             .add-school-form { flex-direction: column; align-items: stretch; }
-            .btn { width: 100%; } /* Full width buttons on mobile */
-            .action-cell .btn { width: auto; } /* Keep table buttons normal */
+            .btn { width: 100%; }
+            .action-cell .btn { width: auto; }
         }
-
         @media (max-width: 480px) {
             .sidebar { flex-direction: column; gap: 15px; }
             header { flex-direction: column; align-items: flex-start; }
@@ -235,7 +272,10 @@
                 </div>
                 
                 <div class="card-content">
-                    <div class="card-header"><span>pH Level</span><span>💧</span></div>
+                    <div class="card-header">
+                        <span>pH Level</span>
+                        <video src="img/water.mp4" autoplay loop muted playsinline class="icon-media"></video>
+                    </div>
                     <div class="metric-value">7.4 <span class="metric-unit">pH</span></div>
                     <div class="metric-status" style="color: #2f855a;">● Optimal Range</div>
                 </div>
@@ -249,7 +289,10 @@
                 </div>
 
                 <div class="card-content">
-                    <div class="card-header"><span>Turbidity</span><span>🌫️</span></div>
+                    <div class="card-header">
+                        <span>Turbidity</span>
+                        <img src="img/fog.png" alt="Fog Icon" class="icon-media anim-fog-img">
+                    </div>
                     <div class="metric-value">2.1 <span class="metric-unit">NTU</span></div>
                     <div class="metric-status" style="color: #c05621;">● Slightly Elevated</div>
                 </div>
@@ -263,7 +306,10 @@
                 </div>
 
                 <div class="card-content">
-                    <div class="card-header"><span>TDS (Solids)</span><span>⚗️</span></div>
+                    <div class="card-header">
+                        <span>TDS (Solids)</span>
+                        <video src="img/chemical.mp4" autoplay loop muted playsinline class="icon-media"></video>
+                    </div>
                     <div class="metric-value">145 <span class="metric-unit">ppm</span></div>
                     <div class="metric-status" style="color: #2f855a;">● Safe Level</div>
                 </div>
@@ -531,175 +577,177 @@
     }
 
     // --- MAIN GENERATOR FUNCTION ---
-window.generateAndSend = async function() {
-    const tester = document.getElementById('testerName').value;
-    const school = document.getElementById('currentSchoolName').value;
-    const email = document.getElementById('currentSchoolEmail').value;
+    window.generateAndSend = async function() {
+        const tester = document.getElementById('testerName').value;
+        const school = document.getElementById('currentSchoolName').value;
+        const email = document.getElementById('currentSchoolEmail').value;
 
-    if(!tester) { alert("Please enter the name."); return; }
+        if(!tester) { alert("Please enter the name."); return; }
 
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
 
-    // -----------------------------------------------------------
-    // 1. GENERATE PDF CONTENT (Standard)
-    // -----------------------------------------------------------
-    addHeader(doc);
-    
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'bold');
-    doc.text("I. Guide in Descriptive Values", 14, 60);
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'normal');
-    doc.text(`Reference for: ${school}`, 14, 65);
+        // -----------------------------------------------------------
+        // 1. GENERATE PDF CONTENT (Standard)
+        // -----------------------------------------------------------
+        addHeader(doc);
+        
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'bold');
+        doc.text("I. Guide in Descriptive Values", 14, 60);
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        doc.text(`Reference for: ${school}`, 14, 65);
 
-    doc.autoTable({
-        startY: 70,
-        head: [['Denomination', 'pH Range']],
-        body: [
-            ['Ultra acidic', '< 3.5'], ['Extremely acidic', '3.5-4.4'], ['Very strongly acidic', '4.5-5.0'],
-            ['Strongly acidic', '5.1-5.5'], ['Moderately acidic', '5.6-6.0'], ['Slightly acidic', '6.1-6.5'],
-            ['Neutral', '6.6-7.3'], ['Slightly alkaline', '7.4-7.8'], ['Moderately alkaline', '7.9-8.4'],
-            ['Strongly alkaline', '8.5-9.0'], ['Very strongly alkaline', '> 9.0'],
-        ],
-        theme: 'grid',
-        styles: { fontSize: 8, cellPadding: 1 },
-        tableWidth: 80,
-        margin: { left: 14 }
-    });
-    let finalY_pH = doc.lastAutoTable.finalY;
-
-    doc.autoTable({
-        startY: 70, 
-        head: [['Level of TDS (mg/L)', 'Rating']],
-        body: [
-            ['<300', 'Excellent'], ['300-600', 'Good'], ['601-900', 'Fair'],
-            ['900-1200', 'Poor'], ['>1200', 'Unacceptable'],
-        ],
-        theme: 'grid',
-        styles: { fontSize: 8, cellPadding: 1 },
-        tableWidth: 80,
-        margin: { left: 110 } 
-    });
-    let finalY_TDS = doc.lastAutoTable.finalY;
-
-    let bottomStartY = Math.max(finalY_pH, finalY_TDS) + 10;
-    doc.autoTable({
-        startY: bottomStartY,
-        head: [
-            [
-                { content: 'Turbidity Level', colSpan: 3, styles: { halign: 'center', fillColor: [220, 220, 220], textColor: 0 } }, 
-                { content: 'TDS Level', colSpan: 2, styles: { halign: 'center', fillColor: [220, 220, 220], textColor: 0 } },
-                { content: 'Hardness Level', colSpan: 2, styles: { halign: 'center', fillColor: [220, 220, 220], textColor: 0 } }
+        doc.autoTable({
+            startY: 70,
+            head: [['Denomination', 'pH Range']],
+            body: [
+                ['Ultra acidic', '< 3.5'], ['Extremely acidic', '3.5-4.4'], ['Very strongly acidic', '4.5-5.0'],
+                ['Strongly acidic', '5.1-5.5'], ['Moderately acidic', '5.6-6.0'], ['Slightly acidic', '6.1-6.5'],
+                ['Neutral', '6.6-7.3'], ['Slightly alkaline', '7.4-7.8'], ['Moderately alkaline', '7.9-8.4'],
+                ['Strongly alkaline', '8.5-9.0'], ['Very strongly alkaline', '> 9.0'],
             ],
-            ['Range (NTU)', 'Rating', 'Description', 'Range (mg/L)', 'Rating', 'Range (mg/L)', 'Rating']
-        ],
-        body: [
-            ['< 5', 'Excellent', 'Very clear', '<300', 'Excellent', '0-25', 'Very soft'],
-            ['5-10', 'Good', 'Clear', '300-600', 'Good', '25-50', 'Soft'],
-            ['10-25', 'Fair', 'Slightly clear', '600-900', 'Fair', '50-100', 'Mod. soft'],
-            ['25-50', 'Marginal', 'Mod. cloudy', '900-1,200', 'Marginal', '100-150', 'Slightly hard'],
-            ['50-100', 'Poor', 'Cloudy', '1,200-1,500', 'Poor', '150-200', 'Mod. hard'],
-            ['100-500', '', 'Very cloudy', '>1,500', 'Unacceptable', '200-300', 'Hard'],
-            ['500-1000', 'Unacceptable', 'Muddy', '', '', '300-600', 'Very hard'],
-            ['>1000', '', 'Very muddy', '', '', '>600', 'Ext. hard']
-        ],
-        theme: 'grid',
-        styles: { fontSize: 7, cellPadding: 1.5 },
-        margin: { left: 10, right: 10 }
-    });
+            theme: 'grid',
+            styles: { fontSize: 8, cellPadding: 1 },
+            tableWidth: 80,
+            margin: { left: 14 }
+        });
+        let finalY_pH = doc.lastAutoTable.finalY;
 
-    addFooter(doc, 1);
+        doc.autoTable({
+            startY: 70, 
+            head: [['Level of TDS (mg/L)', 'Rating']],
+            body: [
+                ['<300', 'Excellent'], ['300-600', 'Good'], ['601-900', 'Fair'],
+                ['900-1200', 'Poor'], ['>1200', 'Unacceptable'],
+            ],
+            theme: 'grid',
+            styles: { fontSize: 8, cellPadding: 1 },
+            tableWidth: 80,
+            margin: { left: 110 } 
+        });
+        let finalY_TDS = doc.lastAutoTable.finalY;
 
-    // --- PAGE 2 ---
-    doc.addPage();
-    addHeader(doc);
+        let bottomStartY = Math.max(finalY_pH, finalY_TDS) + 10;
+        doc.autoTable({
+            startY: bottomStartY,
+            head: [
+                [
+                    { content: 'Turbidity Level', colSpan: 3, styles: { halign: 'center', fillColor: [220, 220, 220], textColor: 0 } }, 
+                    { content: 'TDS Level', colSpan: 2, styles: { halign: 'center', fillColor: [220, 220, 220], textColor: 0 } },
+                    { content: 'Hardness Level', colSpan: 2, styles: { halign: 'center', fillColor: [220, 220, 220], textColor: 0 } }
+                ],
+                ['Range (NTU)', 'Rating', 'Description', 'Range (mg/L)', 'Rating', 'Range (mg/L)', 'Rating']
+            ],
+            body: [
+                ['< 5', 'Excellent', 'Very clear', '<300', 'Excellent', '0-25', 'Very soft'],
+                ['5-10', 'Good', 'Clear', '300-600', 'Good', '25-50', 'Soft'],
+                ['10-25', 'Fair', 'Slightly clear', '600-900', 'Fair', '50-100', 'Mod. soft'],
+                ['25-50', 'Marginal', 'Mod. cloudy', '900-1,200', 'Marginal', '100-150', 'Slightly hard'],
+                ['50-100', 'Poor', 'Cloudy', '1,200-1,500', 'Poor', '150-200', 'Mod. hard'],
+                ['100-500', '', 'Very cloudy', '>1,500', 'Unacceptable', '200-300', 'Hard'],
+                ['500-1000', 'Unacceptable', 'Muddy', '', '', '300-600', 'Very hard'],
+                ['>1000', '', 'Very muddy', '', '', '>600', 'Ext. hard']
+            ],
+            theme: 'grid',
+            styles: { fontSize: 7, cellPadding: 1.5 },
+            margin: { left: 10, right: 10 }
+        });
 
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'bold');
-    doc.text(`II. Water Quality Test Results - ${school}`, 14, 60);
+        addFooter(doc, 1);
 
-    const tableData = [
-        ["pH Level", "7.4 pH", "Slightly Alkaline"],
-        ["Total Dissolved Solid", "145 mg/L", "Excellent"],
-        ["Turbidity Level", "2.1 NTU", "Excellent"]
-    ];
+        // --- PAGE 2 ---
+        doc.addPage();
+        addHeader(doc);
 
-    doc.autoTable({
-        startY: 65,
-        head: [['Parameter', 'Result', 'Descriptive Value']],
-        body: tableData,
-        theme: 'grid',
-        headStyles: { fillColor: [50, 50, 50], textColor: [255, 255, 255] },
-        styles: { fontSize: 10, cellPadding: 3 }
-    });
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'bold');
+        doc.text(`II. Water Quality Test Results - ${school}`, 14, 60);
 
-    let sigY = doc.lastAutoTable.finalY + 20;
-    doc.setFont(undefined, 'normal');
-    doc.text("REMARKS : _________________________________________________", 14, sigY);
-    doc.text("Tested by:", 14, sigY + 25);
-    doc.setFont(undefined, 'bold');
-    doc.text(tester.toUpperCase(), 14, sigY + 35); 
-    doc.line(14, sigY + 36, 80, sigY + 36); 
+        const tableData = [
+            ["pH Level", "7.4 pH", "Slightly Alkaline"],
+            ["Total Dissolved Solid", "145 mg/L", "Excellent"],
+            ["Turbidity Level", "2.1 NTU", "Excellent"]
+        ];
 
-    addFooter(doc, 2);
+        doc.autoTable({
+            startY: 65,
+            head: [['Parameter', 'Result', 'Descriptive Value']],
+            body: tableData,
+            theme: 'grid',
+            headStyles: { fillColor: [50, 50, 50], textColor: [255, 255, 255] },
+            styles: { fontSize: 10, cellPadding: 3 }
+        });
 
-    // -----------------------------------------------------------
-    // 2. MOBILE SHARE LOGIC (ROBUST FIX)
-    // -----------------------------------------------------------
-    const filename = `${school}_Water_Report.pdf`;
-    const subject = `Water Quality Report: ${school}`;
-    const bodyText = `Hello,\n\nPlease find the attached Water Quality Report for ${school}.\n\nTested by: ${tester}`;
+        let sigY = doc.lastAutoTable.finalY + 20;
+        doc.setFont(undefined, 'normal');
+        doc.text("REMARKS : _________________________________________________", 14, sigY);
+        doc.text("Tested by:", 14, sigY + 25);
+        doc.setFont(undefined, 'bold');
+        doc.text(tester.toUpperCase(), 14, sigY + 35); 
+        doc.line(14, sigY + 36, 80, sigY + 36); 
 
-    const pdfBlob = doc.output('blob');
-    const file = new File([pdfBlob], filename, { type: "application/pdf" });
+        addFooter(doc, 2);
 
-    // A. Check for Mobile Sharing Support
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        
-        // STEP 1: Attempt to Copy Email
-        try {
-            await navigator.clipboard.writeText(email);
-            alert(`📧 Email Copied: ${email}\n\n1. Tap 'OK' to open Share Options.\n2. Select Gmail.\n3. Long-press 'To' field and PASTE.`);
-        } catch (err) {
-            console.warn("Clipboard failed (likely permission issue), skipping copy.", err);
-        }
+        // -----------------------------------------------------------
+        // 2. MOBILE SHARE LOGIC (ROBUST FIX)
+        // -----------------------------------------------------------
+        const filename = `${school}_Water_Report.pdf`;
+        const subject = `Water Quality Report: ${school}`;
+        const bodyText = `Hello,\n\nPlease find the attached Water Quality Report for ${school}.\n\nTested by: ${tester}`;
 
-        // STEP 2: Open Share Sheet
-        try {
-            await navigator.share({
-                title: subject,
-                text: bodyText,
-                files: [file]
-            });
-            closeModal();
-        } catch (err) {
-            console.log("Share cancelled by user or failed", err);
-        }
-    } 
-    // B. Desktop Fallback (Download + Open Gmail Web)
-    else {
-        doc.save(filename); 
-        
-        isWaitingForReturn = true;
-        const gmailURL = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText + "\n\n(Note: Please attach the downloaded PDF manually)")}`;
-        
-        // Attempt to open popup
-        const newWindow = window.open(gmailURL, '_blank');
+        const pdfBlob = doc.output('blob');
+        const file = new File([pdfBlob], filename, { type: "application/pdf" });
 
-        // Check if popup blocked
-        const btnElement = document.querySelector('.modal .btn-primary');
-        if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
-            alert("Pop-up blocked! Please click the button in the modal to open Gmail.");
-            if(btnElement) {
-                btnElement.innerText = "Click here to Open Gmail";
-                btnElement.onclick = function() { window.open(gmailURL, '_blank'); };
+        // A. Check for Mobile Sharing Support
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            
+            // STEP 1: Attempt to Copy Email (Separate try/catch)
+            // If this fails, we continue to Step 2 anyway.
+            try {
+                await navigator.clipboard.writeText(email);
+                alert(`📧 Email Copied: ${email}\n\n1. Tap 'OK' to open Share Options.\n2. Select Gmail.\n3. Long-press 'To' field and PASTE.`);
+            } catch (err) {
+                console.warn("Clipboard failed (likely permission issue), skipping copy.", err);
+                // We do NOT stop here. We proceed to open the share sheet.
             }
-        } else {
-            if(btnElement) btnElement.innerText = "Check New Tab...";
+
+            // STEP 2: Open Share Sheet (The file is attached here)
+            try {
+                await navigator.share({
+                    title: subject,
+                    text: bodyText,
+                    files: [file]
+                });
+                closeModal();
+            } catch (err) {
+                console.log("Share cancelled by user or failed", err);
+            }
+        } 
+        // B. Desktop Fallback (Download + Open Gmail Web)
+        else {
+            doc.save(filename); 
+            
+            isWaitingForReturn = true;
+            const gmailURL = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText + "\n\n(Note: Please attach the downloaded PDF manually)")}`;
+            
+            // Attempt to open popup
+            const newWindow = window.open(gmailURL, '_blank');
+
+            // Check if popup blocked
+            const btnElement = document.querySelector('.modal .btn-primary');
+            if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
+                alert("Pop-up blocked! Please click the button in the modal to open Gmail.");
+                if(btnElement) {
+                    btnElement.innerText = "Click here to Open Gmail";
+                    btnElement.onclick = function() { window.open(gmailURL, '_blank'); };
+                }
+            } else {
+                if(btnElement) btnElement.innerText = "Check New Tab...";
+            }
         }
     }
-}
     </script>
 </body>
 </html>
