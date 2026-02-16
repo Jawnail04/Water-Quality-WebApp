@@ -59,7 +59,7 @@
 
         /* --- CARD STYLES --- */
         .card { 
-            background: rgba(255, 255, 255, 0.9); /* Increased opacity for cleaner look */
+            background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.8);
@@ -142,56 +142,24 @@
             100% { transform: translateX(-50%) scaleY(-1) rotate(0deg); } 
         }
 
-        /* UPDATED WAVE LAYERS: 
-           - Opacity set to 1 (Solid).
-           - Different 'bottom' offsets to create stacking depth.
-           - Specific colors per card to simulate lighting depth without transparency.
-        */
+        .wave1 { animation: moveWave 15s linear infinite; bottom: 12px; opacity: 1; z-index: 1; }
+        .wave2 { animation: moveWave 9s linear infinite; bottom: 6px; opacity: 1; z-index: 2; }
+        .wave3 { animation: moveWave 5s linear infinite; bottom: 0px; opacity: 1; z-index: 3; }
 
-        /* Back Layer - Lightest Color, Sits Highest */
-        .wave1 { 
-            animation: moveWave 15s linear infinite; 
-            bottom: 12px; 
-            opacity: 1; 
-            z-index: 1;
-        }
-
-        /* Middle Layer - Medium Color */
-        .wave2 { 
-            animation: moveWave 9s linear infinite; 
-            bottom: 6px; 
-            opacity: 1; 
-            z-index: 2;
-        }
-
-        /* Front Layer - Main Color, Sits Lowest, Covers bottom area */
-        .wave3 { 
-            animation: moveWave 5s linear infinite; 
-            bottom: 0px; 
-            opacity: 1; 
-            z-index: 3;
-        }
-
-        /* --- COLOR PALETTES (Solid Colors) --- */
-        
-        /* pH Card (Blue) */
-        .ph-card .wave1 { background-color: #bee3f8; } /* Lightest Blue */
-        .ph-card .wave2 { background-color: #90cdf4; } /* Medium Blue */
-        .ph-card .wave3 { background-color: #4299e1; } /* Main Blue */
+        .ph-card .wave1 { background-color: #bee3f8; } 
+        .ph-card .wave2 { background-color: #90cdf4; } 
+        .ph-card .wave3 { background-color: #4299e1; } 
         .ph-card .metric-value { color: #2b6cb0; }
         
-        /* Turbidity Card (Orange) */
-        .turbidity-card .wave1 { background-color: #feebc8; } /* Lightest Orange */
-        .turbidity-card .wave2 { background-color: #fbd38d; } /* Medium Orange */
-        .turbidity-card .wave3 { background-color: #ed8936; } /* Main Orange */
+        .turbidity-card .wave1 { background-color: #feebc8; } 
+        .turbidity-card .wave2 { background-color: #fbd38d; } 
+        .turbidity-card .wave3 { background-color: #ed8936; } 
         .turbidity-card .metric-value { color: #c05621; }
         
-        /* TDS Card (Purple) */
-        .tds-card .wave1 { background-color: #e9d8fd; } /* Lightest Purple */
-        .tds-card .wave2 { background-color: #d6bcfa; } /* Medium Purple */
-        .tds-card .wave3 { background-color: #9f7aea; } /* Main Purple */
+        .tds-card .wave1 { background-color: #e9d8fd; } 
+        .tds-card .wave2 { background-color: #d6bcfa; } 
+        .tds-card .wave3 { background-color: #9f7aea; } 
         .tds-card .metric-value { color: #6b46c1; }
-
 
         /* --- DATA SECTION --- */
         .data-section { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); margin-bottom: 30px; }
@@ -214,9 +182,27 @@
         .btn-delete { background-color: #e53e3e; color: white; font-size: 0.8rem; padding: 6px 12px; }
         .action-cell { display: flex; gap: 8px; }
 
-        /* --- MODAL --- */
+        /* --- MODALS --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
-        .modal { background: white; padding: 30px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        
+        /* Modal Animation */
+        .modal { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 12px; 
+            width: 100%; 
+            max-width: 400px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            animation: modalPop 0.3s ease-out;
+        }
+        @keyframes modalPop {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal h3 { margin-bottom: 10px; color: #2d3748; }
+        .modal p { color: #4a5568; line-height: 1.5; font-size: 0.95rem; margin-bottom: 20px; }
+        
         .modal-buttons { margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px; }
         .btn-cancel { background-color: #718096; color: white; }
 
@@ -379,6 +365,39 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="alertModal">
+        <div class="modal">
+            <h3 id="alertTitle">Notification</h3>
+            <p id="alertMessage">Message goes here...</p>
+            <div class="modal-buttons">
+                <button class="btn btn-primary" onclick="closeAlert()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal">
+            <h3>Delete School?</h3>
+            <p>Are you sure you want to permanently delete this school record? This action cannot be undone.</p>
+            <div class="modal-buttons">
+                <button class="btn btn-cancel" onclick="closeConfirm()">Cancel</button>
+                <button class="btn btn-delete" onclick="confirmDeleteAction()">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="shareModal">
+        <div class="modal">
+            <h3>Email Copied! 📋</h3>
+            <p>The recipient email has been copied to your clipboard.</p>
+            <p style="font-size: 0.9rem; color: #666;">Click the button below to open your sharing options, then select Gmail and paste the email.</p>
+            <div class="modal-buttons">
+                <button class="btn btn-cancel" onclick="closeShareModal()">Cancel</button>
+                <button class="btn btn-primary" id="shareBtnAction">Open Share Options</button>
+            </div>
+        </div>
+    </div>
+
     <img id="pdf-logo-hidden" src="/img/kagawaran_logo.png" style="display: none;" crossorigin="anonymous">
     <img id="footer-logo-deped" src="img/deped_logo.png" style="display: none;" crossorigin="anonymous">
     <img id="footer-logo-bagong" src="img/Bagong_Pilipinas_logo.png" style="display: none;" crossorigin="anonymous">
@@ -406,7 +425,68 @@
     const schoolsCol = collection(db, "Schools");
 
     // ---------------------------------------------------------
-    // 2. REAL-TIME DATA LISTENER
+    // 2. MODAL HELPER FUNCTIONS
+    // ---------------------------------------------------------
+    
+    // Alert Modal Logic
+    window.showAlert = function(title, message) {
+        document.getElementById('alertTitle').innerText = title;
+        document.getElementById('alertMessage').innerText = message;
+        document.getElementById('alertModal').style.display = 'flex';
+    }
+    
+    window.closeAlert = function() {
+        document.getElementById('alertModal').style.display = 'none';
+    }
+
+    // Confirmation Modal Logic
+    let pendingDeleteId = null;
+
+    window.openDeleteModal = function(docId) {
+        pendingDeleteId = docId;
+        document.getElementById('confirmModal').style.display = 'flex';
+    }
+
+    window.closeConfirm = function() {
+        pendingDeleteId = null;
+        document.getElementById('confirmModal').style.display = 'none';
+    }
+
+    window.confirmDeleteAction = async function() {
+        if(pendingDeleteId) {
+            try { 
+                await deleteDoc(doc(db, "Schools", pendingDeleteId)); 
+                closeConfirm();
+                // Optional: show success toast/alert if desired, but row removal is visual enough
+            } 
+            catch (e) { 
+                closeConfirm();
+                showAlert("Error", "Failed to delete: " + e.message); 
+            }
+        }
+    }
+
+    // Share Modal Logic
+    window.openShareModal = function(shareFunction) {
+        document.getElementById('shareModal').style.display = 'flex';
+        const shareBtn = document.getElementById('shareBtnAction');
+        // Clear previous listeners to prevent multiple firings
+        const newBtn = shareBtn.cloneNode(true);
+        shareBtn.parentNode.replaceChild(newBtn, shareBtn);
+        
+        newBtn.onclick = async () => {
+            await shareFunction();
+            document.getElementById('shareModal').style.display = 'none';
+        };
+    }
+
+    window.closeShareModal = function() {
+        document.getElementById('shareModal').style.display = 'none';
+    }
+
+
+    // ---------------------------------------------------------
+    // 3. REAL-TIME DATA LISTENER
     // ---------------------------------------------------------
     onSnapshot(schoolsCol, (snapshot) => {
         const tbody = document.getElementById("schoolTableBody");
@@ -430,7 +510,7 @@
                 ${statusHtml}
                 <td class="action-cell">
                     <button class="btn btn-email" onclick="openReportModal('${school.schoolName}', '${school.email}')">📧 Send Report</button>
-                    <button class="btn btn-delete" onclick="deleteSchool('${schoolId}')">🗑️</button>
+                    <button class="btn btn-delete" onclick="openDeleteModal('${schoolId}')">🗑️</button>
                 </td>
             `;
             tbody.appendChild(tr);
@@ -441,14 +521,17 @@
     });
 
     // ---------------------------------------------------------
-    // 3. DATABASE FUNCTIONS
+    // 4. DATABASE FUNCTIONS
     // ---------------------------------------------------------
     window.addSchoolToDB = async function() {
         const name = document.getElementById('newSchoolName').value;
         const head = document.getElementById('newSchoolHead').value;
         const email = document.getElementById('newSchoolEmail').value;
 
-        if(!name || !head || !email) { alert("Please fill in all fields."); return; }
+        if(!name || !head || !email) { 
+            showAlert("Missing Information", "Please fill in all fields."); 
+            return; 
+        }
 
         try {
             await addDoc(schoolsCol, {
@@ -457,21 +540,14 @@
             document.getElementById('newSchoolName').value = "";
             document.getElementById('newSchoolHead').value = "";
             document.getElementById('newSchoolEmail').value = "";
-            alert("School added successfully!");
+            showAlert("Success", "School added successfully!");
         } catch (e) {
-            alert("Error saving to database: " + e.message);
-        }
-    }
-
-    window.deleteSchool = async function(docId) {
-        if(confirm("Delete this school?")) {
-            try { await deleteDoc(doc(db, "Schools", docId)); } 
-            catch (e) { alert("Failed to delete: " + e.message); }
+            showAlert("Database Error", "Error saving to database: " + e.message);
         }
     }
 
     // ---------------------------------------------------------
-    // 4. REPORT LOGIC
+    // 5. REPORT LOGIC
     // ---------------------------------------------------------
     let isWaitingForReturn = false; 
 
@@ -490,8 +566,8 @@
         if (document.visibilityState === "visible" && isWaitingForReturn) {
             isWaitingForReturn = false; 
             setTimeout(() => {
-                alert("Welcome back!\n\nThe dashboard is ready for the next school.");
                 closeModal(); 
+                showAlert("Welcome Back!", "The dashboard is ready for the next school.");
                 const btnElement = document.querySelector('.modal .btn-primary');
                 if(btnElement) btnElement.innerText = "Download & Open Gmail";
             }, 500);
@@ -582,13 +658,16 @@
         const school = document.getElementById('currentSchoolName').value;
         const email = document.getElementById('currentSchoolEmail').value;
 
-        if(!tester) { alert("Please enter the name."); return; }
+        if(!tester) { 
+            showAlert("Input Required", "Please enter the tester's name."); 
+            return; 
+        }
 
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
 
         // -----------------------------------------------------------
-        // 1. GENERATE PDF CONTENT (Standard)
+        // 1. GENERATE PDF CONTENT
         // -----------------------------------------------------------
         addHeader(doc);
         
@@ -703,27 +782,32 @@
         // A. Check for Mobile Sharing Support
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
             
-            // STEP 1: Attempt to Copy Email (Separate try/catch)
-            // If this fails, we continue to Step 2 anyway.
+            // STEP 1: Attempt to Copy Email
             try {
                 await navigator.clipboard.writeText(email);
-                alert(`📧 Email Copied: ${email}\n\n1. Tap 'OK' to open Share Options.\n2. Select Gmail.\n3. Long-press 'To' field and PASTE.`);
             } catch (err) {
-                console.warn("Clipboard failed (likely permission issue), skipping copy.", err);
-                // We do NOT stop here. We proceed to open the share sheet.
+                console.warn("Clipboard failed, proceeding anyway.", err);
             }
 
-            // STEP 2: Open Share Sheet (The file is attached here)
-            try {
-                await navigator.share({
-                    title: subject,
-                    text: bodyText,
-                    files: [file]
-                });
-                closeModal();
-            } catch (err) {
-                console.log("Share cancelled by user or failed", err);
-            }
+            // STEP 2: Show Share Modal to trigger user gesture
+            closeModal(); // Close the report modal
+            
+            // Define what happens when user clicks "Open Share Options"
+            const performShare = async () => {
+                try {
+                    await navigator.share({
+                        title: subject,
+                        text: bodyText,
+                        files: [file]
+                    });
+                } catch (err) {
+                    console.log("Share cancelled by user or failed", err);
+                }
+            };
+
+            // Open custom share modal
+            openShareModal(performShare);
+
         } 
         // B. Desktop Fallback (Download + Open Gmail Web)
         else {
@@ -738,7 +822,7 @@
             // Check if popup blocked
             const btnElement = document.querySelector('.modal .btn-primary');
             if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
-                alert("Pop-up blocked! Please click the button in the modal to open Gmail.");
+                showAlert("Popup Blocked", "Please click the button in the report modal to open Gmail.");
                 if(btnElement) {
                     btnElement.innerText = "Click here to Open Gmail";
                     btnElement.onclick = function() { window.open(gmailURL, '_blank'); };
