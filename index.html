@@ -108,15 +108,10 @@
             bottom: 0; 
             left: 0; 
             width: 100%; 
-            height: 21%; /* Low water level */
+            height: 30%; 
             overflow: hidden; 
             border-radius: 0 0 20px 20px; 
             pointer-events: none; 
-        }
-
-        /* No rise on hover, just card lift */
-        .card:hover .wave-container {
-            /* height remains 30% */
         }
 
         .wave { 
@@ -125,7 +120,6 @@
             bottom: 0; 
             width: 200%; 
             background-repeat: repeat-x;
-            transform-origin: bottom center; /* FIX: Anchors animation to bottom */
         }
 
         .wave-mask {
@@ -145,27 +139,9 @@
             100% { transform: translateX(-50%) translateZ(0) scaleY(1); } 
         }
 
-        /* Heights slightly > 100% to effectively seal the bottom edge */
-        .wave1 { 
-            animation: moveWave 15s linear infinite; 
-            height: 130%; 
-            opacity: 1; 
-            z-index: 1;
-        }
-
-        .wave2 { 
-            animation: moveWave 9s linear infinite; 
-            height: 120%; 
-            opacity: 1; 
-            z-index: 2;
-        }
-
-        .wave3 { 
-            animation: moveWave 5s linear infinite; 
-            height: 105%; 
-            opacity: 1; 
-            z-index: 3;
-        }
+        .wave1 { animation: moveWave 15s linear infinite; height: 120%; opacity: 1; z-index: 1; bottom: 0; }
+        .wave2 { animation: moveWave 9s linear infinite; height: 110%; opacity: 1; z-index: 2; bottom: 0; }
+        .wave3 { animation: moveWave 5s linear infinite; height: 100%; opacity: 1; z-index: 3; bottom: 0; }
 
         /* --- COLOR PALETTES --- */
         .ph-card .wave1 { background-color: #bee3f8; } 
@@ -196,10 +172,15 @@
         .form-group input { padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; outline: none; width: 100%; }
         .form-group input:focus { border-color: #4299e1; }
         
+        /* Edit Inputs */
+        .edit-input { padding: 8px; border: 1px solid #4299e1; border-radius: 4px; width: 100%; font-size: 0.9rem; }
+
         .btn { padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: opacity 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 5px; white-space: nowrap; }
         .btn:hover { opacity: 0.9; }
         .btn-primary { background-color: #3182ce; color: white; }
         .btn-email { background-color: #4299e1; color: white; font-size: 0.8rem; padding: 6px 12px; }
+        .btn-edit { background-color: #d69e2e; color: white; font-size: 0.8rem; padding: 6px 12px; }
+        .btn-save { background-color: #38a169; color: white; font-size: 0.8rem; padding: 6px 12px; }
         .btn-delete { background-color: #e53e3e; color: white; font-size: 0.8rem; padding: 6px 12px; }
         .action-cell { display: flex; gap: 8px; }
 
@@ -224,11 +205,6 @@
             .add-school-form { flex-direction: column; align-items: stretch; }
             .btn { width: 100%; }
             .action-cell .btn { width: auto; }
-        }
-        @media (max-width: 480px) {
-            .sidebar { flex-direction: column; gap: 15px; }
-            header { flex-direction: column; align-items: flex-start; }
-            .user-profile { width: 100%; justify-content: space-between; }
         }
     </style>
 </head>
@@ -255,14 +231,12 @@
         </header>
 
         <section class="dashboard-grid">
-            
             <div class="card ph-card">
                 <div class="wave-container">
                     <div class="wave wave-mask wave1"></div>
                     <div class="wave wave-mask wave2"></div>
                     <div class="wave wave-mask wave3"></div>
                 </div>
-                
                 <div class="card-content">
                     <div class="card-header">
                         <span>pH Level</span>
@@ -279,7 +253,6 @@
                     <div class="wave wave-mask wave2"></div>
                     <div class="wave wave-mask wave3"></div>
                 </div>
-
                 <div class="card-content">
                     <div class="card-header">
                         <span>Turbidity</span>
@@ -296,7 +269,6 @@
                     <div class="wave wave-mask wave2"></div>
                     <div class="wave wave-mask wave3"></div>
                 </div>
-
                 <div class="card-content">
                     <div class="card-header">
                         <span>TDS (Solids)</span>
@@ -306,16 +278,13 @@
                     <div class="metric-status" style="color: #2f855a;">● Safe Level</div>
                 </div>
             </div>
-
         </section>
 
         <section class="data-section">
             <h3>Recent Sensor Readings</h3>
             <div class="table-wrapper">
                 <table>
-                    <thead>
-                        <tr><th>Time</th><th>pH Level</th><th>Turbidity (NTU)</th><th>TDS (ppm)</th><th>Status</th></tr>
-                    </thead>
+                    <thead><tr><th>Time</th><th>pH Level</th><th>Turbidity (NTU)</th><th>TDS (ppm)</th><th>Status</th></tr></thead>
                     <tbody>
                         <tr><td>10:45 AM</td><td>7.4</td><td>2.1</td><td>145</td><td style="color: green;">Normal</td></tr>
                         <tr><td>10:30 AM</td><td>7.3</td><td>1.9</td><td>142</td><td style="color: green;">Normal</td></tr>
@@ -327,7 +296,7 @@
         <section class="data-section">
             <h3>School Testing Registry</h3>
             <div class="add-school-form">
-                <div class="form-group"><label>Name of School</label><input type="text" id="newSchoolName" placeholder="e.g. Lincoln High"></div>
+                <div class="form-group"><label>Name of School <span style="color:red">*</span></label><input type="text" id="newSchoolName" placeholder="e.g. Lincoln High"></div>
                 <div class="form-group"><label>School Head</label><input type="text" id="newSchoolHead" placeholder="e.g. Mr. Doe"></div>
                 <div class="form-group"><label>Email</label><input type="email" id="newSchoolEmail" placeholder="e.g. head@school.edu"></div>
                 <button class="btn btn-primary" onclick="addSchoolToDB()">+ Add School</button>
@@ -335,12 +304,8 @@
 
             <div class="table-wrapper">
                 <table>
-                    <thead>
-                        <tr><th>School Name</th><th>School Head</th><th>Email</th><th>Water Status</th><th>Actions</th></tr>
-                    </thead>
-                    <tbody id="schoolTableBody">
-                        <tr><td colspan="5">Loading data from Firebase...</td></tr>
-                    </tbody>
+                    <thead><tr><th>School Name</th><th>School Head</th><th>Email</th><th>Water Status</th><th>Actions</th></tr></thead>
+                    <tbody id="schoolTableBody"><tr><td colspan="5">Loading data from Firebase...</td></tr></tbody>
                 </table>
             </div>
         </section>
@@ -355,15 +320,12 @@
                 <b>Page 1:</b> Descriptive Guide<br>
                 <b>Page 2:</b> Test Results & Signatures
             </p>
-            
             <div class="form-group">
                 <label>Tested By (Name):</label>
                 <input type="text" id="testerName" placeholder="Juan Dela Cruz">
             </div>
-
             <input type="hidden" id="currentSchoolName">
             <input type="hidden" id="currentSchoolEmail">
-
             <div class="modal-buttons">
                 <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
                 <button class="btn btn-primary" onclick="generateAndSend()">Download & Open Gmail</button>
@@ -410,11 +372,8 @@
     <img id="footer-logo-mabalacat" src="img/mabalacat_city_logo.png" style="display: none;" crossorigin="anonymous">
 
     <script type="module">
-    // ---------------------------------------------------------
-    // 1. FIREBASE CONFIGURATION
-    // ---------------------------------------------------------
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAxWmm5YsLjnwatHOVImrpIHAxicbHWYuw",
@@ -430,11 +389,7 @@
     const db = getFirestore(app);
     const schoolsCol = collection(db, "Schools");
 
-    // ---------------------------------------------------------
-    // 2. MODAL HELPER FUNCTIONS
-    // ---------------------------------------------------------
-    
-    // Alert Modal Logic
+    // --- MODAL FUNCTIONS ---
     window.showAlert = function(title, message) {
         document.getElementById('alertTitle').innerText = title;
         document.getElementById('alertMessage').innerText = message;
@@ -445,9 +400,7 @@
         document.getElementById('alertModal').style.display = 'none';
     }
 
-    // Confirmation Modal Logic
     let pendingDeleteId = null;
-
     window.openDeleteModal = function(docId) {
         pendingDeleteId = docId;
         document.getElementById('confirmModal').style.display = 'flex';
@@ -471,13 +424,11 @@
         }
     }
 
-    // Share Modal Logic
     window.openShareModal = function(shareFunction) {
         document.getElementById('shareModal').style.display = 'flex';
         const shareBtn = document.getElementById('shareBtnAction');
         const newBtn = shareBtn.cloneNode(true);
         shareBtn.parentNode.replaceChild(newBtn, shareBtn);
-        
         newBtn.onclick = async () => {
             await shareFunction();
             document.getElementById('shareModal').style.display = 'none';
@@ -488,9 +439,67 @@
         document.getElementById('shareModal').style.display = 'none';
     }
 
-    // ---------------------------------------------------------
-    // 3. REAL-TIME DATA LISTENER
-    // ---------------------------------------------------------
+    // --- EDIT FUNCTIONS ---
+    let originalData = {}; 
+
+    window.editSchool = function(id) {
+        const row = document.getElementById(`row-${id}`);
+        if(!row) return;
+
+        const nameCell = row.querySelector('.name-cell');
+        const headCell = row.querySelector('.head-cell');
+        const emailCell = row.querySelector('.email-cell');
+        const actionsCell = row.querySelector('.action-cell');
+
+        originalData[id] = {
+            name: nameCell.innerText,
+            head: headCell.innerText,
+            email: emailCell.innerText,
+            actions: actionsCell.innerHTML
+        };
+
+        nameCell.innerHTML = `<input type="text" id="edit-name-${id}" value="${originalData[id].name}" class="edit-input">`;
+        headCell.innerHTML = `<input type="text" id="edit-head-${id}" value="${originalData[id].head === "N/A" ? "" : originalData[id].head}" class="edit-input">`;
+        emailCell.innerHTML = `<input type="email" id="edit-email-${id}" value="${originalData[id].email === "N/A" ? "" : originalData[id].email}" class="edit-input">`;
+
+        actionsCell.innerHTML = `
+            <button class="btn btn-save" onclick="saveSchool('${id}')">💾 Save</button>
+            <button class="btn btn-cancel" onclick="cancelEdit('${id}')">❌</button>
+        `;
+    }
+
+    window.saveSchool = async function(id) {
+        const newName = document.getElementById(`edit-name-${id}`).value.trim();
+        const newHead = document.getElementById(`edit-head-${id}`).value.trim();
+        const newEmail = document.getElementById(`edit-email-${id}`).value.trim();
+
+        if(!newName) {
+            showAlert("Validation Error", "School Name cannot be empty.");
+            return;
+        }
+
+        try {
+            await updateDoc(doc(db, "Schools", id), {
+                schoolName: newName,
+                schoolHead: newHead,
+                email: newEmail
+            });
+        } catch (e) {
+            showAlert("Error", "Could not update school: " + e.message);
+        }
+    }
+
+    window.cancelEdit = function(id) {
+        const row = document.getElementById(`row-${id}`);
+        if(!row || !originalData[id]) return;
+        row.querySelector('.name-cell').innerText = originalData[id].name;
+        row.querySelector('.head-cell').innerText = originalData[id].head;
+        row.querySelector('.email-cell').innerText = originalData[id].email;
+        row.querySelector('.action-cell').innerHTML = originalData[id].actions;
+        delete originalData[id];
+    }
+
+    // --- REAL-TIME DATA ---
     onSnapshot(schoolsCol, (snapshot) => {
         const tbody = document.getElementById("schoolTableBody");
         tbody.innerHTML = ""; 
@@ -506,13 +515,15 @@
             const statusHtml = `<td style="color: #48bb78; font-weight:bold;">Safe</td>`;
 
             const tr = document.createElement("tr");
+            tr.id = `row-${schoolId}`; 
             tr.innerHTML = `
-                <td>${school.schoolName || "N/A"}</td>
-                <td>${school.schoolHead || "N/A"}</td>
-                <td>${school.email || "N/A"}</td>
+                <td class="name-cell">${school.schoolName || "N/A"}</td>
+                <td class="head-cell">${school.schoolHead || "N/A"}</td>
+                <td class="email-cell">${school.email || "N/A"}</td>
                 ${statusHtml}
                 <td class="action-cell">
                     <button class="btn btn-email" onclick="openReportModal('${school.schoolName}', '${school.email}')">📧 Send Report</button>
+                    <button class="btn btn-edit" onclick="editSchool('${schoolId}')">✏️</button>
                     <button class="btn btn-delete" onclick="openDeleteModal('${schoolId}')">🗑️</button>
                 </td>
             `;
@@ -523,16 +534,14 @@
         tbody.innerHTML = `<tr><td colspan='5' style='color: red;'>Error: ${error.message}</td></tr>`;
     });
 
-    // ---------------------------------------------------------
-    // 4. DATABASE FUNCTIONS
-    // ---------------------------------------------------------
+    // --- DATABASE FUNCTIONS ---
     window.addSchoolToDB = async function() {
-        const name = document.getElementById('newSchoolName').value;
-        const head = document.getElementById('newSchoolHead').value;
-        const email = document.getElementById('newSchoolEmail').value;
+        const name = document.getElementById('newSchoolName').value.trim();
+        const head = document.getElementById('newSchoolHead').value.trim();
+        const email = document.getElementById('newSchoolEmail').value.trim();
 
-        if(!name || !head || !email) { 
-            showAlert("Missing Information", "Please fill in all fields."); 
+        if(!name) { 
+            showAlert("Missing Information", "Please enter the School Name."); 
             return; 
         }
 
@@ -549,9 +558,7 @@
         }
     }
 
-    // ---------------------------------------------------------
-    // 5. REPORT LOGIC
-    // ---------------------------------------------------------
+    // --- REPORT LOGIC ---
     let isWaitingForReturn = false; 
 
     window.openReportModal = function(schoolName, schoolEmail) {
@@ -577,7 +584,6 @@
         }
     });
 
-    // --- HELPER: DRAW HEADER ---
     function addHeader(doc) {
         const imgElement = document.getElementById('pdf-logo-hidden');
         if (imgElement && imgElement.complete && imgElement.naturalHeight !== 0) {
@@ -595,7 +601,6 @@
         doc.setFont(undefined, 'normal');
     }
 
-    // --- HELPER: DRAW FOOTER ---
     function addFooter(doc, pageNum) {
         const pageHeight = doc.internal.pageSize.height || doc.internal.pageSize.getHeight();
         const footerY = pageHeight - 35; 
@@ -616,12 +621,10 @@
         if (logoDeped && logoDeped.complete && logoDeped.naturalHeight !== 0) {
             doc.addImage(logoDeped, 'PNG', 10, logoY, 22, logoH - 2); 
         }
-
         const logoBagong = document.getElementById('footer-logo-bagong');
         if (logoBagong && logoBagong.complete && logoBagong.naturalHeight !== 0) {
             doc.addImage(logoBagong, 'JPEG', 34, logoY, 10, 10); 
         }
-
         const logoMabalacat = document.getElementById('footer-logo-mabalacat');
         if (logoMabalacat && logoMabalacat.complete && logoMabalacat.naturalHeight !== 0) {
             doc.addImage(logoMabalacat, 'PNG', 46, logoY, 10, 10); 
@@ -635,7 +638,6 @@
         doc.text("Telephone No.: (045) 402-7534", 200, logoY + 7, null, null, "right");
 
         const bottomRowY = logoY + 12; 
-        
         doc.setFillColor(66, 103, 178); 
         doc.rect(58, bottomRowY - 2, 4, 4, 'F');
         doc.setTextColor(255, 255, 255);
@@ -645,13 +647,10 @@
         doc.setTextColor(0, 0, 0);
         doc.setFontSize(7);
         doc.text("DepEd Tayo Division of Mabalacat", 64, bottomRowY + 1);
-
         doc.text("✉", 115, bottomRowY + 1); 
         doc.text("mabalacat.city@deped.gov.ph", 118, bottomRowY + 1);
-
         doc.text("🌐", 160, bottomRowY + 1);
         doc.text("www.depedmabalacat.org", 164, bottomRowY + 1);
-
         doc.text("Page " + pageNum + " of 3", 200, pageHeight - 5, null, null, "right");
     }
 
@@ -669,9 +668,6 @@
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
 
-        // -----------------------------------------------------------
-        // 1. GENERATE PDF CONTENT
-        // -----------------------------------------------------------
         addHeader(doc);
         
         doc.setFontSize(12);
@@ -738,8 +734,6 @@
         });
 
         addFooter(doc, 1);
-
-        // --- PAGE 2 ---
         doc.addPage();
         addHeader(doc);
 
@@ -772,9 +766,6 @@
 
         addFooter(doc, 2);
 
-        // -----------------------------------------------------------
-        // 2. MOBILE SHARE LOGIC (ROBUST FIX)
-        // -----------------------------------------------------------
         const filename = `${school}_Water_Report.pdf`;
         const subject = `Water Quality Report: ${school}`;
         const bodyText = `Hello,\n\nPlease find the attached Water Quality Report for ${school}.\n\nTested by: ${tester}`;
@@ -782,20 +773,21 @@
         const pdfBlob = doc.output('blob');
         const file = new File([pdfBlob], filename, { type: "application/pdf" });
 
-        // A. Check for Mobile Sharing Support
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            
-            // STEP 1: Attempt to Copy Email
-            try {
-                await navigator.clipboard.writeText(email);
-            } catch (err) {
-                console.warn("Clipboard failed, proceeding anyway.", err);
-            }
+        // --- NEW DETECTION LOGIC ---
+        // We use a regex to verify if the user Agent is genuinely a mobile device.
+        // This is necessary because some desktop browsers return true for navigator.share,
+        // but we want to force the Desktop behavior (redirect to Gmail) for them.
+        const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-            // STEP 2: Show Share Modal to trigger user gesture
-            closeModal(); // Close the report modal
+        // 1. MOBILE LOGIC (Share Sheet)
+        if (isMobileDevice && navigator.canShare && navigator.canShare({ files: [file] })) {
             
-            // Define what happens when user clicks "Open Share Options"
+            // Attempt to copy email for convenience (fail silently if not supported)
+            try { await navigator.clipboard.writeText(email); } catch (e) {}
+
+            closeModal(); // Hide report modal
+            
+            // Define the share action
             const performShare = async () => {
                 try {
                     await navigator.share({
@@ -804,34 +796,36 @@
                         files: [file]
                     });
                 } catch (err) {
-                    console.log("Share cancelled by user or failed", err);
+                    console.log("Share cancelled or failed", err);
                 }
             };
-
-            // Open custom share modal
+            
+            // Show custom share modal to get user gesture
             openShareModal(performShare);
 
         } 
-        // B. Desktop Fallback (Download + Open Gmail Web)
+        // 2. DESKTOP LOGIC (Auto-Download + Gmail Redirect)
         else {
+            // Save file immediately
             doc.save(filename); 
             
             isWaitingForReturn = true;
             const gmailURL = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText + "\n\n(Note: Please attach the downloaded PDF manually)")}`;
             
-            // Attempt to open popup
+            // Attempt to open Gmail immediately
             const newWindow = window.open(gmailURL, '_blank');
 
-            // Check if popup blocked
-            const btnElement = document.querySelector('.modal .btn-primary');
+            // Handle Popup Blocker *passively* inside the existing modal
+            // (Only change button text, do not show a new alert)
             if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
-                showAlert("Popup Blocked", "Please click the button in the report modal to open Gmail.");
+                const btnElement = document.querySelector('.modal .btn-primary');
                 if(btnElement) {
                     btnElement.innerText = "Click here to Open Gmail";
                     btnElement.onclick = function() { window.open(gmailURL, '_blank'); };
                 }
             } else {
-                if(btnElement) btnElement.innerText = "Check New Tab...";
+                // If successful, just close the modal
+                closeModal();
             }
         }
     }
