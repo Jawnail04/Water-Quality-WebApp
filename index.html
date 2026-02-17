@@ -184,6 +184,18 @@
         .btn-delete { background-color: #e53e3e; color: white; font-size: 0.8rem; padding: 6px 12px; }
         .action-cell { display: flex; gap: 8px; }
 
+        /* --- SEARCH CONTAINER STYLES --- */
+        .search-container {
+            margin-bottom: 15px; 
+            display: flex; 
+            gap: 10px;
+            align-items: center;
+        }
+        .search-actions {
+            display: flex;
+            gap: 10px;
+        }
+
         /* --- MODALS --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
         .modal { background: white; padding: 30px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); animation: modalPop 0.3s ease-out; }
@@ -207,20 +219,31 @@
             .nav-links a:hover, .nav-links a.active { padding-left: 12px; }
             .main-content { padding: 20px; }
             .add-school-form { flex-direction: column; align-items: stretch; }
+            .btn { width: 100%; }
             
-            /* --- FIXED RESPONSIVENESS FOR TABLE BUTTONS --- */
-            .btn { width: 100%; } /* Default for form buttons */
-            
+            /* -- Mobile Updates for Search -- */
+            .search-container {
+                flex-direction: column; /* Stack input on top of buttons */
+                align-items: stretch;
+            }
+            .search-actions {
+                width: 100%; /* Make button container full width */
+            }
+            .search-actions .btn {
+                flex: 1; /* Make search and clear buttons share space evenly */
+            }
+
+            /* -- Mobile Updates for Table Buttons -- */
             .action-cell { 
-                flex-direction: column; /* Stack buttons vertically on mobile */
+                flex-direction: column; 
                 gap: 5px;
                 display: flex;
             }
             .action-cell .btn { 
-                width: 100%; /* Make buttons full width of the cell */
-                margin: 0; /* Remove default margins if any */
-                justify-content: center; /* Center text/icons */
-                padding: 8px 10px; /* Comfortable touch target */
+                width: 100%; 
+                margin: 0; 
+                justify-content: center; 
+                padding: 8px 10px;
                 font-size: 0.85rem;
             }
         }
@@ -320,12 +343,14 @@
                 <button class="btn btn-primary" onclick="addSchoolToDB()">+ Add School</button>
             </div>
 
-            <div style="margin-bottom: 15px; display: flex; gap: 10px;">
+            <div class="search-container">
                 <input type="text" id="searchInput" placeholder="Search by School Name (e.g. 'cani')" 
                        oninput="handleSearch(this.value)"
                        style="padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; flex: 1; outline: none;">
-                <button class="btn btn-primary" onclick="searchSchools()">🔍 Search</button>
-                <button class="btn btn-cancel" onclick="clearSearch()">Clear</button>
+                <div class="search-actions">
+                    <button class="btn btn-primary" onclick="searchSchools()">🔍 Search</button>
+                    <button class="btn btn-cancel" onclick="clearSearch()">Clear</button>
+                </div>
             </div>
 
             <div class="table-wrapper">
