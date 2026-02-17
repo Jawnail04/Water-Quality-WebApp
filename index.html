@@ -246,6 +246,17 @@
                 padding: 8px 10px;
                 font-size: 0.85rem;
             }
+
+            /* -- Mobile Updates for Pagination Controls -- */
+            .pagination-controls .btn {
+                width: auto; /* Allow buttons to size based on content/flex */
+                flex: 1; /* Distribute space equally */
+                font-size: 0.8rem; /* Prevent text overflow */
+                padding: 10px 5px;
+            }
+            .pagination-controls {
+                gap: 10px; /* Add spacing between prev/next/text */
+            }
         }
     </style>
 </head>
