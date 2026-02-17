@@ -10,27 +10,33 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         
         body { 
-            background: linear-gradient(135deg, #f4f7fe 0%, #e2e8f0 100%); 
+            /* Background Image matching Dashboard */
+            background: url('img/flare.jpg') no-repeat center center fixed; 
+            background-size: cover;
             color: #333; 
             display: flex; 
             min-height: 100vh; 
             overflow-x: hidden; 
         }
         
-        /* --- SIDEBAR --- */
+        /* --- SIDEBAR (Glass Style) --- */
         .sidebar { 
             width: 250px; 
-            background-color: #1a2035; 
+            background: rgba(26, 32, 53, 0.85); 
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
             color: #fff; 
             display: flex; 
             flex-direction: column; 
             padding: 20px; 
             transition: all 0.3s ease;
             flex-shrink: 0; 
+            z-index: 100;
         }
         .sidebar h2 { text-align: center; margin-bottom: 40px; font-weight: 600; letter-spacing: 1px; }
-        .nav-links a { display: block; color: #a0aec0; text-decoration: none; padding: 15px; margin-bottom: 10px; border-radius: 8px; transition: 0.3s; }
-        .nav-links a:hover, .nav-links a.active { background-color: #2d3748; color: #fff; padding-left: 20px; }
+        .nav-links a { display: block; color: #cbd5e0; text-decoration: none; padding: 15px; margin-bottom: 10px; border-radius: 8px; transition: 0.3s; }
+        .nav-links a:hover, .nav-links a.active { background-color: rgba(255, 255, 255, 0.15); color: #fff; padding-left: 20px; border: 1px solid rgba(255, 255, 255, 0.1); }
         
         /* --- MAIN CONTENT --- */
         .main-content { 
@@ -41,28 +47,50 @@
         }
         
         header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        header h1 { font-size: 24px; color: #2d3748; }
         
-        /* --- DATA TABLE SECTION --- */
-        .data-section { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); }
+        header h1 { 
+            font-size: 24px; 
+            color: #1a202c; 
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+        }
+        header p {
+            color: #2d3748 !important; 
+            font-size: 0.9rem;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+        }
+        
+        /* --- DATA TABLE SECTION (Glass Style) --- */
+        .data-section { 
+            background: rgba(255, 255, 255, 0.35); /* Glass Effect */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 25px; 
+            border-radius: 15px; 
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1); 
+        }
         
         /* Header inside the white box */
         .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-        
+        .section-header h3 { color: #2d3748; }
+
         .table-wrapper { width: 100%; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        th, td { text-align: left; padding: 15px; border-bottom: 1px solid #e2e8f0; }
-        th { color: #718096; font-weight: 600; font-size: 0.9rem; white-space: nowrap; }
-        tr:hover { background-color: #f7fafc; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 600px; }
+        
+        th, td { text-align: left; padding: 15px; border-bottom: 1px solid rgba(113, 128, 150, 0.2); }
+        th { color: #4a5568; font-weight: 700; font-size: 0.9rem; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.5px; }
+        td { color: #2d3748; font-weight: 500; }
+        
+        tbody tr:hover { background-color: rgba(255, 255, 255, 0.3); transition: background-color 0.2s; }
 
         /* --- BUTTONS --- */
-        .btn { padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: opacity 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
-        .btn:hover { opacity: 0.9; }
+        .btn { padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.15); opacity: 0.95; }
         .btn-export { background-color: #38a169; color: white; } /* Green */
         .btn-refresh { background-color: #3182ce; color: white; } /* Blue */
 
         /* --- LOADING SPINNER --- */
-        .loader { border: 3px solid #f3f3f3; border-radius: 50%; border-top: 3px solid #3182ce; width: 20px; height: 20px; animation: spin 1s linear infinite; display: none; }
+        .loader { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid #3182ce; width: 20px; height: 20px; animation: spin 1s linear infinite; display: none; margin-right: 10px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* --- RESPONSIVE --- */
@@ -90,7 +118,7 @@
         <header>
             <div>
                 <h1>Sensor History Logs</h1>
-                <p style="color: #718096; font-size: 0.9rem;">Archive of recorded water quality data</p>
+                <p>Archive of recorded water quality data</p>
             </div>
         </header>
 
@@ -143,10 +171,8 @@
 
         // --- 1. LOAD HISTORY LOGS (Real-time) ---
         // We order by timestamp descending (newest first) and limit to 50 for the view
-        // Note: If you have no timestamp field in older data, this might show random order for those.
         const qLogs = query(waterQualityCol, limit(50)); 
         // Ideally use: query(waterQualityCol, orderBy("timestamp", "desc"), limit(50));
-        // If "orderBy" fails due to missing index, check console link.
 
         onSnapshot(qLogs, (snapshot) => {
             const tbody = document.getElementById("logsTableBody");
@@ -162,11 +188,9 @@
                 
                 // --- Formatting Logic ---
                 let timeString = "Unknown Time";
-                // If timestamp exists
                 if (data.timestamp && data.timestamp.toDate) {
                     timeString = data.timestamp.toDate().toLocaleString(); 
                 } 
-                // Fallback if your ESP32 isn't sending a timestamp yet, use current time for display (optional)
                 else {
                     timeString = "Live/Recent";
                 }
@@ -196,11 +220,10 @@
             const t = parseFloat(turb) || 0;
             const s = parseFloat(tds) || 0;
 
-            // Simple Logic
             if ((p >= 6.5 && p <= 8.5) && t < 10 && s < 1000) {
-                return '<span style="color: #38a169; font-weight:bold; background: #c6f6d5; padding: 4px 8px; border-radius: 4px;">Normal</span>';
+                return '<span style="color: #2f855a; font-weight:bold; background: rgba(198, 246, 213, 0.6); padding: 4px 8px; border-radius: 4px;">Normal</span>';
             }
-            return '<span style="color: #c05621; font-weight:bold; background: #feebc8; padding: 4px 8px; border-radius: 4px;">Check</span>';
+            return '<span style="color: #c05621; font-weight:bold; background: rgba(254, 235, 200, 0.6); padding: 4px 8px; border-radius: 4px;">Check</span>';
         }
 
         // --- 3. EXPORT TO CSV FUNCTION ---
@@ -214,8 +237,6 @@
             btn.innerText = "Generating...";
 
             try {
-                // Fetch ALL data for export (not just the limited 50 view)
-                // Note: If you have thousands of records, consider a cloud function or limit this.
                 const querySnapshot = await getDocs(waterQualityCol);
                 
                 let csvContent = "data:text/csv;charset=utf-8,";
@@ -225,7 +246,6 @@
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
                     
-                    // Format Date/Time
                     let dateStr = "N/A";
                     let timeStr = "N/A";
                     if (data.timestamp && data.timestamp.toDate) {
@@ -234,7 +254,6 @@
                         timeStr = dateObj.toLocaleTimeString();
                     }
 
-                    // Status Text
                     const ph = parseFloat(data.phLevel) || 0;
                     const turb = parseFloat(data.turbidity) || 0;
                     const tds = parseFloat(data.tds) || 0;
@@ -243,7 +262,6 @@
                         status = "Normal";
                     }
 
-                    // Add Row
                     const row = [
                         dateStr,
                         timeStr,
@@ -255,12 +273,11 @@
                     csvContent += row + "\r\n";
                 });
 
-                // Trigger Download
                 const encodedUri = encodeURI(csvContent);
                 const link = document.createElement("a");
                 link.setAttribute("href", encodedUri);
                 link.setAttribute("download", "WaterQuality_Logs_" + new Date().toISOString().slice(0,10) + ".csv");
-                document.body.appendChild(link); // Required for FF
+                document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
 
@@ -268,7 +285,6 @@
                 alert("Error exporting data: " + e.message);
                 console.error(e);
             } finally {
-                // Reset UI
                 loader.style.display = "none";
                 btn.disabled = false;
                 btn.innerText = "📄 Export to Excel (CSV)";
