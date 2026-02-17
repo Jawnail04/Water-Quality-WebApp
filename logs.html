@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Quality - History Logs</title>
+    
+    <style>
+        /* --- CSS STYLES (Matching Dashboard) --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        body { 
+            background: linear-gradient(135deg, #f4f7fe 0%, #e2e8f0 100%); 
+            color: #333; 
+            display: flex; 
+            min-height: 100vh; 
+            overflow-x: hidden; 
+        }
+        
+        /* --- SIDEBAR --- */
+        .sidebar { 
+            width: 250px; 
+            background-color: #1a2035; 
+            color: #fff; 
+            display: flex; 
+            flex-direction: column; 
+            padding: 20px; 
+            transition: all 0.3s ease;
+            flex-shrink: 0; 
+        }
+        .sidebar h2 { text-align: center; margin-bottom: 40px; font-weight: 600; letter-spacing: 1px; }
+        .nav-links a { display: block; color: #a0aec0; text-decoration: none; padding: 15px; margin-bottom: 10px; border-radius: 8px; transition: 0.3s; }
+        .nav-links a:hover, .nav-links a.active { background-color: #2d3748; color: #fff; padding-left: 20px; }
+        
+        /* --- MAIN CONTENT --- */
+        .main-content { 
+            flex: 1; 
+            padding: 30px; 
+            overflow-y: auto; 
+            width: 100%; 
+        }
+        
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        header h1 { font-size: 24px; color: #2d3748; }
+        
+        /* --- DATA TABLE SECTION --- */
+        .data-section { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); }
+        
+        /* Header inside the white box */
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+        
+        .table-wrapper { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th, td { text-align: left; padding: 15px; border-bottom: 1px solid #e2e8f0; }
+        th { color: #718096; font-weight: 600; font-size: 0.9rem; white-space: nowrap; }
+        tr:hover { background-color: #f7fafc; }
+
+        /* --- BUTTONS --- */
+        .btn { padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: opacity 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
+        .btn:hover { opacity: 0.9; }
+        .btn-export { background-color: #38a169; color: white; } /* Green */
+        .btn-refresh { background-color: #3182ce; color: white; } /* Blue */
+
+        /* --- LOADING SPINNER --- */
+        .loader { border: 3px solid #f3f3f3; border-radius: 50%; border-top: 3px solid #3182ce; width: 20px; height: 20px; animation: spin 1s linear infinite; display: none; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 900px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; flex-direction: row; align-items: center; justify-content: space-between; padding: 15px 20px; }
+            .sidebar h2 { margin-bottom: 0; font-size: 1.2rem; }
+            .nav-links { display: flex; gap: 10px; margin-top: 0; }
+            .nav-links a { margin-bottom: 0; padding: 8px 12px; font-size: 0.9rem; }
+            .main-content { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <h2>AquaMonitor</h2>
+        <div class="nav-links">
+            <a href="index.html">Overview</a>
+            <a href="#" class="active">History Logs</a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <header>
+            <div>
+                <h1>Sensor History Logs</h1>
+                <p style="color: #718096; font-size: 0.9rem;">Archive of recorded water quality data</p>
+            </div>
+        </header>
+
+        <section class="data-section">
+            <div class="section-header">
+                <h3>Recorded Data</h3>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <div class="loader" id="exportLoader"></div>
+                    <button class="btn btn-export" onclick="exportToCSV()">📄 Export to Excel (CSV)</button>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table id="logsTable">
+                    <thead>
+                        <tr>
+                            <th>Date & Time</th>
+                            <th>pH Level</th>
+                            <th>Turbidity (NTU)</th>
+                            <th>TDS (ppm)</th>
+                            <th>Assessment</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logsTableBody">
+                        <tr><td colspan="5">Loading logs...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, query, orderBy, limit, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // --- FIREBASE CONFIGURATION (Must match index.html) ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyAxWmm5YsLjnwatHOVImrpIHAxicbHWYuw",
+            authDomain: "water-quality-db-d2dff.firebaseapp.com",
+            projectId: "water-quality-db-d2dff",
+            storageBucket: "water-quality-db-d2dff.firebasestorage.app",
+            messagingSenderId: "499791448587",
+            appId: "1:499791448587:web:a11b55aa1af45bdf78550e",
+            measurementId: "G-5L40CDJPG5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const waterQualityCol = collection(db, "waterQuality");
+
+        // --- 1. LOAD HISTORY LOGS (Real-time) ---
+        // We order by timestamp descending (newest first) and limit to 50 for the view
+        // Note: If you have no timestamp field in older data, this might show random order for those.
+        const qLogs = query(waterQualityCol, limit(50)); 
+        // Ideally use: query(waterQualityCol, orderBy("timestamp", "desc"), limit(50));
+        // If "orderBy" fails due to missing index, check console link.
+
+        onSnapshot(qLogs, (snapshot) => {
+            const tbody = document.getElementById("logsTableBody");
+            tbody.innerHTML = "";
+
+            if (snapshot.empty) {
+                tbody.innerHTML = "<tr><td colspan='5'>No records found.</td></tr>";
+                return;
+            }
+
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                
+                // --- Formatting Logic ---
+                let timeString = "Unknown Time";
+                // If timestamp exists
+                if (data.timestamp && data.timestamp.toDate) {
+                    timeString = data.timestamp.toDate().toLocaleString(); 
+                } 
+                // Fallback if your ESP32 isn't sending a timestamp yet, use current time for display (optional)
+                else {
+                    timeString = "Live/Recent";
+                }
+
+                const ph = data.phLevel !== undefined ? data.phLevel : "--";
+                const turb = data.turbidity !== undefined ? data.turbidity : "--";
+                const tds = data.tds !== undefined ? data.tds : "--";
+
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${timeString}</td>
+                    <td>${ph}</td>
+                    <td>${turb}</td>
+                    <td>${tds}</td>
+                    <td>${getOverallStatus(ph, turb, tds)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }, (error) => {
+            console.error("Error loading logs:", error);
+            document.getElementById("logsTableBody").innerHTML = `<tr><td colspan='5' style='color: red;'>Error loading data: ${error.message}</td></tr>`;
+        });
+
+        // --- 2. HELPER: STATUS LOGIC (Same as Dashboard) ---
+        function getOverallStatus(ph, turb, tds) {
+            const p = parseFloat(ph) || 0;
+            const t = parseFloat(turb) || 0;
+            const s = parseFloat(tds) || 0;
+
+            // Simple Logic
+            if ((p >= 6.5 && p <= 8.5) && t < 10 && s < 1000) {
+                return '<span style="color: #38a169; font-weight:bold; background: #c6f6d5; padding: 4px 8px; border-radius: 4px;">Normal</span>';
+            }
+            return '<span style="color: #c05621; font-weight:bold; background: #feebc8; padding: 4px 8px; border-radius: 4px;">Check</span>';
+        }
+
+        // --- 3. EXPORT TO CSV FUNCTION ---
+        window.exportToCSV = async function() {
+            const loader = document.getElementById("exportLoader");
+            const btn = document.querySelector(".btn-export");
+            
+            // UI Feedback
+            loader.style.display = "block";
+            btn.disabled = true;
+            btn.innerText = "Generating...";
+
+            try {
+                // Fetch ALL data for export (not just the limited 50 view)
+                // Note: If you have thousands of records, consider a cloud function or limit this.
+                const querySnapshot = await getDocs(waterQualityCol);
+                
+                let csvContent = "data:text/csv;charset=utf-8,";
+                // CSV Header
+                csvContent += "Date,Time,pH Level,Turbidity (NTU),TDS (ppm),Status\n";
+
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    
+                    // Format Date/Time
+                    let dateStr = "N/A";
+                    let timeStr = "N/A";
+                    if (data.timestamp && data.timestamp.toDate) {
+                        const dateObj = data.timestamp.toDate();
+                        dateStr = dateObj.toLocaleDateString();
+                        timeStr = dateObj.toLocaleTimeString();
+                    }
+
+                    // Status Text
+                    const ph = parseFloat(data.phLevel) || 0;
+                    const turb = parseFloat(data.turbidity) || 0;
+                    const tds = parseFloat(data.tds) || 0;
+                    let status = "Check";
+                    if ((ph >= 6.5 && ph <= 8.5) && turb < 10 && tds < 1000) {
+                        status = "Normal";
+                    }
+
+                    // Add Row
+                    const row = [
+                        dateStr,
+                        timeStr,
+                        data.phLevel || 0,
+                        data.turbidity || 0,
+                        data.tds || 0,
+                        status
+                    ].join(",");
+                    csvContent += row + "\r\n";
+                });
+
+                // Trigger Download
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", "WaterQuality_Logs_" + new Date().toISOString().slice(0,10) + ".csv");
+                document.body.appendChild(link); // Required for FF
+                link.click();
+                document.body.removeChild(link);
+
+            } catch (e) {
+                alert("Error exporting data: " + e.message);
+                console.error(e);
+            } finally {
+                // Reset UI
+                loader.style.display = "none";
+                btn.disabled = false;
+                btn.innerText = "📄 Export to Excel (CSV)";
+            }
+        }
+    </script>
+</body>
+</html>

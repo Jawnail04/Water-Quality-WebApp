@@ -108,7 +108,7 @@
             bottom: 0; 
             left: 0; 
             width: 100%; 
-            height: 30%; 
+            height: 22%; 
             overflow: hidden; 
             border-radius: 0 0 20px 20px; 
             pointer-events: none; 
@@ -193,6 +193,10 @@
         .modal-buttons { margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px; }
         .btn-cancel { background-color: #718096; color: white; }
 
+        /* --- PAGINATION --- */
+        .pagination-controls { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
+        .pagination-controls button:disabled { background-color: #cbd5e0; cursor: not-allowed; }
+
         /* --- MEDIA QUERIES --- */
         @media (max-width: 900px) {
             body { flex-direction: column; }
@@ -214,7 +218,7 @@
         <h2>AquaMonitor</h2>
         <div class="nav-links">
             <a href="#" class="active">Overview</a>
-            <a href="#">History Logs</a>
+            <a href="logs.html">History Logs</a>
         </div>
     </nav>
 
@@ -242,8 +246,8 @@
                         <span>pH Level</span>
                         <video src="img/water.mp4" autoplay loop muted playsinline class="icon-media"></video>
                     </div>
-                    <div class="metric-value">7.4 <span class="metric-unit">pH</span></div>
-                    <div class="metric-status" style="color: #2f855a;">● Optimal Range</div>
+                    <div class="metric-value"><span id="phValue">--</span> <span class="metric-unit">pH</span></div>
+                    <div class="metric-status" id="phStatus">Waiting for data...</div>
                 </div>
             </div>
 
@@ -258,8 +262,8 @@
                         <span>Turbidity</span>
                         <img src="img/fog.png" alt="Fog Icon" class="icon-media anim-fog-img">
                     </div>
-                    <div class="metric-value">2.1 <span class="metric-unit">NTU</span></div>
-                    <div class="metric-status" style="color: #c05621;">● Slightly Elevated</div>
+                    <div class="metric-value"><span id="turbidityValue">--</span> <span class="metric-unit">NTU</span></div>
+                    <div class="metric-status" id="turbidityStatus">Waiting for data...</div>
                 </div>
             </div>
 
@@ -274,8 +278,8 @@
                         <span>TDS (Solids)</span>
                         <video src="img/chemical.mp4" autoplay loop muted playsinline class="icon-media"></video>
                     </div>
-                    <div class="metric-value">145 <span class="metric-unit">ppm</span></div>
-                    <div class="metric-status" style="color: #2f855a;">● Safe Level</div>
+                    <div class="metric-value"><span id="tdsValue">--</span> <span class="metric-unit">ppm</span></div>
+                    <div class="metric-status" id="tdsStatus">Waiting for data...</div>
                 </div>
             </div>
         </section>
@@ -285,9 +289,8 @@
             <div class="table-wrapper">
                 <table>
                     <thead><tr><th>Time</th><th>pH Level</th><th>Turbidity (NTU)</th><th>TDS (ppm)</th><th>Status</th></tr></thead>
-                    <tbody>
-                        <tr><td>10:45 AM</td><td>7.4</td><td>2.1</td><td>145</td><td style="color: green;">Normal</td></tr>
-                        <tr><td>10:30 AM</td><td>7.3</td><td>1.9</td><td>142</td><td style="color: green;">Normal</td></tr>
+                    <tbody id="readingsTableBody">
+                        <tr><td colspan="5">Initializing connection...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -295,6 +298,7 @@
 
         <section class="data-section">
             <h3>School Testing Registry</h3>
+            
             <div class="add-school-form">
                 <div class="form-group"><label>Name of School <span style="color:red">*</span></label><input type="text" id="newSchoolName" placeholder="e.g. Lincoln High"></div>
                 <div class="form-group"><label>School Head</label><input type="text" id="newSchoolHead" placeholder="e.g. Mr. Doe"></div>
@@ -302,11 +306,25 @@
                 <button class="btn btn-primary" onclick="addSchoolToDB()">+ Add School</button>
             </div>
 
+            <div style="margin-bottom: 15px; display: flex; gap: 10px;">
+                <input type="text" id="searchInput" placeholder="Search by School Name (e.g. 'cani')" 
+                       oninput="handleSearch(this.value)"
+                       style="padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; flex: 1; outline: none;">
+                <button class="btn btn-primary" onclick="searchSchools()">🔍 Search</button>
+                <button class="btn btn-cancel" onclick="clearSearch()">Clear</button>
+            </div>
+
             <div class="table-wrapper">
                 <table>
                     <thead><tr><th>School Name</th><th>School Head</th><th>Email</th><th>Water Status</th><th>Actions</th></tr></thead>
                     <tbody id="schoolTableBody"><tr><td colspan="5">Loading data from Firebase...</td></tr></tbody>
                 </table>
+            </div>
+
+            <div class="pagination-controls">
+                <button class="btn btn-primary" id="prevBtn" disabled onclick="changePage(-1)">← Previous</button>
+                <span id="pageIndicator" style="font-weight: 600; color: #4a5568;">Page 1</span>
+                <button class="btn btn-primary" id="nextBtn" onclick="changePage(1)">Next →</button>
             </div>
         </section>
     </main>
@@ -373,7 +391,7 @@
 
     <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy, limit, startAfter, endBefore, limitToLast, startAt, endAt } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAxWmm5YsLjnwatHOVImrpIHAxicbHWYuw",
@@ -387,9 +405,277 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    
+    // COLLECTIONS
     const schoolsCol = collection(db, "Schools");
+    const waterQualityCol = collection(db, "waterQuality"); 
 
-    // --- MODAL FUNCTIONS ---
+    // --- 1. REAL-TIME SENSOR DATA LISTENER ---
+    const qWater = query(waterQualityCol, limit(20));
+
+    onSnapshot(qWater, (snapshot) => {
+        const readingsBody = document.getElementById("readingsTableBody");
+        readingsBody.innerHTML = ""; // Clear table
+
+        if (snapshot.empty) {
+            readingsBody.innerHTML = "<tr><td colspan='5'>No sensor data found in 'waterQuality'.</td></tr>";
+            document.getElementById("phValue").innerText = "--";
+            document.getElementById("turbidityValue").innerText = "--";
+            document.getElementById("tdsValue").innerText = "--";
+            return;
+        }
+
+        let readings = [];
+        snapshot.forEach(doc => {
+            const d = doc.data();
+            readings.push(d);
+        });
+
+        if (readings.length > 0) {
+            updateDashboardCards(readings[0]);
+        }
+
+        readings.forEach(data => {
+            let timeString = "Live Data";
+            if (data.timestamp && data.timestamp.toDate) {
+                timeString = data.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+
+            const ph = data.phLevel !== undefined ? data.phLevel : "--";
+            const turb = data.turbidity !== undefined ? data.turbidity : "--";
+            const tds = data.tds !== undefined ? data.tds : "--";
+
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${timeString}</td>
+                <td>${ph}</td>
+                <td>${turb}</td>
+                <td>${tds}</td>
+                <td>${getOverallStatus(ph, turb, tds)}</td>
+            `;
+            readingsBody.appendChild(tr);
+        });
+    }, (error) => {
+        console.error("Error fetching water data:", error);
+        const readingsBody = document.getElementById("readingsTableBody");
+        readingsBody.innerHTML = `<tr><td colspan='5' style='color: red;'>Error: ${error.message}</td></tr>`;
+    });
+
+    function updateDashboardCards(data) {
+        const phVal = data.phLevel !== undefined ? data.phLevel : 0;
+        const turbVal = data.turbidity !== undefined ? data.turbidity : 0;
+        const tdsVal = data.tds !== undefined ? data.tds : 0;
+
+        // 1. pH Update
+        document.getElementById("phValue").innerText = parseFloat(phVal).toFixed(1);
+        const phEl = document.getElementById("phStatus");
+        
+        if (phVal >= 6.5 && phVal <= 8.5) {
+            phEl.innerText = "● Optimal Range";
+            phEl.style.color = "#2f855a"; 
+        } else {
+            phEl.innerText = "● Attention Required";
+            phEl.style.color = "#c05621"; 
+        }
+
+        // 2. Turbidity Update
+        document.getElementById("turbidityValue").innerText = parseFloat(turbVal).toFixed(1);
+        const turbEl = document.getElementById("turbidityStatus");
+
+        if (turbVal < 5) {
+            turbEl.innerText = "● Clear / Excellent";
+            turbEl.style.color = "#2f855a";
+        } else if (turbVal < 10) {
+             turbEl.innerText = "● Good";
+             turbEl.style.color = "#2f855a";
+        } else {
+            turbEl.innerText = "● Cloudy / High";
+            turbEl.style.color = "#c05621";
+        }
+
+        // 3. TDS Update
+        document.getElementById("tdsValue").innerText = tdsVal;
+        const tdsEl = document.getElementById("tdsStatus");
+
+        if (tdsVal < 300) {
+            tdsEl.innerText = "● Excellent";
+            tdsEl.style.color = "#2f855a";
+        } else if (tdsVal < 600) {
+            tdsEl.innerText = "● Good";
+            tdsEl.style.color = "#2b6cb0"; 
+        } else {
+            tdsEl.innerText = "● High Solids";
+            tdsEl.style.color = "#c05621";
+        }
+    }
+
+    function getOverallStatus(ph, turb, tds) {
+        const p = parseFloat(ph) || 0;
+        const t = parseFloat(turb) || 0;
+        const s = parseFloat(tds) || 0;
+
+        if ((p >= 6.5 && p <= 8.5) && t < 10 && s < 1000) {
+            return '<span style="color: green; font-weight:bold;">Normal</span>';
+        }
+        return '<span style="color: orange; font-weight:bold;">Check</span>';
+    }
+
+
+    // --- 2. SCHOOLS LOGIC (PAGINATION + CLIENT-SIDE SEARCH) ---
+
+    let schoolsUnsubscribe = null;
+    let currentPage = 1;
+    const pageSize = 5; 
+    let firstDoc = null; 
+    let lastDoc = null;  
+    let isSearchMode = false; 
+
+    async function loadSchools(direction = 0, searchTerm = "") {
+        let q;
+
+        // A. SEARCH MODE (Fetch ALL and Filter Client-Side)
+        if (searchTerm) {
+            isSearchMode = true;
+            // Fetch everything ordered by name to filter in Javascript
+            q = query(schoolsCol, orderBy("schoolName")); 
+        } 
+        // B. PAGINATION MODE (Normal)
+        else {
+            isSearchMode = false;
+            if (direction === 1 && lastDoc) {
+                q = query(schoolsCol, orderBy("schoolName"), startAfter(lastDoc), limit(pageSize));
+            } else if (direction === -1 && firstDoc) {
+                q = query(schoolsCol, orderBy("schoolName"), endBefore(firstDoc), limitToLast(pageSize));
+            } else {
+                q = query(schoolsCol, orderBy("schoolName"), limit(pageSize));
+            }
+        }
+
+        if (schoolsUnsubscribe) schoolsUnsubscribe();
+
+        schoolsUnsubscribe = onSnapshot(q, (snapshot) => {
+            const tbody = document.getElementById("schoolTableBody");
+            tbody.innerHTML = "";
+
+            // 1. Convert snapshot to array for easy filtering
+            let allDocs = [];
+            snapshot.forEach(docSnap => {
+                allDocs.push({ id: docSnap.id, data: docSnap.data(), doc: docSnap });
+            });
+
+            // 2. Client-Side Filtering (Case-Insensitive & Contains)
+            if (isSearchMode) {
+                const termLower = searchTerm.toLowerCase();
+                allDocs = allDocs.filter(item => {
+                    const name = item.data.schoolName ? item.data.schoolName.toLowerCase() : "";
+                    // 'includes' allows "cani" to find "Canida"
+                    return name.includes(termLower);
+                });
+            } else {
+                // In normal mode, track pagination boundaries
+                if (allDocs.length > 0) {
+                    firstDoc = allDocs[0].doc;
+                    lastDoc = allDocs[allDocs.length - 1].doc;
+                }
+            }
+
+            // 3. Render Results
+            if (allDocs.length === 0) {
+                tbody.innerHTML = "<tr><td colspan='5'>No schools found.</td></tr>";
+                if (!isSearchMode) document.getElementById("nextBtn").disabled = true;
+            } else {
+                allDocs.forEach(item => {
+                    const school = item.data;
+                    const schoolId = item.id;
+                    const statusHtml = `<td style="color: #48bb78; font-weight:bold;">Safe</td>`;
+
+                    const tr = document.createElement("tr");
+                    tr.id = `row-${schoolId}`; 
+                    tr.innerHTML = `
+                        <td class="name-cell">${school.schoolName || "N/A"}</td>
+                        <td class="head-cell">${school.schoolHead || "N/A"}</td>
+                        <td class="email-cell">${school.email || "N/A"}</td>
+                        ${statusHtml}
+                        <td class="action-cell">
+                            <button class="btn btn-email" onclick="openReportModal('${school.schoolName}', '${school.email}')">📧 Send Report</button>
+                            <button class="btn btn-edit" onclick="editSchool('${schoolId}')">✏️</button>
+                            <button class="btn btn-delete" onclick="openDeleteModal('${schoolId}')">🗑️</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            // 4. Update Controls
+            if (isSearchMode) {
+                document.getElementById("pageIndicator").innerText = "Search Results";
+                document.getElementById("prevBtn").disabled = true;
+                document.getElementById("nextBtn").disabled = true;
+            } else {
+                document.getElementById("pageIndicator").innerText = `Page ${currentPage}`;
+                document.getElementById("prevBtn").disabled = (currentPage === 1);
+                document.getElementById("nextBtn").disabled = (snapshot.docs.length < pageSize);
+            }
+
+        }, (error) => {
+            console.error("Data Error:", error);
+            const tbody = document.getElementById("schoolTableBody");
+            tbody.innerHTML = `<tr><td colspan='5' style='color: red;'>Error: ${error.message}</td></tr>`;
+        });
+    }
+
+    // --- SEARCH FUNCTIONS ---
+    let debounceTimeout = null;
+
+    // UPDATED: Function called by oninput event
+    window.handleSearch = function(value) {
+        clearTimeout(debounceTimeout);
+        // Wait 300ms after typing stops before querying
+        debounceTimeout = setTimeout(() => {
+            const term = value.trim();
+            if (term) {
+                // If there is text, search immediately
+                currentPage = 1;
+                loadSchools(0, term);
+            } else {
+                // If text is cleared, reset to normal list
+                clearSearch();
+            }
+        }, 300);
+    }
+
+    // Function called by button
+    window.searchSchools = function() {
+        const term = document.getElementById("searchInput").value.trim();
+        if (!term) {
+            showAlert("Input Required", "Please enter a school name to search.");
+            return;
+        }
+        currentPage = 1;
+        loadSchools(0, term);
+    }
+
+    window.clearSearch = function() {
+        document.getElementById("searchInput").value = "";
+        isSearchMode = false;
+        currentPage = 1;
+        loadSchools(0); 
+    }
+
+    // --- PAGE NAVIGATION ---
+    window.changePage = function(step) {
+        if (isSearchMode) return; 
+        if (currentPage + step < 1) return;
+        currentPage += step;
+        loadSchools(step);
+    };
+
+    // Initial Load
+    loadSchools(0);
+
+
+    // --- 3. UTILITY FUNCTIONS ---
+
     window.showAlert = function(title, message) {
         document.getElementById('alertTitle').innerText = title;
         document.getElementById('alertMessage').innerText = message;
@@ -416,6 +702,8 @@
             try { 
                 await deleteDoc(doc(db, "Schools", pendingDeleteId)); 
                 closeConfirm();
+                // Reload current page to reflect changes
+                loadSchools(0);
             } 
             catch (e) { 
                 closeConfirm();
@@ -439,7 +727,7 @@
         document.getElementById('shareModal').style.display = 'none';
     }
 
-    // --- EDIT FUNCTIONS ---
+    // EDIT FUNCTIONS
     let originalData = {}; 
 
     window.editSchool = function(id) {
@@ -484,6 +772,8 @@
                 schoolHead: newHead,
                 email: newEmail
             });
+            // Reload to refresh view
+            loadSchools(0);
         } catch (e) {
             showAlert("Error", "Could not update school: " + e.message);
         }
@@ -499,42 +789,7 @@
         delete originalData[id];
     }
 
-    // --- REAL-TIME DATA ---
-    onSnapshot(schoolsCol, (snapshot) => {
-        const tbody = document.getElementById("schoolTableBody");
-        tbody.innerHTML = ""; 
-
-        if (snapshot.empty) {
-            tbody.innerHTML = "<tr><td colspan='5'>No schools found.</td></tr>";
-            return;
-        }
-
-        snapshot.forEach((docSnap) => {
-            const school = docSnap.data();
-            const schoolId = docSnap.id;
-            const statusHtml = `<td style="color: #48bb78; font-weight:bold;">Safe</td>`;
-
-            const tr = document.createElement("tr");
-            tr.id = `row-${schoolId}`; 
-            tr.innerHTML = `
-                <td class="name-cell">${school.schoolName || "N/A"}</td>
-                <td class="head-cell">${school.schoolHead || "N/A"}</td>
-                <td class="email-cell">${school.email || "N/A"}</td>
-                ${statusHtml}
-                <td class="action-cell">
-                    <button class="btn btn-email" onclick="openReportModal('${school.schoolName}', '${school.email}')">📧 Send Report</button>
-                    <button class="btn btn-edit" onclick="editSchool('${schoolId}')">✏️</button>
-                    <button class="btn btn-delete" onclick="openDeleteModal('${schoolId}')">🗑️</button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }, (error) => {
-        const tbody = document.getElementById("schoolTableBody");
-        tbody.innerHTML = `<tr><td colspan='5' style='color: red;'>Error: ${error.message}</td></tr>`;
-    });
-
-    // --- DATABASE FUNCTIONS ---
+    // ADD SCHOOL FUNCTION
     window.addSchoolToDB = async function() {
         const name = document.getElementById('newSchoolName').value.trim();
         const head = document.getElementById('newSchoolHead').value.trim();
@@ -553,12 +808,17 @@
             document.getElementById('newSchoolHead').value = "";
             document.getElementById('newSchoolEmail').value = "";
             showAlert("Success", "School added successfully!");
+            
+            // Reload page 1 to see new entry
+            currentPage = 1;
+            loadSchools(0);
+
         } catch (e) {
             showAlert("Database Error", "Error saving to database: " + e.message);
         }
     }
 
-    // --- REPORT LOGIC ---
+    // REPORT GENERATION
     let isWaitingForReturn = false; 
 
     window.openReportModal = function(schoolName, schoolEmail) {
@@ -589,7 +849,6 @@
         if (imgElement && imgElement.complete && imgElement.naturalHeight !== 0) {
             doc.addImage(imgElement, 'PNG', 95, 5, 20, 20); 
         }
-
         doc.setFontSize(10);
         doc.text("Republic of the Philippines", 105, 30, null, null, "center");
         doc.text("Department of Education", 105, 35, null, null, "center");
@@ -604,12 +863,10 @@
     function addFooter(doc, pageNum) {
         const pageHeight = doc.internal.pageSize.height || doc.internal.pageSize.getHeight();
         const footerY = pageHeight - 35; 
-
         doc.setFontSize(9);
         doc.setTextColor(50, 50, 50); 
         doc.setFont(undefined, 'italic');
         doc.text('"Serve with courtesy, act with integrity."', 105, footerY, null, null, "center");
-
         doc.setDrawColor(50, 50, 50); 
         doc.setLineWidth(0.7);
         doc.line(10, footerY + 2, 200, footerY + 2);
@@ -654,7 +911,6 @@
         doc.text("Page " + pageNum + " of 3", 200, pageHeight - 5, null, null, "right");
     }
 
-    // --- MAIN GENERATOR FUNCTION ---
     window.generateAndSend = async function() {
         const tester = document.getElementById('testerName').value;
         const school = document.getElementById('currentSchoolName').value;
@@ -741,10 +997,15 @@
         doc.setFont(undefined, 'bold');
         doc.text(`II. Water Quality Test Results - ${school}`, 14, 60);
 
+        // GRAB REAL DATA FROM DOM OR DEFAULT TO "N/A"
+        const curPh = document.getElementById("phValue").innerText;
+        const curTds = document.getElementById("tdsValue").innerText;
+        const curTurb = document.getElementById("turbidityValue").innerText;
+
         const tableData = [
-            ["pH Level", "7.4 pH", "Slightly Alkaline"],
-            ["Total Dissolved Solid", "145 mg/L", "Excellent"],
-            ["Turbidity Level", "2.1 NTU", "Excellent"]
+            ["pH Level", `${curPh} pH`, curPh >= 6.5 && curPh <= 8.5 ? "Good" : "Check"],
+            ["Total Dissolved Solid", `${curTds} mg/L`, curTds < 600 ? "Good" : "High"],
+            ["Turbidity Level", `${curTurb} NTU`, curTurb < 5 ? "Excellent" : "Cloudy"]
         ];
 
         doc.autoTable({
@@ -773,21 +1034,11 @@
         const pdfBlob = doc.output('blob');
         const file = new File([pdfBlob], filename, { type: "application/pdf" });
 
-        // --- NEW DETECTION LOGIC ---
-        // We use a regex to verify if the user Agent is genuinely a mobile device.
-        // This is necessary because some desktop browsers return true for navigator.share,
-        // but we want to force the Desktop behavior (redirect to Gmail) for them.
         const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-        // 1. MOBILE LOGIC (Share Sheet)
         if (isMobileDevice && navigator.canShare && navigator.canShare({ files: [file] })) {
-            
-            // Attempt to copy email for convenience (fail silently if not supported)
             try { await navigator.clipboard.writeText(email); } catch (e) {}
-
-            closeModal(); // Hide report modal
-            
-            // Define the share action
+            closeModal(); 
             const performShare = async () => {
                 try {
                     await navigator.share({
@@ -799,24 +1050,12 @@
                     console.log("Share cancelled or failed", err);
                 }
             };
-            
-            // Show custom share modal to get user gesture
             openShareModal(performShare);
-
-        } 
-        // 2. DESKTOP LOGIC (Auto-Download + Gmail Redirect)
-        else {
-            // Save file immediately
+        } else {
             doc.save(filename); 
-            
             isWaitingForReturn = true;
             const gmailURL = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText + "\n\n(Note: Please attach the downloaded PDF manually)")}`;
-            
-            // Attempt to open Gmail immediately
             const newWindow = window.open(gmailURL, '_blank');
-
-            // Handle Popup Blocker *passively* inside the existing modal
-            // (Only change button text, do not show a new alert)
             if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
                 const btnElement = document.querySelector('.modal .btn-primary');
                 if(btnElement) {
@@ -824,7 +1063,6 @@
                     btnElement.onclick = function() { window.open(gmailURL, '_blank'); };
                 }
             } else {
-                // If successful, just close the modal
                 closeModal();
             }
         }
