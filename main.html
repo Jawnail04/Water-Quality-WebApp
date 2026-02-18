@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Quality Dashboard</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        /* --- CSS STYLES --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        body { 
+            /* Background Image */
+            background: url('img/flare.jpg') no-repeat center center fixed; 
+            background-size: cover;
+            color: #333; 
+            display: flex; 
+            min-height: 100vh; 
+            overflow-x: hidden; 
+        }
+        
+        /* --- GLASSMORPHISM MIXIN --- */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(12px);          
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar { 
+            width: 250px; 
+            background: rgba(26, 32, 53, 0.85); 
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff; 
+            display: flex; 
+            flex-direction: column; 
+            padding: 20px; 
+            transition: all 0.3s ease;
+            flex-shrink: 0; 
+            z-index: 100;
+        }
+        .sidebar h2 { text-align: center; margin-bottom: 40px; font-weight: 600; letter-spacing: 1px; }
+        .nav-links a { display: block; color: #cbd5e0; text-decoration: none; padding: 15px; margin-bottom: 10px; border-radius: 8px; transition: 0.3s; }
+        .nav-links a:hover, .nav-links a.active { background-color: rgba(255, 255, 255, 0.15); color: #fff; padding-left: 20px; border: 1px solid rgba(255, 255, 255, 0.1); }
+        
+        /* --- MAIN CONTENT --- */
+        .main-content { 
+            flex: 1; 
+            padding: 30px; 
+            overflow-y: auto; 
+            position: relative; 
+            width: 100%; 
+        }
+        
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }
+        
+        header h1 { 
+            font-size: 24px; 
+            color: #1a202c; 
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+        }
+        header p {
+            color: #2d3748 !important; 
+            font-weight: 500;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+        }
+        
+        .user-profile { display: flex; align-items: center; gap: 10px; font-weight: 500; }
+        .status-badge { background-color: #48bb78; color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; white-space: nowrap; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        
+        .dashboard-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 25px; 
+            margin-bottom: 30px; 
+        }
+
+        /* --- CARD STYLES --- */
+        .card { 
+            background: rgba(255, 255, 255, 0.4); 
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            border-radius: 20px; 
+            padding: 25px; 
+            position: relative; 
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between; 
+            min-height: 180px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.2); border-color: #fff; }
+        .card-content { position: relative; z-index: 10; }
+
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: #2d3748; font-size: 0.9rem; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; }
+        .metric-value { font-size: 2.5rem; font-weight: 800; margin-bottom: 5px; color: #1a202c; }
+        .metric-unit { font-size: 1rem; color: #4a5568; font-weight: 600; }
+        .metric-status { margin-top: 15px; font-size: 0.9rem; font-weight: 700; }
+        
+        /* --- ICONS & ANIMATIONS --- */
+        .icon-media {
+            width: 45px;
+            height: 45px;
+            object-fit: cover;
+            border-radius: 12px;
+            display: block;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .anim-fog-img {
+            opacity: 0.8;
+            animation: fogDrift 6s ease-in-out infinite alternate;
+        }
+
+        @keyframes fogDrift {
+            0% { transform: translateX(-3px) scale(1); opacity: 0.7; filter: blur(0px); }
+            100% { transform: translateX(3px) scale(1.08); opacity: 1; filter: blur(1px); }
+        }
+
+        .wave-container { 
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 22%; 
+            overflow: hidden; border-radius: 0 0 20px 20px; pointer-events: none; opacity: 0.8;
+        }
+        .wave { position: absolute; left: 0; bottom: 0; width: 200%; background-repeat: repeat-x; }
+        .wave-mask {
+            -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 88.7'%3E%3Cpath d='M800 56.9c-155.5 0-204.9-50-405.5-49.9-200 0-250 49.9-394.5 49.9v31.8h800v-.2-31.6z' fill='%23000000'/%3E%3C/svg%3E");
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 88.7'%3E%3Cpath d='M800 56.9c-155.5 0-204.9-50-405.5-49.9-200 0-250 49.9-394.5 49.9v31.8h800v-.2-31.6z' fill='%23000000'/%3E%3C/svg%3E");
+            -webkit-mask-size: 50% 100%; mask-size: 50% 100%; -webkit-mask-position: bottom; mask-position: bottom; -webkit-mask-repeat: repeat-x; mask-repeat: repeat-x;
+        }
+        @keyframes moveWave { 
+            0% { transform: translateX(0) translateZ(0) scaleY(1); } 
+            50% { transform: translateX(-25%) translateZ(0) scaleY(0.95); } 
+            100% { transform: translateX(-50%) translateZ(0) scaleY(1); } 
+        }
+        .wave1 { animation: moveWave 15s linear infinite; height: 120%; opacity: 1; z-index: 1; bottom: 0; }
+        .wave2 { animation: moveWave 9s linear infinite; height: 110%; opacity: 1; z-index: 2; bottom: 0; }
+        .wave3 { animation: moveWave 5s linear infinite; height: 100%; opacity: 1; z-index: 3; bottom: 0; }
+        .ph-card .wave1 { background-color: #bee3f8; } .ph-card .wave2 { background-color: #90cdf4; } .ph-card .wave3 { background-color: #4299e1; } .ph-card .metric-value { color: #2b6cb0; }
+        .turbidity-card .wave1 { background-color: #feebc8; } .turbidity-card .wave2 { background-color: #fbd38d; } .turbidity-card .wave3 { background-color: #ed8936; } .turbidity-card .metric-value { color: #c05621; }
+        .tds-card .wave1 { background-color: #e9d8fd; } .tds-card .wave2 { background-color: #d6bcfa; } .tds-card .wave3 { background-color: #9f7aea; } .tds-card .metric-value { color: #6b46c1; }
+
+        /* --- DATA SECTION --- */
+        .data-section { 
+            background: rgba(255, 255, 255, 0.35); 
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 25px; 
+            border-radius: 15px; 
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1); 
+            margin-bottom: 30px; 
+        }
+        .table-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 600px; }
+        th, td { text-align: left; padding: 15px; border-bottom: 1px solid rgba(113, 128, 150, 0.2); }
+        th { color: #4a5568; font-weight: 700; font-size: 0.9rem; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.5px; }
+        td { color: #2d3748; font-weight: 500; }
+        tbody tr:hover { background-color: rgba(255, 255, 255, 0.3); transition: background-color 0.2s; }
+        
+        .add-school-form { 
+            background-color: rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 15px; border-radius: 10px; margin-bottom: 20px; display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; 
+        }
+        .form-group { flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 200px; }
+        .form-group label { font-size: 0.85rem; color: #2d3748; font-weight: 700; }
+        .form-group input { padding: 10px; background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 6px; outline: none; width: 100%; color: #1a202c; }
+        .form-group input:focus { border-color: #4299e1; background: rgba(255, 255, 255, 0.9); }
+        .edit-input { padding: 8px; border: 1px solid #4299e1; border-radius: 4px; width: 100%; font-size: 0.9rem; background: rgba(255,255,255,0.8); }
+
+        /* --- BUTTONS & ICONS --- */
+        .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.15); opacity: 0.95; }
+        .btn-primary { background-color: #3182ce; color: white; }
+        .btn-email { background-color: #6aaee7; color: white; padding: 6px 10px; }
+        .btn-edit { background-color: #deb053; color: white; padding: 6px 10px; }
+        .btn-save { background-color: #38a169; color: white; padding: 6px 10px; }
+        .btn-delete { background-color: #e53e3e; color: white; padding: 6px 10px; }
+        .action-cell { display: flex; gap: 8px; }
+
+        /* Style for the button icons (PNGs) */
+        .btn-icon {
+            width: 18px;
+            height: 18px;
+            object-fit: contain;
+            display: block;
+        }
+
+        /* --- SEARCH CONTAINER --- */
+        .search-container { margin-bottom: 15px; display: flex; gap: 10px; align-items: center; }
+        .search-container input { padding: 10px; background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 6px; flex: 1; outline: none; }
+        .search-container input:focus { background: rgba(255, 255, 255, 0.9); border-color: #4299e1; }
+        .search-actions { display: flex; gap: 10px; }
+
+        /* --- MODALS --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; backdrop-filter: blur(8px); }
+        .modal { background: rgba(255, 255, 255, 0.95); padding: 30px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: modalPop 0.3s ease-out; border: 1px solid rgba(255,255,255,0.6); }
+        @keyframes modalPop { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal h3 { margin-bottom: 10px; color: #2d3748; }
+        .modal p { color: #4a5568; line-height: 1.5; font-size: 0.95rem; margin-bottom: 20px; }
+        .modal-buttons { margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px; }
+        .btn-cancel { background-color: #718096; color: white; }
+
+        /* --- PAGINATION --- */
+        .pagination-controls { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
+        .pagination-controls button:disabled { background-color: rgba(203, 213, 224, 0.6); cursor: not-allowed; color: #718096; }
+
+        @media (max-width: 900px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; flex-direction: row; align-items: center; justify-content: space-between; padding: 15px 20px; }
+            .sidebar h2 { margin-bottom: 0; font-size: 1.2rem; }
+            .nav-links { display: flex; gap: 10px; margin-top: 0; }
+            .nav-links a { margin-bottom: 0; padding: 8px 12px; font-size: 0.9rem; }
+            .main-content { padding: 20px; }
+            .add-school-form { flex-direction: column; align-items: stretch; }
+            .btn { width: 100%; }
+            .search-container { flex-direction: column; align-items: stretch; }
+            .search-actions { width: 100%; }
+            .search-actions .btn { flex: 1; }
+            .action-cell { flex-direction: column; gap: 5px; display: flex; }
+            .action-cell .btn { width: 100%; margin: 0; justify-content: center; padding: 8px 10px; font-size: 0.85rem; }
+            .pagination-controls .btn { width: auto; flex: 1; font-size: 0.8rem; padding: 10px 5px; }
+            .pagination-controls { gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <h2>AquaMonitor</h2>
+        <div class="nav-links">
+            <a href="#" class="active">Overview</a>
+            <a href="logs.html">History Logs</a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <header>
+            <div>
+                <h1>Dashboard Overview</h1>
+                <p style="color: #4a5568;">Real-time water quality monitoring</p>
+            </div>
+            <div class="user-profile">
+                <span>System Status:</span>
+                <span class="status-badge">Online</span>
+            </div>
+        </header>
+
+        <section class="dashboard-grid">
+            <div class="card ph-card">
+                <div class="wave-container">
+                    <div class="wave wave-mask wave1"></div>
+                    <div class="wave wave-mask wave2"></div>
+                    <div class="wave wave-mask wave3"></div>
+                </div>
+                <div class="card-content">
+                    <div class="card-header">
+                        <span>pH Level</span>
+                        <video src="img/water.mp4" autoplay loop muted playsinline class="icon-media"></video>
+                    </div>
+                    <div class="metric-value"><span id="phValue">--</span> <span class="metric-unit">pH</span></div>
+                    <div class="metric-status" id="phStatus">Waiting for data...</div>
+                </div>
+            </div>
+
+            <div class="card turbidity-card">
+                <div class="wave-container">
+                    <div class="wave wave-mask wave1"></div>
+                    <div class="wave wave-mask wave2"></div>
+                    <div class="wave wave-mask wave3"></div>
+                </div>
+                <div class="card-content">
+                    <div class="card-header">
+                        <span>Turbidity</span>
+                        <img src="img/fog.png" alt="Fog Icon" class="icon-media anim-fog-img">
+                    </div>
+                    <div class="metric-value"><span id="turbidityValue">--</span> <span class="metric-unit">NTU</span></div>
+                    <div class="metric-status" id="turbidityStatus">Waiting for data...</div>
+                </div>
+            </div>
+
+            <div class="card tds-card">
+                <div class="wave-container">
+                    <div class="wave wave-mask wave1"></div>
+                    <div class="wave wave-mask wave2"></div>
+                    <div class="wave wave-mask wave3"></div>
+                </div>
+                <div class="card-content">
+                    <div class="card-header">
+                        <span>TDS (Solids)</span>
+                        <video src="img/chemical.mp4" autoplay loop muted playsinline class="icon-media"></video>
+                    </div>
+                    <div class="metric-value"><span id="tdsValue">--</span> <span class="metric-unit">ppm</span></div>
+                    <div class="metric-status" id="tdsStatus">Waiting for data...</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="data-section">
+            <h3>Recent Sensor Readings</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>Time</th><th>pH Level</th><th>Turbidity (NTU)</th><th>TDS (ppm)</th><th>Status</th></tr></thead>
+                    <tbody id="readingsTableBody">
+                        <tr><td colspan="5">Initializing connection...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="data-section">
+            <h3>School Testing Registry</h3>
+            
+            <div class="add-school-form">
+                <div class="form-group"><label>Name of School <span style="color:red">*</span></label><input type="text" id="newSchoolName" placeholder="e.g. Lincoln High"></div>
+                <div class="form-group"><label>School Head</label><input type="text" id="newSchoolHead" placeholder="e.g. Mr. Doe"></div>
+                <div class="form-group"><label>Email</label><input type="email" id="newSchoolEmail" placeholder="e.g. head@school.edu"></div>
+                <button class="btn btn-primary" onclick="addSchoolToDB()">+ Add School</button>
+            </div>
+
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Search by School Name (e.g. 'cani')" 
+                       oninput="handleSearch(this.value)">
+                <div class="search-actions">
+                    <button class="btn btn-primary" onclick="searchSchools()">
+                        <img src="img/search.png" class="btn-icon"> Search
+                    </button>
+                    <button class="btn btn-cancel" onclick="clearSearch()">Clear</button>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>School Name</th><th>School Head</th><th>Email</th><th>Water Status</th><th>Actions</th></tr></thead>
+                    <tbody id="schoolTableBody"><tr><td colspan="5">Loading data from Firebase...</td></tr></tbody>
+                </table>
+            </div>
+
+            <div class="pagination-controls">
+                <button class="btn btn-primary" id="prevBtn" disabled onclick="changePage(-1)">← Previous</button>
+                <span id="pageIndicator" style="font-weight: 600; color: #2d3748;">Page 1</span>
+                <button class="btn btn-primary" id="nextBtn" onclick="changePage(1)">Next →</button>
+            </div>
+        </section>
+    </main>
+
+    <div class="modal-overlay" id="reportModal">
+        <div class="modal">
+            <h3>Generate Water Quality Report</h3>
+            <p style="margin-bottom: 15px; font-size: 0.9rem; color: #666;">
+                The PDF (2 Pages) will download, and Gmail will open in a <b>new tab</b>.
+                <br><br>
+                <b>Page 1:</b> Descriptive Guide<br>
+                <b>Page 2:</b> Test Results & Signatures
+            </p>
+            <div class="form-group">
+                <label>Tested By (Name):</label>
+                <input type="text" id="testerName" placeholder="Juan Dela Cruz">
+            </div>
+            <input type="hidden" id="currentSchoolName">
+            <input type="hidden" id="currentSchoolEmail">
+            <div class="modal-buttons">
+                <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="generateAndSend()">Download & Open Gmail</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="alertModal">
+        <div class="modal">
+            <h3 id="alertTitle">Notification</h3>
+            <p id="alertMessage">Message goes here...</p>
+            <div class="modal-buttons">
+                <button class="btn btn-primary" onclick="closeAlert()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal">
+            <h3>Delete School?</h3>
+            <p>Are you sure you want to permanently delete this school record? This action cannot be undone.</p>
+            <div class="modal-buttons">
+                <button class="btn btn-cancel" onclick="closeConfirm()">Cancel</button>
+                <button class="btn btn-delete" onclick="confirmDeleteAction()">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="shareModal">
+        <div class="modal">
+            <h3>Email Copied! 📋</h3>
+            <p>The recipient email has been copied to your clipboard.</p>
+            <p style="font-size: 0.9rem; color: #666;">Click the button below to open your sharing options, then select Gmail and paste the email.</p>
+            <div class="modal-buttons">
+                <button class="btn btn-cancel" onclick="closeShareModal()">Cancel</button>
+                <button class="btn btn-primary" id="shareBtnAction">Open Share Options</button>
+            </div>
+        </div>
+    </div>
+
+    <img id="pdf-logo-hidden" src="/img/kagawaran_logo.png" style="display: none;" crossorigin="anonymous">
+    <img id="footer-logo-deped" src="img/deped_logo.png" style="display: none;" crossorigin="anonymous">
+    <img id="footer-logo-bagong" src="img/Bagong_Pilipinas_logo.png" style="display: none;" crossorigin="anonymous">
+    <img id="footer-logo-mabalacat" src="img/mabalacat_city_logo.png" style="display: none;" crossorigin="anonymous">
+
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy, limit, startAfter, endBefore, limitToLast, startAt, endAt } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAxWmm5YsLjnwatHOVImrpIHAxicbHWYuw",
+        authDomain: "water-quality-db-d2dff.firebaseapp.com",
+        projectId: "water-quality-db-d2dff",
+        storageBucket: "water-quality-db-d2dff.firebasestorage.app",
+        messagingSenderId: "499791448587",
+        appId: "1:499791448587:web:a11b55aa1af45bdf78550e",
+        measurementId: "G-5L40CDJPG5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    
+    // COLLECTIONS
+    const schoolsCol = collection(db, "Schools");
+    const waterQualityCol = collection(db, "waterQuality"); 
+
+    // --- 1. REAL-TIME SENSOR DATA LISTENER ---
+    const qWater = query(waterQualityCol, limit(20));
+
+    onSnapshot(qWater, (snapshot) => {
+        const readingsBody = document.getElementById("readingsTableBody");
+        readingsBody.innerHTML = ""; // Clear table
+
+        if (snapshot.empty) {
+            readingsBody.innerHTML = "<tr><td colspan='5'>No sensor data found in 'waterQuality'.</td></tr>";
+            document.getElementById("phValue").innerText = "--";
+            document.getElementById("turbidityValue").innerText = "--";
+            document.getElementById("tdsValue").innerText = "--";
+            return;
+        }
+
+        let readings = [];
+        snapshot.forEach(doc => {
+            const d = doc.data();
+            readings.push(d);
+        });
+
+        if (readings.length > 0) {
+            updateDashboardCards(readings[0]);
+        }
+
+        readings.forEach(data => {
+            let timeString = "Live Data";
+            if (data.timestamp && data.timestamp.toDate) {
+                timeString = data.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+
+            const ph = data.phLevel !== undefined ? data.phLevel : "--";
+            const turb = data.turbidity !== undefined ? data.turbidity : "--";
+            const tds = data.tds !== undefined ? data.tds : "--";
+
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${timeString}</td>
+                <td>${ph}</td>
+                <td>${turb}</td>
+                <td>${tds}</td>
+                <td>${getOverallStatus(ph, turb, tds)}</td>
+            `;
+            readingsBody.appendChild(tr);
+        });
+    }, (error) => {
+        console.error("Error fetching water data:", error);
+        const readingsBody = document.getElementById("readingsTableBody");
+        readingsBody.innerHTML = `<tr><td colspan='5' style='color: red;'>Error: ${error.message}</td></tr>`;
+    });
+
+    function updateDashboardCards(data) {
+        const phVal = data.phLevel !== undefined ? data.phLevel : 0;
+        const turbVal = data.turbidity !== undefined ? data.turbidity : 0;
+        const tdsVal = data.tds !== undefined ? data.tds : 0;
+
+        // 1. pH Update
+        document.getElementById("phValue").innerText = parseFloat(phVal).toFixed(1);
+        const phEl = document.getElementById("phStatus");
+        
+        if (phVal >= 6.5 && phVal <= 8.5) {
+            phEl.innerText = "● Optimal Range";
+            phEl.style.color = "#2f855a"; 
+        } else {
+            phEl.innerText = "● Attention Required";
+            phEl.style.color = "#c05621"; 
+        }
+
+        // 2. Turbidity Update
+        document.getElementById("turbidityValue").innerText = parseFloat(turbVal).toFixed(1);
+        const turbEl = document.getElementById("turbidityStatus");
+
+        if (turbVal < 5) {
+            turbEl.innerText = "● Clear / Excellent";
+            turbEl.style.color = "#2f855a";
+        } else if (turbVal < 10) {
+             turbEl.innerText = "● Good";
+             turbEl.style.color = "#2f855a";
+        } else {
+            turbEl.innerText = "● Cloudy / High";
+            turbEl.style.color = "#c05621";
+        }
+
+        // 3. TDS Update
+        document.getElementById("tdsValue").innerText = tdsVal;
+        const tdsEl = document.getElementById("tdsStatus");
+
+        if (tdsVal < 300) {
+            tdsEl.innerText = "● Excellent";
+            tdsEl.style.color = "#2f855a";
+        } else if (tdsVal < 600) {
+            tdsEl.innerText = "● Good";
+            tdsEl.style.color = "#2b6cb0"; 
+        } else {
+            tdsEl.innerText = "● High Solids";
+            tdsEl.style.color = "#c05621";
+        }
+    }
+
+    function getOverallStatus(ph, turb, tds) {
+        const p = parseFloat(ph) || 0;
+        const t = parseFloat(turb) || 0;
+        const s = parseFloat(tds) || 0;
+
+        if ((p >= 6.5 && p <= 8.5) && t < 10 && s < 1000) {
+            return '<span style="color: green; font-weight:bold;">Normal</span>';
+        }
+        return '<span style="color: orange; font-weight:bold;">Check</span>';
+    }
+
+
+    // --- 2. SCHOOLS LOGIC (PAGINATION + CLIENT-SIDE SEARCH) ---
+
+    let schoolsUnsubscribe = null;
+    let currentPage = 1;
+    const pageSize = 5; 
+    let firstDoc = null; 
+    let lastDoc = null;  
+    let isSearchMode = false; 
+
+    async function loadSchools(direction = 0, searchTerm = "") {
+        let q;
+
+        // A. SEARCH MODE (Fetch ALL and Filter Client-Side)
+        if (searchTerm) {
+            isSearchMode = true;
+            // Fetch everything ordered by name to filter in Javascript
+            q = query(schoolsCol, orderBy("schoolName")); 
+        } 
+        // B. PAGINATION MODE (Normal)
+        else {
+            isSearchMode = false;
+            if (direction === 1 && lastDoc) {
+                q = query(schoolsCol, orderBy("schoolName"), startAfter(lastDoc), limit(pageSize));
+            } else if (direction === -1 && firstDoc) {
+                q = query(schoolsCol, orderBy("schoolName"), endBefore(firstDoc), limitToLast(pageSize));
+            } else {
+                q = query(schoolsCol, orderBy("schoolName"), limit(pageSize));
+            }
+        }
+
+        if (schoolsUnsubscribe) schoolsUnsubscribe();
+
+        schoolsUnsubscribe = onSnapshot(q, (snapshot) => {
+            const tbody = document.getElementById("schoolTableBody");
+            tbody.innerHTML = "";
+
+            // 1. Convert snapshot to array for easy filtering
+            let allDocs = [];
+            snapshot.forEach(docSnap => {
+                allDocs.push({ id: docSnap.id, data: docSnap.data(), doc: docSnap });
+            });
+
+            // 2. Client-Side Filtering (Case-Insensitive & Contains)
+            if (isSearchMode) {
+                const termLower = searchTerm.toLowerCase();
+                allDocs = allDocs.filter(item => {
+                    const name = item.data.schoolName ? item.data.schoolName.toLowerCase() : "";
+                    // 'includes' allows "cani" to find "Canida"
+                    return name.includes(termLower);
+                });
+            } else {
+                // In normal mode, track pagination boundaries
+                if (allDocs.length > 0) {
+                    firstDoc = allDocs[0].doc;
+                    lastDoc = allDocs[allDocs.length - 1].doc;
+                }
+            }
+
+            // 3. Render Results
+            if (allDocs.length === 0) {
+                tbody.innerHTML = "<tr><td colspan='5'>No schools found.</td></tr>";
+                if (!isSearchMode) document.getElementById("nextBtn").disabled = true;
+            } else {
+                allDocs.forEach(item => {
+                    const school = item.data;
+                    const schoolId = item.id;
+                    const statusHtml = `<td><span style="color: #a0aec0;">--</span></td>`;
+
+                    const tr = document.createElement("tr");
+                    tr.id = `row-${schoolId}`; 
+                    // UPDATED BUTTONS WITH PNG ICONS
+                    tr.innerHTML = `
+                        <td class="name-cell">${school.schoolName || "N/A"}</td>
+                        <td class="head-cell">${school.schoolHead || "N/A"}</td>
+                        <td class="email-cell">${school.email || "N/A"}</td>
+                        ${statusHtml}
+                        <td class="action-cell">
+                            <button class="btn btn-email" title="Send Report" onclick="openReportModal('${school.schoolName}', '${school.email}')">
+                                <img src="img/gmail.png" class="btn-icon">
+                            </button>
+                            <button class="btn btn-edit" title="Edit" onclick="editSchool('${schoolId}')">
+                                <img src="img/edit.png" class="btn-icon">
+                            </button>
+                            <button class="btn btn-delete" title="Delete" onclick="openDeleteModal('${schoolId}')">
+                                <img src="img/trash.png" class="btn-icon">
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            // 4. Update Controls
+            if (isSearchMode) {
+                document.getElementById("pageIndicator").innerText = "Search Results";
+                document.getElementById("prevBtn").disabled = true;
+                document.getElementById("nextBtn").disabled = true;
+            } else {
+                document.getElementById("pageIndicator").innerText = `Page ${currentPage}`;
+                document.getElementById("prevBtn").disabled = (currentPage === 1);
+                document.getElementById("nextBtn").disabled = (snapshot.docs.length < pageSize);
+            }
+
+        }, (error) => {
+            console.error("Data Error:", error);
+            const tbody = document.getElementById("schoolTableBody");
+            tbody.innerHTML = `<tr><td colspan='5' style='color: red;'>Error: ${error.message}</td></tr>`;
+        });
+    }
+
+    // --- SEARCH FUNCTIONS ---
+    let debounceTimeout = null;
+
+    // UPDATED: Function called by oninput event
+    window.handleSearch = function(value) {
+        clearTimeout(debounceTimeout);
+        // Wait 300ms after typing stops before querying
+        debounceTimeout = setTimeout(() => {
+            const term = value.trim();
+            if (term) {
+                // If there is text, search immediately
+                currentPage = 1;
+                loadSchools(0, term);
+            } else {
+                // If text is cleared, reset to normal list
+                clearSearch();
+            }
+        }, 300);
+    }
+
+    // Function called by button
+    window.searchSchools = function() {
+        const term = document.getElementById("searchInput").value.trim();
+        if (!term) {
+            showAlert("Input Required", "Please enter a school name to search.");
+            return;
+        }
+        currentPage = 1;
+        loadSchools(0, term);
+    }
+
+    window.clearSearch = function() {
+        document.getElementById("searchInput").value = "";
+        isSearchMode = false;
+        currentPage = 1;
+        loadSchools(0); 
+    }
+
+    // --- PAGE NAVIGATION ---
+    window.changePage = function(step) {
+        if (isSearchMode) return; 
+        if (currentPage + step < 1) return;
+        currentPage += step;
+        loadSchools(step);
+    };
+
+    // Initial Load
+    loadSchools(0);
+
+
+    // --- 3. UTILITY FUNCTIONS ---
+
+    window.showAlert = function(title, message) {
+        document.getElementById('alertTitle').innerText = title;
+        document.getElementById('alertMessage').innerText = message;
+        document.getElementById('alertModal').style.display = 'flex';
+    }
+    
+    window.closeAlert = function() {
+        document.getElementById('alertModal').style.display = 'none';
+    }
+
+    let pendingDeleteId = null;
+    window.openDeleteModal = function(docId) {
+        pendingDeleteId = docId;
+        document.getElementById('confirmModal').style.display = 'flex';
+    }
+
+    window.closeConfirm = function() {
+        pendingDeleteId = null;
+        document.getElementById('confirmModal').style.display = 'none';
+    }
+
+    window.confirmDeleteAction = async function() {
+        if(pendingDeleteId) {
+            try { 
+                await deleteDoc(doc(db, "Schools", pendingDeleteId)); 
+                closeConfirm();
+                // Reload current page to reflect changes
+                loadSchools(0);
+            } 
+            catch (e) { 
+                closeConfirm();
+                showAlert("Error", "Failed to delete: " + e.message); 
+            }
+        }
+    }
+
+    window.openShareModal = function(shareFunction) {
+        document.getElementById('shareModal').style.display = 'flex';
+        const shareBtn = document.getElementById('shareBtnAction');
+        const newBtn = shareBtn.cloneNode(true);
+        shareBtn.parentNode.replaceChild(newBtn, shareBtn);
+        newBtn.onclick = async () => {
+            await shareFunction();
+            document.getElementById('shareModal').style.display = 'none';
+        };
+    }
+
+    window.closeShareModal = function() {
+        document.getElementById('shareModal').style.display = 'none';
+    }
+
+    // EDIT FUNCTIONS
+    let originalData = {}; 
+
+    window.editSchool = function(id) {
+        const row = document.getElementById(`row-${id}`);
+        if(!row) return;
+
+        const nameCell = row.querySelector('.name-cell');
+        const headCell = row.querySelector('.head-cell');
+        const emailCell = row.querySelector('.email-cell');
+        const actionsCell = row.querySelector('.action-cell');
+
+        originalData[id] = {
+            name: nameCell.innerText,
+            head: headCell.innerText,
+            email: emailCell.innerText,
+            actions: actionsCell.innerHTML
+        };
+
+        nameCell.innerHTML = `<input type="text" id="edit-name-${id}" value="${originalData[id].name}" class="edit-input">`;
+        headCell.innerHTML = `<input type="text" id="edit-head-${id}" value="${originalData[id].head === "N/A" ? "" : originalData[id].head}" class="edit-input">`;
+        emailCell.innerHTML = `<input type="email" id="edit-email-${id}" value="${originalData[id].email === "N/A" ? "" : originalData[id].email}" class="edit-input">`;
+
+        actionsCell.innerHTML = `
+            <button class="btn btn-save" onclick="saveSchool('${id}')">💾 Save</button>
+            <button class="btn btn-cancel" onclick="cancelEdit('${id}')">❌</button>
+        `;
+    }
+
+    window.saveSchool = async function(id) {
+        const newName = document.getElementById(`edit-name-${id}`).value.trim();
+        const newHead = document.getElementById(`edit-head-${id}`).value.trim();
+        const newEmail = document.getElementById(`edit-email-${id}`).value.trim();
+
+        if(!newName) {
+            showAlert("Validation Error", "School Name cannot be empty.");
+            return;
+        }
+
+        try {
+            await updateDoc(doc(db, "Schools", id), {
+                schoolName: newName,
+                schoolHead: newHead,
+                email: newEmail
+            });
+            // Reload to refresh view
+            loadSchools(0);
+        } catch (e) {
+            showAlert("Error", "Could not update school: " + e.message);
+        }
+    }
+
+    window.cancelEdit = function(id) {
+        const row = document.getElementById(`row-${id}`);
+        if(!row || !originalData[id]) return;
+        row.querySelector('.name-cell').innerText = originalData[id].name;
+        row.querySelector('.head-cell').innerText = originalData[id].head;
+        row.querySelector('.email-cell').innerText = originalData[id].email;
+        row.querySelector('.action-cell').innerHTML = originalData[id].actions;
+        delete originalData[id];
+    }
+
+    // ADD SCHOOL FUNCTION
+    window.addSchoolToDB = async function() {
+        const name = document.getElementById('newSchoolName').value.trim();
+        const head = document.getElementById('newSchoolHead').value.trim();
+        const email = document.getElementById('newSchoolEmail').value.trim();
+
+        if(!name) { 
+            showAlert("Missing Information", "Please enter the School Name."); 
+            return; 
+        }
+
+        try {
+            await addDoc(schoolsCol, {
+                schoolName: name, schoolHead: head, email: email, createdAt: new Date()
+            });
+            document.getElementById('newSchoolName').value = "";
+            document.getElementById('newSchoolHead').value = "";
+            document.getElementById('newSchoolEmail').value = "";
+            showAlert("Success", "School added successfully!");
+            
+            // Reload page 1 to see new entry
+            currentPage = 1;
+            loadSchools(0);
+
+        } catch (e) {
+            showAlert("Database Error", "Error saving to database: " + e.message);
+        }
+    }
+
+    // REPORT GENERATION
+    let isWaitingForReturn = false; 
+
+    window.openReportModal = function(schoolName, schoolEmail) {
+        document.getElementById('currentSchoolName').value = schoolName;
+        document.getElementById('currentSchoolEmail').value = schoolEmail;
+        document.getElementById('reportModal').style.display = 'flex';
+    }
+
+    window.closeModal = function() {
+        document.getElementById('reportModal').style.display = 'none';
+        document.getElementById('testerName').value = ''; 
+    }
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible" && isWaitingForReturn) {
+            isWaitingForReturn = false; 
+            setTimeout(() => {
+                closeModal(); 
+                showAlert("Welcome Back!", "The dashboard is ready for the next school.");
+                const btnElement = document.querySelector('.modal .btn-primary');
+                if(btnElement) btnElement.innerText = "Download & Open Gmail";
+            }, 500);
+        }
+    });
+
+    function addHeader(doc) {
+        const imgElement = document.getElementById('pdf-logo-hidden');
+        if (imgElement && imgElement.complete && imgElement.naturalHeight !== 0) {
+            doc.addImage(imgElement, 'PNG', 95, 5, 20, 20); 
+        }
+        doc.setFontSize(10);
+        doc.text("Republic of the Philippines", 105, 30, null, null, "center");
+        doc.text("Department of Education", 105, 35, null, null, "center");
+        doc.text("Region III", 105, 40, null, null, "center");
+        doc.setFontSize(11);
+        doc.setFont(undefined, 'bold');
+        doc.text("Division of Mabalacat City", 105, 45, null, null, "center");
+        doc.setLineWidth(0.5); doc.line(10, 50, 200, 50); 
+        doc.setFont(undefined, 'normal');
+    }
+
+    function addFooter(doc, pageNum) {
+        const pageHeight = doc.internal.pageSize.height || doc.internal.pageSize.getHeight();
+        const footerY = pageHeight - 35; 
+        doc.setFontSize(9);
+        doc.setTextColor(50, 50, 50); 
+        doc.setFont(undefined, 'italic');
+        doc.text('"Serve with courtesy, act with integrity."', 105, footerY, null, null, "center");
+        doc.setDrawColor(50, 50, 50); 
+        doc.setLineWidth(0.7);
+        doc.line(10, footerY + 2, 200, footerY + 2);
+        
+        const logoY = footerY + 4;
+        const logoH = 12; 
+        
+        const logoDeped = document.getElementById('footer-logo-deped');
+        if (logoDeped && logoDeped.complete && logoDeped.naturalHeight !== 0) {
+            doc.addImage(logoDeped, 'PNG', 10, logoY, 22, logoH - 2); 
+        }
+        const logoBagong = document.getElementById('footer-logo-bagong');
+        if (logoBagong && logoBagong.complete && logoBagong.naturalHeight !== 0) {
+            doc.addImage(logoBagong, 'JPEG', 34, logoY, 10, 10); 
+        }
+        const logoMabalacat = document.getElementById('footer-logo-mabalacat');
+        if (logoMabalacat && logoMabalacat.complete && logoMabalacat.naturalHeight !== 0) {
+            doc.addImage(logoMabalacat, 'PNG', 46, logoY, 10, 10); 
+        }
+
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(7);
+        doc.setTextColor(0, 0, 0);
+
+        doc.text("P. Burgos St., Poblacion, Mabalacat City, Pampanga, 2010", 200, logoY + 3, null, null, "right");
+        doc.text("Telephone No.: (045) 402-7534", 200, logoY + 7, null, null, "right");
+
+        const bottomRowY = logoY + 12; 
+        doc.setFillColor(66, 103, 178); 
+        doc.rect(58, bottomRowY - 2, 4, 4, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(7);
+        doc.text("f", 59.2, bottomRowY + 1); 
+        
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(7);
+        doc.text("DepEd Tayo Division of Mabalacat", 64, bottomRowY + 1);
+        doc.text("✉", 115, bottomRowY + 1); 
+        doc.text("mabalacat.city@deped.gov.ph", 118, bottomRowY + 1);
+        doc.text("🌐", 160, bottomRowY + 1);
+        doc.text("www.depedmabalacat.org", 164, bottomRowY + 1);
+        doc.text("Page " + pageNum + " of 3", 200, pageHeight - 5, null, null, "right");
+    }
+
+    window.generateAndSend = async function() {
+        const tester = document.getElementById('testerName').value;
+        const school = document.getElementById('currentSchoolName').value;
+        const email = document.getElementById('currentSchoolEmail').value;
+
+        if(!tester) { 
+            showAlert("Input Required", "Please enter the tester's name."); 
+            return; 
+        }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        addHeader(doc);
+        
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'bold');
+        doc.text("I. Guide in Descriptive Values", 14, 60);
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        doc.text(`Reference for: ${school}`, 14, 65);
+
+        doc.autoTable({
+            startY: 70,
+            head: [['Denomination', 'pH Range']],
+            body: [
+                ['Ultra acidic', '< 3.5'], ['Extremely acidic', '3.5-4.4'], ['Very strongly acidic', '4.5-5.0'],
+                ['Strongly acidic', '5.1-5.5'], ['Moderately acidic', '5.6-6.0'], ['Slightly acidic', '6.1-6.5'],
+                ['Neutral', '6.6-7.3'], ['Slightly alkaline', '7.4-7.8'], ['Moderately alkaline', '7.9-8.4'],
+                ['Strongly alkaline', '8.5-9.0'], ['Very strongly alkaline', '> 9.0'],
+            ],
+            theme: 'grid',
+            styles: { fontSize: 8, cellPadding: 1 },
+            tableWidth: 80,
+            margin: { left: 14 }
+        });
+        let finalY_pH = doc.lastAutoTable.finalY;
+
+        doc.autoTable({
+            startY: 70, 
+            head: [['Level of TDS (mg/L)', 'Rating']],
+            body: [
+                ['<300', 'Excellent'], ['300-600', 'Good'], ['601-900', 'Fair'],
+                ['900-1200', 'Poor'], ['>1200', 'Unacceptable'],
+            ],
+            theme: 'grid',
+            styles: { fontSize: 8, cellPadding: 1 },
+            tableWidth: 80,
+            margin: { left: 110 } 
+        });
+        let finalY_TDS = doc.lastAutoTable.finalY;
+
+        let bottomStartY = Math.max(finalY_pH, finalY_TDS) + 10;
+        doc.autoTable({
+            startY: bottomStartY,
+            head: [
+                [
+                    { content: 'Turbidity Level', colSpan: 3, styles: { halign: 'center', fillColor: [220, 220, 220], textColor: 0 } }, 
+                    { content: 'TDS Level', colSpan: 2, styles: { halign: 'center', fillColor: [220, 220, 220], textColor: 0 } },
+                    { content: 'Hardness Level', colSpan: 2, styles: { halign: 'center', fillColor: [220, 220, 220], textColor: 0 } }
+                ],
+                ['Range (NTU)', 'Rating', 'Description', 'Range (mg/L)', 'Rating', 'Range (mg/L)', 'Rating']
+            ],
+            body: [
+                ['< 5', 'Excellent', 'Very clear', '<300', 'Excellent', '0-25', 'Very soft'],
+                ['5-10', 'Good', 'Clear', '300-600', 'Good', '25-50', 'Soft'],
+                ['10-25', 'Fair', 'Slightly clear', '600-900', 'Fair', '50-100', 'Mod. soft'],
+                ['25-50', 'Marginal', 'Mod. cloudy', '900-1,200', 'Marginal', '100-150', 'Slightly hard'],
+                ['50-100', 'Poor', 'Cloudy', '1,200-1,500', 'Poor', '150-200', 'Mod. hard'],
+                ['100-500', '', 'Very cloudy', '>1,500', 'Unacceptable', '200-300', 'Hard'],
+                ['500-1000', 'Unacceptable', 'Muddy', '', '', '300-600', 'Very hard'],
+                ['>1000', '', 'Very muddy', '', '', '>600', 'Ext. hard']
+            ],
+            theme: 'grid',
+            styles: { fontSize: 7, cellPadding: 1.5 },
+            margin: { left: 10, right: 10 }
+        });
+
+        addFooter(doc, 1);
+        doc.addPage();
+        addHeader(doc);
+
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'bold');
+        doc.text(`II. Water Quality Test Results - ${school}`, 14, 60);
+
+        // GRAB REAL DATA FROM DOM OR DEFAULT TO "N/A"
+        const curPh = document.getElementById("phValue").innerText;
+        const curTds = document.getElementById("tdsValue").innerText;
+        const curTurb = document.getElementById("turbidityValue").innerText;
+
+        const tableData = [
+            ["pH Level", `${curPh} pH`, curPh >= 6.5 && curPh <= 8.5 ? "Good" : "Check"],
+            ["Total Dissolved Solid", `${curTds} mg/L`, curTds < 600 ? "Good" : "High"],
+            ["Turbidity Level", `${curTurb} NTU`, curTurb < 5 ? "Excellent" : "Cloudy"]
+        ];
+
+        doc.autoTable({
+            startY: 65,
+            head: [['Parameter', 'Result', 'Descriptive Value']],
+            body: tableData,
+            theme: 'grid',
+            headStyles: { fillColor: [50, 50, 50], textColor: [255, 255, 255] },
+            styles: { fontSize: 10, cellPadding: 3 }
+        });
+
+        let sigY = doc.lastAutoTable.finalY + 20;
+        doc.setFont(undefined, 'normal');
+        doc.text("REMARKS : _________________________________________________", 14, sigY);
+        doc.text("Tested by:", 14, sigY + 25);
+        doc.setFont(undefined, 'bold');
+        doc.text(tester.toUpperCase(), 14, sigY + 35); 
+        doc.line(14, sigY + 36, 80, sigY + 36); 
+
+        addFooter(doc, 2);
+
+        const filename = `${school}_Water_Report.pdf`;
+        const subject = `Water Quality Report: ${school}`;
+        const bodyText = `Hello,\n\nPlease find the attached Water Quality Report for ${school}.\n\nTested by: ${tester}`;
+
+        const pdfBlob = doc.output('blob');
+        const file = new File([pdfBlob], filename, { type: "application/pdf" });
+
+        const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        if (isMobileDevice && navigator.canShare && navigator.canShare({ files: [file] })) {
+            try { await navigator.clipboard.writeText(email); } catch (e) {}
+            closeModal(); 
+            const performShare = async () => {
+                try {
+                    await navigator.share({
+                        title: subject,
+                        text: bodyText,
+                        files: [file]
+                    });
+                } catch (err) {
+                    console.log("Share cancelled or failed", err);
+                }
+            };
+            openShareModal(performShare);
+        } else {
+            doc.save(filename); 
+            isWaitingForReturn = true;
+            const gmailURL = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText + "\n\n(Note: Please attach the downloaded PDF manually)")}`;
+            const newWindow = window.open(gmailURL, '_blank');
+            if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
+                const btnElement = document.querySelector('.modal .btn-primary');
+                if(btnElement) {
+                    btnElement.innerText = "Click here to Open Gmail";
+                    btnElement.onclick = function() { window.open(gmailURL, '_blank'); };
+                }
+            } else {
+                closeModal();
+            }
+        }
+    }
+    </script>
+</body>
+</html>

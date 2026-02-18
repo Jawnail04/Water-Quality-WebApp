@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Quality Dashboard - Viewer Mode</title>
+    
+    <style>
+        /* --- CSS STYLES (Identical to Admin for consistency) --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        body { 
+            /* Background Image */
+            background: url('img/flare.jpg') no-repeat center center fixed; 
+            background-size: cover;
+            color: #333; 
+            display: flex; 
+            min-height: 100vh; 
+            overflow-x: hidden; 
+        }
+        
+        /* --- SIDEBAR --- */
+        .sidebar { 
+            width: 250px; 
+            background: rgba(26, 32, 53, 0.85); 
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff; 
+            display: flex; 
+            flex-direction: column; 
+            padding: 20px; 
+            transition: all 0.3s ease;
+            flex-shrink: 0; 
+            z-index: 100;
+        }
+        .sidebar h2 { text-align: center; margin-bottom: 40px; font-weight: 600; letter-spacing: 1px; }
+        .nav-links a { display: block; color: #cbd5e0; text-decoration: none; padding: 15px; margin-bottom: 10px; border-radius: 8px; transition: 0.3s; }
+        .nav-links a:hover, .nav-links a.active { background-color: rgba(255, 255, 255, 0.15); color: #fff; padding-left: 20px; border: 1px solid rgba(255, 255, 255, 0.1); }
+        
+        /* Logout Button Style */
+        .nav-links .logout-btn { color: #fc8181; margin-top: 20px; border: 1px solid rgba(252, 129, 129, 0.2); }
+        .nav-links .logout-btn:hover { background-color: rgba(229, 62, 62, 0.2); border-color: #fc8181; color: #fff; }
+
+        /* --- MAIN CONTENT --- */
+        .main-content { 
+            flex: 1; 
+            padding: 30px; 
+            overflow-y: auto; 
+            position: relative; 
+            width: 100%; 
+        }
+        
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }
+        
+        header h1 { 
+            font-size: 24px; 
+            color: #1a202c; 
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+        }
+        header p {
+            color: #2d3748 !important; 
+            font-weight: 500;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+        }
+        
+        .user-profile { display: flex; align-items: center; gap: 10px; font-weight: 500; }
+        .status-badge { background-color: #48bb78; color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; white-space: nowrap; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        
+        .dashboard-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 25px; 
+            margin-bottom: 30px; 
+        }
+
+        /* --- CARD STYLES --- */
+        .card { 
+            background: rgba(255, 255, 255, 0.4); 
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            border-radius: 20px; 
+            padding: 25px; 
+            position: relative; 
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between; 
+            min-height: 180px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.2); border-color: #fff; }
+        .card-content { position: relative; z-index: 10; }
+
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: #2d3748; font-size: 0.9rem; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; }
+        .metric-value { font-size: 2.5rem; font-weight: 800; margin-bottom: 5px; color: #1a202c; }
+        .metric-unit { font-size: 1rem; color: #4a5568; font-weight: 600; }
+        .metric-status { margin-top: 15px; font-size: 0.9rem; font-weight: 700; }
+        
+        /* --- ICONS & ANIMATIONS --- */
+        .icon-media {
+            width: 45px;
+            height: 45px;
+            object-fit: cover;
+            border-radius: 12px;
+            display: block;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .anim-fog-img {
+            opacity: 0.8;
+            animation: fogDrift 6s ease-in-out infinite alternate;
+        }
+
+        @keyframes fogDrift {
+            0% { transform: translateX(-3px) scale(1); opacity: 0.7; filter: blur(0px); }
+            100% { transform: translateX(3px) scale(1.08); opacity: 1; filter: blur(1px); }
+        }
+
+        .wave-container { 
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 22%; 
+            overflow: hidden; border-radius: 0 0 20px 20px; pointer-events: none; opacity: 0.8;
+        }
+        .wave { position: absolute; left: 0; bottom: 0; width: 200%; background-repeat: repeat-x; }
+        .wave-mask {
+            -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 88.7'%3E%3Cpath d='M800 56.9c-155.5 0-204.9-50-405.5-49.9-200 0-250 49.9-394.5 49.9v31.8h800v-.2-31.6z' fill='%23000000'/%3E%3C/svg%3E");
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 88.7'%3E%3Cpath d='M800 56.9c-155.5 0-204.9-50-405.5-49.9-200 0-250 49.9-394.5 49.9v31.8h800v-.2-31.6z' fill='%23000000'/%3E%3C/svg%3E");
+            -webkit-mask-size: 50% 100%; mask-size: 50% 100%; -webkit-mask-position: bottom; mask-position: bottom; -webkit-mask-repeat: repeat-x; mask-repeat: repeat-x;
+        }
+        @keyframes moveWave { 
+            0% { transform: translateX(0) translateZ(0) scaleY(1); } 
+            50% { transform: translateX(-25%) translateZ(0) scaleY(0.95); } 
+            100% { transform: translateX(-50%) translateZ(0) scaleY(1); } 
+        }
+        .wave1 { animation: moveWave 15s linear infinite; height: 120%; opacity: 1; z-index: 1; bottom: 0; }
+        .wave2 { animation: moveWave 9s linear infinite; height: 110%; opacity: 1; z-index: 2; bottom: 0; }
+        .wave3 { animation: moveWave 5s linear infinite; height: 100%; opacity: 1; z-index: 3; bottom: 0; }
+        .ph-card .wave1 { background-color: #bee3f8; } .ph-card .wave2 { background-color: #90cdf4; } .ph-card .wave3 { background-color: #4299e1; } .ph-card .metric-value { color: #2b6cb0; }
+        .turbidity-card .wave1 { background-color: #feebc8; } .turbidity-card .wave2 { background-color: #fbd38d; } .turbidity-card .wave3 { background-color: #ed8936; } .turbidity-card .metric-value { color: #c05621; }
+        .tds-card .wave1 { background-color: #e9d8fd; } .tds-card .wave2 { background-color: #d6bcfa; } .tds-card .wave3 { background-color: #9f7aea; } .tds-card .metric-value { color: #6b46c1; }
+
+        /* --- DATA SECTION --- */
+        .data-section { 
+            background: rgba(255, 255, 255, 0.35); 
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 25px; 
+            border-radius: 15px; 
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1); 
+            margin-bottom: 30px; 
+        }
+        .table-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 600px; }
+        th, td { text-align: left; padding: 15px; border-bottom: 1px solid rgba(113, 128, 150, 0.2); }
+        th { color: #4a5568; font-weight: 700; font-size: 0.9rem; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.5px; }
+        td { color: #2d3748; font-weight: 500; }
+        tbody tr:hover { background-color: rgba(255, 255, 255, 0.3); transition: background-color 0.2s; }
+        
+        @media (max-width: 900px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; flex-direction: row; align-items: center; justify-content: space-between; padding: 15px 20px; }
+            .sidebar h2 { margin-bottom: 0; font-size: 1.2rem; }
+            .nav-links { display: flex; gap: 10px; margin-top: 0; }
+            .nav-links a { margin-bottom: 0; padding: 8px 12px; font-size: 0.9rem; }
+            .main-content { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <h2>AquaMonitor</h2>
+        <div class="nav-links">
+            <a href="#" class="active">Overview</a>
+            <a href="#" onclick="handleLogout()" class="logout-btn">
+                 Logout ➜
+            </a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <header>
+            <div>
+                <h1>Public Dashboard</h1>
+                <p style="color: #4a5568;">Real-time water quality monitoring view</p>
+            </div>
+            <div class="user-profile">
+                <span>System Status:</span>
+                <span class="status-badge">Online</span>
+            </div>
+        </header>
+
+        <section class="dashboard-grid">
+            <div class="card ph-card">
+                <div class="wave-container">
+                    <div class="wave wave-mask wave1"></div>
+                    <div class="wave wave-mask wave2"></div>
+                    <div class="wave wave-mask wave3"></div>
+                </div>
+                <div class="card-content">
+                    <div class="card-header">
+                        <span>pH Level</span>
+                        <video src="img/water.mp4" autoplay loop muted playsinline class="icon-media"></video>
+                    </div>
+                    <div class="metric-value"><span id="phValue">--</span> <span class="metric-unit">pH</span></div>
+                    <div class="metric-status" id="phStatus">Waiting for data...</div>
+                </div>
+            </div>
+
+            <div class="card turbidity-card">
+                <div class="wave-container">
+                    <div class="wave wave-mask wave1"></div>
+                    <div class="wave wave-mask wave2"></div>
+                    <div class="wave wave-mask wave3"></div>
+                </div>
+                <div class="card-content">
+                    <div class="card-header">
+                        <span>Turbidity</span>
+                        <img src="img/fog.png" alt="Fog Icon" class="icon-media anim-fog-img">
+                    </div>
+                    <div class="metric-value"><span id="turbidityValue">--</span> <span class="metric-unit">NTU</span></div>
+                    <div class="metric-status" id="turbidityStatus">Waiting for data...</div>
+                </div>
+            </div>
+
+            <div class="card tds-card">
+                <div class="wave-container">
+                    <div class="wave wave-mask wave1"></div>
+                    <div class="wave wave-mask wave2"></div>
+                    <div class="wave wave-mask wave3"></div>
+                </div>
+                <div class="card-content">
+                    <div class="card-header">
+                        <span>TDS (Solids)</span>
+                        <video src="img/chemical.mp4" autoplay loop muted playsinline class="icon-media"></video>
+                    </div>
+                    <div class="metric-value"><span id="tdsValue">--</span> <span class="metric-unit">ppm</span></div>
+                    <div class="metric-status" id="tdsStatus">Waiting for data...</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="data-section">
+            <h3>Recent Sensor Readings</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>Time</th><th>pH Level</th><th>Turbidity (NTU)</th><th>TDS (ppm)</th><th>Status</th></tr></thead>
+                    <tbody id="readingsTableBody">
+                        <tr><td colspan="5">Initializing connection...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <div class="modal-overlay" id="alertModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); justify-content: center; align-items: center; z-index: 1000; padding: 20px; backdrop-filter: blur(8px);">
+        <div class="modal" style="background: rgba(255, 255, 255, 0.95); padding: 30px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.6);">
+            <h3 id="alertTitle" style="margin-bottom: 10px; color: #2d3748;">Notification</h3>
+            <p id="alertMessage" style="color: #4a5568; line-height: 1.5; font-size: 0.95rem; margin-bottom: 20px;">Message goes here...</p>
+            <div class="modal-buttons" style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+                <button class="btn btn-primary" onclick="closeAlert()" style="padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; background-color: #3182ce; color: white;">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, query, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    // IMPORTED AUTH FOR LOGOUT
+    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAxWmm5YsLjnwatHOVImrpIHAxicbHWYuw",
+        authDomain: "water-quality-db-d2dff.firebaseapp.com",
+        projectId: "water-quality-db-d2dff",
+        storageBucket: "water-quality-db-d2dff.firebasestorage.app",
+        messagingSenderId: "499791448587",
+        appId: "1:499791448587:web:a11b55aa1af45bdf78550e",
+        measurementId: "G-5L40CDJPG5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app); // Init Auth
+    
+    // COLLECTIONS
+    const waterQualityCol = collection(db, "waterQuality"); 
+
+    // --- 1. LOGOUT FUNCTION ---
+    window.handleLogout = async function() {
+        if(confirm("Are you sure you want to log out?")) {
+            try {
+                await signOut(auth);
+                // Redirects to index.html (assumed login page)
+                window.location.href = "index.html"; 
+            } catch (error) {
+                console.error("Logout Error:", error);
+                alert("Error logging out: " + error.message);
+            }
+        }
+    }
+
+    // --- 2. REAL-TIME SENSOR DATA LISTENER ---
+    const qWater = query(waterQualityCol, limit(20));
+
+    onSnapshot(qWater, (snapshot) => {
+        const readingsBody = document.getElementById("readingsTableBody");
+        readingsBody.innerHTML = ""; // Clear table
+
+        if (snapshot.empty) {
+            readingsBody.innerHTML = "<tr><td colspan='5'>No sensor data found in 'waterQuality'.</td></tr>";
+            document.getElementById("phValue").innerText = "--";
+            document.getElementById("turbidityValue").innerText = "--";
+            document.getElementById("tdsValue").innerText = "--";
+            return;
+        }
+
+        let readings = [];
+        snapshot.forEach(doc => {
+            const d = doc.data();
+            readings.push(d);
+        });
+
+        if (readings.length > 0) {
+            updateDashboardCards(readings[0]);
+        }
+
+        readings.forEach(data => {
+            let timeString = "Live Data";
+            if (data.timestamp && data.timestamp.toDate) {
+                timeString = data.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+
+            const ph = data.phLevel !== undefined ? data.phLevel : "--";
+            const turb = data.turbidity !== undefined ? data.turbidity : "--";
+            const tds = data.tds !== undefined ? data.tds : "--";
+
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${timeString}</td>
+                <td>${ph}</td>
+                <td>${turb}</td>
+                <td>${tds}</td>
+                <td>${getOverallStatus(ph, turb, tds)}</td>
+            `;
+            readingsBody.appendChild(tr);
+        });
+    }, (error) => {
+        console.error("Error fetching water data:", error);
+        const readingsBody = document.getElementById("readingsTableBody");
+        readingsBody.innerHTML = `<tr><td colspan='5' style='color: red;'>Error: ${error.message}</td></tr>`;
+    });
+
+    function updateDashboardCards(data) {
+        const phVal = data.phLevel !== undefined ? data.phLevel : 0;
+        const turbVal = data.turbidity !== undefined ? data.turbidity : 0;
+        const tdsVal = data.tds !== undefined ? data.tds : 0;
+
+        // 1. pH Update
+        document.getElementById("phValue").innerText = parseFloat(phVal).toFixed(1);
+        const phEl = document.getElementById("phStatus");
+        
+        if (phVal >= 6.5 && phVal <= 8.5) {
+            phEl.innerText = "● Optimal Range";
+            phEl.style.color = "#2f855a"; 
+        } else {
+            phEl.innerText = "● Attention Required";
+            phEl.style.color = "#c05621"; 
+        }
+
+        // 2. Turbidity Update
+        document.getElementById("turbidityValue").innerText = parseFloat(turbVal).toFixed(1);
+        const turbEl = document.getElementById("turbidityStatus");
+
+        if (turbVal < 5) {
+            turbEl.innerText = "● Clear / Excellent";
+            turbEl.style.color = "#2f855a";
+        } else if (turbVal < 10) {
+             turbEl.innerText = "● Good";
+             turbEl.style.color = "#2f855a";
+        } else {
+            turbEl.innerText = "● Cloudy / High";
+            turbEl.style.color = "#c05621";
+        }
+
+        // 3. TDS Update
+        document.getElementById("tdsValue").innerText = tdsVal;
+        const tdsEl = document.getElementById("tdsStatus");
+
+        if (tdsVal < 300) {
+            tdsEl.innerText = "● Excellent";
+            tdsEl.style.color = "#2f855a";
+        } else if (tdsVal < 600) {
+            tdsEl.innerText = "● Good";
+            tdsEl.style.color = "#2b6cb0"; 
+        } else {
+            tdsEl.innerText = "● High Solids";
+            tdsEl.style.color = "#c05621";
+        }
+    }
+
+    function getOverallStatus(ph, turb, tds) {
+        const p = parseFloat(ph) || 0;
+        const t = parseFloat(turb) || 0;
+        const s = parseFloat(tds) || 0;
+
+        if ((p >= 6.5 && p <= 8.5) && t < 10 && s < 1000) {
+            return '<span style="color: green; font-weight:bold;">Normal</span>';
+        }
+        return '<span style="color: orange; font-weight:bold;">Check</span>';
+    }
+
+    // --- UTILITY FUNCTIONS ---
+    window.closeAlert = function() {
+        document.getElementById('alertModal').style.display = 'none';
+    }
+    </script>
+</body>
+</html>

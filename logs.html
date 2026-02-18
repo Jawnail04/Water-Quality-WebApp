@@ -109,7 +109,7 @@
     <nav class="sidebar">
         <h2>AquaMonitor</h2>
         <div class="nav-links">
-            <a href="index.html">Overview</a>
+            <a href="main.html">Overview</a>
             <a href="#" class="active">History Logs</a>
         </div>
     </nav>
@@ -154,7 +154,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, query, orderBy, limit, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // --- FIREBASE CONFIGURATION (Must match index.html) ---
+        // --- FIREBASE CONFIGURATION ---
         const firebaseConfig = {
             apiKey: "AIzaSyAxWmm5YsLjnwatHOVImrpIHAxicbHWYuw",
             authDomain: "water-quality-db-d2dff.firebaseapp.com",
@@ -170,9 +170,8 @@
         const waterQualityCol = collection(db, "waterQuality");
 
         // --- 1. LOAD HISTORY LOGS (Real-time) ---
-        // We order by timestamp descending (newest first) and limit to 50 for the view
-        const qLogs = query(waterQualityCol, limit(50)); 
-        // Ideally use: query(waterQualityCol, orderBy("timestamp", "desc"), limit(50));
+        // UPDATED QUERY: Order by timestamp descending (newest first)
+        const qLogs = query(waterQualityCol, orderBy("timestamp", "desc"), limit(50));
 
         onSnapshot(qLogs, (snapshot) => {
             const tbody = document.getElementById("logsTableBody");
@@ -211,10 +210,20 @@
             });
         }, (error) => {
             console.error("Error loading logs:", error);
-            document.getElementById("logsTableBody").innerHTML = `<tr><td colspan='5' style='color: red;'>Error loading data: ${error.message}</td></tr>`;
+            // Helpful error message if index is missing
+            if (error.code === 'failed-precondition') {
+                 document.getElementById("logsTableBody").innerHTML = 
+                 `<tr><td colspan='5' style='color: orange;'>
+                    <b>Action Required:</b><br>
+                    You need to create a Firestore Index.<br>
+                    Open your browser console (F12) and click the link provided by Firebase.
+                 </td></tr>`;
+            } else {
+                 document.getElementById("logsTableBody").innerHTML = `<tr><td colspan='5' style='color: red;'>Error loading data: ${error.message}</td></tr>`;
+            }
         });
 
-        // --- 2. HELPER: STATUS LOGIC (Same as Dashboard) ---
+        // --- 2. HELPER: STATUS LOGIC ---
         function getOverallStatus(ph, turb, tds) {
             const p = parseFloat(ph) || 0;
             const t = parseFloat(turb) || 0;
@@ -237,7 +246,9 @@
             btn.innerText = "Generating...";
 
             try {
-                const querySnapshot = await getDocs(waterQualityCol);
+                // Get ALL docs, ordered by time
+                const qAll = query(waterQualityCol, orderBy("timestamp", "desc"));
+                const querySnapshot = await getDocs(qAll);
                 
                 let csvContent = "data:text/csv;charset=utf-8,";
                 // CSV Header
