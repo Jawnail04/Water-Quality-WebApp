@@ -36,6 +36,10 @@
             transition: all 0.3s ease;
             flex-shrink: 0; 
             z-index: 100;
+            /* --- STICKY SIDEBAR PROPERTIES --- */
+            position: sticky;
+            top: 0;
+            height: 100vh;
         }
 
         .sidebar-content {
@@ -270,7 +274,16 @@
 
         @media (max-width: 900px) {
             body { flex-direction: column; }
-            .sidebar { width: 100%; flex-direction: row; align-items: center; justify-content: space-between; padding: 15px 20px; }
+            .sidebar { 
+                width: 100%; 
+                flex-direction: row; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 15px 20px; 
+                /* --- STICKY MOBILE NAVIGATION PROPERTIES --- */
+                height: auto;
+                z-index: 999;
+            }
             .sidebar-content { flex-direction: row; width: 100%; align-items: center; }
             .sidebar h2 { margin-bottom: 0; font-size: 1.2rem; }
             .nav-links { display: flex; gap: 10px; margin-top: 0; margin-bottom: 0; }
@@ -496,17 +509,12 @@
 
     <div class="modal-overlay" id="addUserModal">
         <div class="modal">
-            <h3>Add New User</h3>
-            <p>Create a new account and assign a role.</p>
+            <h3>Pre-register User</h3>
+            <p>Assign a role to an official DepEd email. They will gain access upon their first Google Sign-In.</p>
             
             <div class="form-group">
                 <label>Email Address</label>
-                <input type="email" id="newUserEmail" placeholder="name@email.com">
-            </div>
-            <br>
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="newUserPassword" placeholder="Minimum 6 characters">
+                <input type="email" id="newUserEmail" placeholder="name@deped.gov.ph">
             </div>
             <br>
             <div class="form-group">
@@ -519,7 +527,7 @@
 
             <div class="modal-buttons">
                 <button class="btn btn-cancel" onclick="closeAddUserModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="createNewUser()">Create User</button>
+                <button class="btn btn-primary" onclick="createNewUser()">Pre-Register User</button>
             </div>
         </div>
     </div>
@@ -763,54 +771,42 @@
 
     window.createNewUser = async function() {
         const email = document.getElementById('newUserEmail').value.trim();
-        const password = document.getElementById('newUserPassword').value.trim();
         const role = document.getElementById('newUserRole').value;
 
-        if (!email || !password) {
-            showAlert("Validation Error", "Please provide both email and password.");
+        if (!email) {
+            showAlert("Validation Error", "Please provide an email address.");
             return;
         }
-        if (password.length < 6) {
-            showAlert("Weak Password", "Password should be at least 6 characters.");
+
+        // Enforce the DepEd domain rule in the admin panel too
+        if (!email.endsWith("@deped.gov.ph")) {
+            showAlert("Invalid Domain", "Only @deped.gov.ph emails can be registered.");
             return;
         }
 
         const btn = document.querySelector('#addUserModal .btn-primary');
         const originalText = btn.innerText;
         btn.disabled = true;
-        btn.innerText = "Creating...";
-
-        let secondaryApp = null;
+        btn.innerText = "Saving...";
 
         try {
-            // Initialize secondary app to avoid logging out admin
-            secondaryApp = initializeApp(firebaseConfig, "Secondary");
-            const secondaryAuth = getAuth(secondaryApp);
-
-            const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
-            const newUserId = userCredential.user.uid;
-
-            // Save to Firestore using Main DB connection
-            await setDoc(doc(db, "users", newUserId), {
+            // We NO LONGER use createUserWithEmailAndPassword. 
+            // We just add their email and assigned role directly to Firestore.
+            await addDoc(usersCol, {
                 email: email,
                 role: role,
                 createdAt: new Date(),
-                lastLogin: null
+                lastLogin: null,
+                authMethod: 'google'
             });
 
-            await signOut(secondaryAuth);
             closeAddUserModal();
-            showAlert("Success", `User created successfully as ${role.toUpperCase()}!`);
+            showAlert("Success", `User ${email} has been pre-registered as ${role.toUpperCase()}!`);
 
         } catch (error) {
             console.error(error);
-            let msg = error.message;
-            if(error.code === 'auth/email-already-in-use') msg = "This email is already registered.";
-            showAlert("Creation Failed", msg);
+            showAlert("Database Error", "Failed to add user: " + error.message);
         } finally {
-            if (secondaryApp) {
-                await deleteApp(secondaryApp);
-            }
             btn.disabled = false;
             btn.innerText = originalText;
         }
@@ -1297,7 +1293,7 @@
         }
         const logoBagong = document.getElementById('footer-logo-bagong');
         if (logoBagong && logoBagong.complete && logoBagong.naturalHeight !== 0) {
-            doc.addImage(logoBagong, 'JPEG', f34, logoY, 10, 10); 
+            doc.addImage(logoBagong, 'JPEG', 34, logoY, 10, 10); 
         }
         const logoMabalacat = document.getElementById('footer-logo-mabalacat');
         if (logoMabalacat && logoMabalacat.complete && logoMabalacat.naturalHeight !== 0) {

@@ -43,7 +43,6 @@
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             animation: floatUp 0.6s ease-out;
             position: relative;
-            transition: height 0.3s ease;
         }
 
         @keyframes floatUp {
@@ -55,40 +54,44 @@
         .header-section h2 { color: var(--text-dark); font-size: 1.75rem; font-weight: 800; margin-bottom: 8px; }
         .header-section p { color: var(--text-gray); font-size: 0.95rem; }
 
-        .form-group { margin-bottom: 20px; position: relative; }
-        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; color: var(--text-dark); }
-
-        .input-wrapper { position: relative; }
-        .input-wrapper i.icon-left { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-gray); font-size: 1.1rem; pointer-events: none; }
-        .input-wrapper input { width: 100%; padding: 12px 40px 12px 42px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.6); background: rgba(255, 255, 255, 0.5); font-size: 0.95rem; color: var(--text-dark); outline: none; transition: 0.2s; }
-        .input-wrapper input:focus { background: #fff; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
-        .toggle-password { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--text-gray); }
-        .toggle-password:hover { color: var(--primary); }
-
-        .btn-submit { width: 100%; padding: 14px; border: none; border-radius: 12px; background: var(--primary); color: white; font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3); }
-        .btn-submit:hover { background: var(--primary-hover); transform: translateY(-2px); }
-        
-        .divider { display: flex; align-items: center; margin: 20px 0; color: var(--text-gray); font-size: 0.85rem; }
-        .divider::before, .divider::after { content: ""; flex: 1; border-bottom: 1px solid rgba(0,0,0,0.1); }
-        .divider::before { margin-right: 10px; }
-        .divider::after { margin-left: 10px; }
+        .domain-notice {
+            background: rgba(37, 99, 235, 0.1);
+            color: #2563eb;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
 
         .btn-google {
-            width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.8);
+            width: 100%; padding: 14px; border: 1px solid rgba(255,255,255,0.8);
             border-radius: 12px; background: rgba(255,255,255,0.7);
-            color: var(--text-dark); font-weight: 600; font-size: 0.95rem;
+            color: var(--text-dark); font-weight: 600; font-size: 1rem;
             cursor: pointer; transition: 0.2s; display: flex;
             justify-content: center; align-items: center; gap: 10px;
         }
-        .btn-google:hover { background: #fff; transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        
+        .btn-google:hover { 
+            background: #fff; 
+            transform: translateY(-2px); 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); 
+        }
 
-        .spinner { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #fff; animation: spin 0.8s linear infinite; display: none; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .btn-google:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
 
         .error-msg { background: var(--error-bg); color: var(--error-text); padding: 12px; border-radius: 10px; font-size: 0.9rem; margin-bottom: 20px; display: none; text-align: left; border: 1px solid rgba(185, 28, 28, 0.2); }
         
-        /* Added helper text */
-        .helper-text { text-align: center; margin-top: 15px; font-size: 0.85rem; color: var(--text-gray); }
+        .helper-text { text-align: center; margin-top: 20px; font-size: 0.85rem; color: var(--text-gray); }
     </style>
 </head>
 <body>
@@ -104,46 +107,24 @@
             <span id="errorText">Error message here</span>
         </div>
 
+        <div class="domain-notice">
+            <i class="ri-information-line" style="font-size: 1.1rem;"></i> 
+            Official DepEd Accounts Only
+        </div>
+
         <button type="button" class="btn-google" id="googleBtn">
             <i class="ri-google-fill" style="font-size: 1.2rem; color: #DB4437;"></i>
-            Continue with Google
+            <span id="googleBtnText">Continue with Google</span>
         </button>
-
-        <div id="passwordSection">
-            <div class="divider">or sign in with password</div>
-
-            <form id="authForm">
-                <div class="form-group">
-                    <label>Email Address</label>
-                    <div class="input-wrapper">
-                        <i class="ri-mail-line icon-left"></i>
-                        <input type="email" id="email" placeholder="name@email.com" autocomplete="email" required>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Password</label>
-                    <div class="input-wrapper">
-                        <i class="ri-lock-2-line icon-left"></i>
-                        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required minlength="6">
-                        <i class="ri-eye-off-line toggle-password" id="togglePasswordBtn"></i>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn-submit" id="submitBtn">
-                    <span id="btnText">Sign In</span>
-                    <div class="spinner" id="btnSpinner"></div>
-                </button>
-            </form>
-            <p class="helper-text">Registration is restricted to Google Accounts.</p>
-        </div>
+        
+        <p class="helper-text">Access is restricted. Please use your <strong>@deped.gov.ph</strong> account to sign in securely.</p>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        // Removed createUserWithEmailAndPassword because we don't want manual registration anymore
-        import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        // NEW IMPORTS: Added collection, query, where, getDocs, updateDoc
+        import { getFirestore, collection, query, where, getDocs, doc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAxWmm5YsLjnwatHOVImrpIHAxicbHWYuw",
@@ -163,66 +144,85 @@
 
         // --- CONFIGURATION ---
         const SUPER_ADMIN_EMAIL = "jhunelbangit@gmail.com";
-        const RESTRICT_DOMAIN = false; 
+        const RESTRICT_DOMAIN = true;  
         const REQUIRED_DOMAIN = "@deped.gov.ph";
 
         // DOM Elements
         const errorDiv = document.getElementById('errorMessage');
         const errorText = document.getElementById('errorText');
-        const btnSpinner = document.getElementById('btnSpinner');
-        const submitBtn = document.getElementById('submitBtn');
-        const btnTextEl = document.getElementById('btnText');
-        const passwordInput = document.getElementById('password');
-        const togglePassBtn = document.getElementById('togglePasswordBtn');
         const googleBtn = document.getElementById('googleBtn');
+        const googleBtnText = document.getElementById('googleBtnText');
 
-        togglePassBtn.addEventListener('click', () => {
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
-            togglePassBtn.classList.toggle('ri-eye-off-line');
-            togglePassBtn.classList.toggle('ri-eye-line');
-        });
-
-        function showError(msg) { errorText.innerText = msg; errorDiv.style.display = 'block'; }
-        function hideError() { errorDiv.style.display = 'none'; }
+        function showError(msg) { 
+            errorText.innerText = msg; 
+            errorDiv.style.display = 'block'; 
+        }
+        
+        function hideError() { 
+            errorDiv.style.display = 'none'; 
+        }
+        
         function setLoading(isLoading) {
             if (isLoading) {
-                submitBtn.disabled = true; googleBtn.disabled = true;
-                btnTextEl.style.display = 'none'; btnSpinner.style.display = 'block';
+                googleBtn.disabled = true;
+                googleBtnText.innerText = "Verifying access...";
             } else {
-                submitBtn.disabled = false; googleBtn.disabled = false;
-                btnTextEl.style.display = 'block'; btnSpinner.style.display = 'none';
+                googleBtn.disabled = false;
+                googleBtnText.innerText = "Continue with Google";
             }
         }
 
-        // --- CORE LOGIN LOGIC ---
-        async function handleLoginSuccess(user, method) {
-            const userRef = doc(db, "users", user.uid);
-            
+        // --- CORE LOGIN LOGIC (UPDATED WITH PRE-REGISTRATION CHECK) ---
+        async function handleLoginSuccess(user) {
             try {
-                // Default role
-                let role = "user"; 
+                const usersRef = collection(db, "users");
+                const q = query(usersRef, where("email", "==", user.email));
+                const querySnapshot = await getDocs(q);
 
-                // 1. Check for Super Admin
-                if (user.email === SUPER_ADMIN_EMAIL) {
-                    role = "superadmin";
+                let role = "user";
+                let docRefToUpdate = null;
 
-                // 2. Check for Admin (STRICTLY DepEd.gov.ph only)
-                } else if (user.email.endsWith("@deped.gov.ph")) {
-                    role = "admin";
+                // 1. If email is NOT found in the database
+                if (querySnapshot.empty) {
+                    // Check if it's the Super Admin logging in for the very first time
+                    if (user.email === SUPER_ADMIN_EMAIL) {
+                        role = "superadmin";
+                        docRefToUpdate = doc(collection(db, "users")); // Create a new document reference
+                        await setDoc(docRefToUpdate, {
+                            email: user.email,
+                            role: role,
+                            createdAt: new Date(),
+                            lastLogin: new Date(),
+                            authMethod: 'google',
+                            uid: user.uid
+                        });
+                    } else {
+                        // BLOCK UNAUTHORIZED USERS
+                        await user.delete().catch(() => signOut(auth)); // Force delete/sign out
+                        showError("Access Denied: Your account has not been pre-registered. Please contact your administrator.");
+                        setLoading(false);
+                        return; // Stop the login process
+                    }
+                } 
+                // 2. If email IS found in the database (Pre-registered)
+                else {
+                    const userDoc = querySnapshot.docs[0];
+                    const userData = userDoc.data();
+                    
+                    // Fetch the role that the admin assigned to them in the database
+                    role = userData.role || "user"; 
+                    docRefToUpdate = userDoc.ref;
 
-                // 3. Everyone else stays as "user"
-                } else {
-                    role = "user";
+                    // Failsafe for Super Admin
+                    if (user.email === SUPER_ADMIN_EMAIL) role = "superadmin";
+
+                    // Update their last login time
+                    await updateDoc(docRefToUpdate, {
+                        lastLogin: new Date(),
+                        uid: user.uid, // Store their Google Auth UID 
+                        authMethod: 'google'
+                    });
                 }
-
-                // Save to Database
-                await setDoc(userRef, {
-                    email: user.email, 
-                    lastLogin: new Date(),
-                    authMethod: method,
-                    role: role
-                }, { merge: true });
 
                 // --- REDIRECT LOGIC ---
                 if (role === 'superadmin') {
@@ -235,12 +235,12 @@
 
             } catch (error) {
                 console.error("Database Error:", error);
-                showError("Login verification failed.");
+                showError("Login verification failed. Please check your connection.");
                 setLoading(false);
             }
         }
 
-        // --- GOOGLE SIGN IN (REGISTER & LOGIN) ---
+        // --- GOOGLE SIGN IN ---
         googleBtn.addEventListener('click', async () => {
             hideError();
             setLoading(true);
@@ -249,15 +249,16 @@
                 const result = await signInWithPopup(auth, googleProvider);
                 const user = result.user;
 
-                // Domain Check
+                // Domain Check - Initial filter
                 if (RESTRICT_DOMAIN && !user.email.endsWith(REQUIRED_DOMAIN) && user.email !== SUPER_ADMIN_EMAIL) {
-                    await user.delete().catch(() => signOut(auth));
+                    await user.delete().catch(() => signOut(auth)); // Force sign out
                     showError(`Access Denied: Only ${REQUIRED_DOMAIN} accounts allowed.`);
                     setLoading(false);
                     return;
                 }
 
-                await handleLoginSuccess(user, 'google');
+                // Proceed to verify in Firestore
+                await handleLoginSuccess(user);
 
             } catch (error) {
                 console.error("Google Sign-In Error", error);
@@ -265,41 +266,6 @@
                 if (error.code !== 'auth/popup-closed-by-user') {
                     showError("Google Sign-In Failed: " + error.message);
                 }
-            }
-        });
-
-        // --- PASSWORD LOGIN (SIGN IN ONLY) ---
-        document.getElementById('authForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            hideError();
-            setLoading(true);
-
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-
-            // Domain Check for Email/Pass as well
-            if (RESTRICT_DOMAIN && !email.endsWith(REQUIRED_DOMAIN) && email !== SUPER_ADMIN_EMAIL) {
-                showError(`Access Denied: Only ${REQUIRED_DOMAIN} accounts allowed.`);
-                setLoading(false);
-                return;
-            }
-
-            try {
-                // SIGN IN ONLY - No Registration allowed via Password
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                await handleLoginSuccess(userCredential.user, 'password');
-
-            } catch (error) {
-                console.error("Auth Error:", error);
-                setLoading(false);
-                
-                let userMsg = "Authentication failed.";
-                if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found') {
-                    userMsg = "Incorrect email or password. New users must use Google.";
-                } else if (error.code === 'auth/wrong-password') {
-                    userMsg = "Incorrect password.";
-                }
-                showError(userMsg);
             }
         });
     </script>

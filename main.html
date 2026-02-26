@@ -41,15 +41,27 @@
             color: #fff; 
             display: flex; 
             flex-direction: column; 
+            justify-content: space-between; /* Spaces out top nav and bottom logout */
             padding: 20px; 
             transition: all 0.3s ease;
             flex-shrink: 0; 
             z-index: 100;
+            /* --- STICKY SIDEBAR PROPERTIES --- */
+            position: sticky;
+            top: 0;
+            height: 100vh;
         }
         .sidebar h2 { text-align: center; margin-bottom: 40px; font-weight: 600; letter-spacing: 1px; }
         .nav-links a { display: block; color: #cbd5e0; text-decoration: none; padding: 15px; margin-bottom: 10px; border-radius: 8px; transition: 0.3s; }
         .nav-links a:hover, .nav-links a.active { background-color: rgba(255, 255, 255, 0.15); color: #fff; padding-left: 20px; border: 1px solid rgba(255, 255, 255, 0.1); }
         
+        .logout-btn {
+            display: block; color: #fc8181; text-decoration: none; padding: 15px; margin-top: 20px; 
+            border-radius: 8px; transition: 0.3s; font-weight: 600; text-align: center; 
+            border: 1px solid rgba(252, 129, 129, 0.3); background-color: rgba(252, 129, 129, 0.1);
+        }
+        .logout-btn:hover { background-color: #e53e3e; color: white; border-color: #e53e3e; }
+
         /* --- MAIN CONTENT --- */
         .main-content { 
             flex: 1; 
@@ -174,8 +186,8 @@
         }
         .form-group { flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 200px; }
         .form-group label { font-size: 0.85rem; color: #2d3748; font-weight: 700; }
-        .form-group input { padding: 10px; background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 6px; outline: none; width: 100%; color: #1a202c; }
-        .form-group input:focus { border-color: #4299e1; background: rgba(255, 255, 255, 0.9); }
+        .form-group input, .form-group select { padding: 10px; background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 6px; outline: none; width: 100%; color: #1a202c; }
+        .form-group input:focus, .form-group select:focus { border-color: #4299e1; background: rgba(255, 255, 255, 0.9); }
         .edit-input { padding: 8px; border: 1px solid #4299e1; border-radius: 4px; width: 100%; font-size: 0.9rem; background: rgba(255,255,255,0.8); }
 
         /* --- BUTTONS & ICONS --- */
@@ -217,10 +229,20 @@
 
         @media (max-width: 900px) {
             body { flex-direction: column; }
-            .sidebar { width: 100%; flex-direction: row; align-items: center; justify-content: space-between; padding: 15px 20px; }
+            .sidebar { 
+                width: 100%; 
+                flex-direction: row; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 15px 20px; 
+                flex-wrap: wrap; 
+                height: auto;
+                z-index: 999;
+            }
             .sidebar h2 { margin-bottom: 0; font-size: 1.2rem; }
             .nav-links { display: flex; gap: 10px; margin-top: 0; }
             .nav-links a { margin-bottom: 0; padding: 8px 12px; font-size: 0.9rem; }
+            .logout-btn { margin-top: 0; padding: 8px 12px; font-size: 0.9rem; }
             .main-content { padding: 20px; }
             .add-school-form { flex-direction: column; align-items: stretch; }
             .btn { width: 100%; }
@@ -237,11 +259,16 @@
 <body>
 
     <nav class="sidebar">
-        <h2>AquaMonitor</h2>
-        <div class="nav-links">
-            <a href="#" class="active">Overview</a>
-            <a href="logs.html">History Logs</a>
+        <div>
+            <h2>AquaMonitor</h2>
+            <div class="nav-links">
+                <a href="#" id="nav-overview" class="active" onclick="switchTab('overview')">Overview</a>
+                <a href="#" id="nav-users" onclick="switchTab('users')">User Management</a>
+                <a href="#" id="nav-logs" onclick="switchTab('logs')">History Logs</a>
+            </div>
         </div>
+        
+        <a href="#" class="logout-btn" onclick="logoutUser()">⏏ Logout</a>
     </nav>
 
     <main class="main-content">
@@ -256,102 +283,165 @@
             </div>
         </header>
 
-        <section class="dashboard-grid">
-            <div class="card ph-card">
-                <div class="wave-container">
-                    <div class="wave wave-mask wave1"></div>
-                    <div class="wave wave-mask wave2"></div>
-                    <div class="wave wave-mask wave3"></div>
-                </div>
-                <div class="card-content">
-                    <div class="card-header">
-                        <span>pH Level</span>
-                        <video src="img/water.mp4" autoplay loop muted playsinline class="icon-media"></video>
+        <div id="overview-section">
+            <section class="dashboard-grid">
+                <div class="card ph-card">
+                    <div class="wave-container">
+                        <div class="wave wave-mask wave1"></div>
+                        <div class="wave wave-mask wave2"></div>
+                        <div class="wave wave-mask wave3"></div>
                     </div>
-                    <div class="metric-value"><span id="phValue">--</span> <span class="metric-unit">pH</span></div>
-                    <div class="metric-status" id="phStatus">Waiting for data...</div>
-                </div>
-            </div>
-
-            <div class="card turbidity-card">
-                <div class="wave-container">
-                    <div class="wave wave-mask wave1"></div>
-                    <div class="wave wave-mask wave2"></div>
-                    <div class="wave wave-mask wave3"></div>
-                </div>
-                <div class="card-content">
-                    <div class="card-header">
-                        <span>Turbidity</span>
-                        <img src="img/fog.png" alt="Fog Icon" class="icon-media anim-fog-img">
+                    <div class="card-content">
+                        <div class="card-header">
+                            <span>pH Level</span>
+                            <video src="img/water.mp4" autoplay loop muted playsinline class="icon-media"></video>
+                        </div>
+                        <div class="metric-value"><span id="phValue">--</span> <span class="metric-unit">pH</span></div>
+                        <div class="metric-status" id="phStatus">Waiting for data...</div>
                     </div>
-                    <div class="metric-value"><span id="turbidityValue">--</span> <span class="metric-unit">NTU</span></div>
-                    <div class="metric-status" id="turbidityStatus">Waiting for data...</div>
                 </div>
-            </div>
 
-            <div class="card tds-card">
-                <div class="wave-container">
-                    <div class="wave wave-mask wave1"></div>
-                    <div class="wave wave-mask wave2"></div>
-                    <div class="wave wave-mask wave3"></div>
-                </div>
-                <div class="card-content">
-                    <div class="card-header">
-                        <span>TDS (Solids)</span>
-                        <video src="img/chemical.mp4" autoplay loop muted playsinline class="icon-media"></video>
+                <div class="card turbidity-card">
+                    <div class="wave-container">
+                        <div class="wave wave-mask wave1"></div>
+                        <div class="wave wave-mask wave2"></div>
+                        <div class="wave wave-mask wave3"></div>
                     </div>
-                    <div class="metric-value"><span id="tdsValue">--</span> <span class="metric-unit">ppm</span></div>
-                    <div class="metric-status" id="tdsStatus">Waiting for data...</div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <span>Turbidity</span>
+                            <img src="img/fog.png" alt="Fog Icon" class="icon-media anim-fog-img">
+                        </div>
+                        <div class="metric-value"><span id="turbidityValue">--</span> <span class="metric-unit">NTU</span></div>
+                        <div class="metric-status" id="turbidityStatus">Waiting for data...</div>
+                    </div>
                 </div>
-            </div>
-        </section>
 
-        <section class="data-section">
-            <h3>Recent Sensor Readings</h3>
-            <div class="table-wrapper">
-                <table>
-                    <thead><tr><th>Time</th><th>pH Level</th><th>Turbidity (NTU)</th><th>TDS (ppm)</th><th>Status</th></tr></thead>
-                    <tbody id="readingsTableBody">
-                        <tr><td colspan="5">Initializing connection...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <section class="data-section">
-            <h3>School Testing Registry</h3>
-            
-            <div class="add-school-form">
-                <div class="form-group"><label>Name of School <span style="color:red">*</span></label><input type="text" id="newSchoolName" placeholder="e.g. Lincoln High"></div>
-                <div class="form-group"><label>School Head</label><input type="text" id="newSchoolHead" placeholder="e.g. Mr. Doe"></div>
-                <div class="form-group"><label>Email</label><input type="email" id="newSchoolEmail" placeholder="e.g. head@school.edu"></div>
-                <button class="btn btn-primary" onclick="addSchoolToDB()">+ Add School</button>
-            </div>
-
-            <div class="search-container">
-                <input type="text" id="searchInput" placeholder="Search by School Name (e.g. 'cani')" 
-                       oninput="handleSearch(this.value)">
-                <div class="search-actions">
-                    <button class="btn btn-primary" onclick="searchSchools()">
-                        <img src="img/search.png" class="btn-icon"> Search
-                    </button>
-                    <button class="btn btn-cancel" onclick="clearSearch()">Clear</button>
+                <div class="card tds-card">
+                    <div class="wave-container">
+                        <div class="wave wave-mask wave1"></div>
+                        <div class="wave wave-mask wave2"></div>
+                        <div class="wave wave-mask wave3"></div>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <span>TDS (Solids)</span>
+                            <video src="img/chemical.mp4" autoplay loop muted playsinline class="icon-media"></video>
+                        </div>
+                        <div class="metric-value"><span id="tdsValue">--</span> <span class="metric-unit">ppm</span></div>
+                        <div class="metric-status" id="tdsStatus">Waiting for data...</div>
+                    </div>
                 </div>
-            </div>
+            </section>
 
-            <div class="table-wrapper">
-                <table>
-                    <thead><tr><th>School Name</th><th>School Head</th><th>Email</th><th>Water Status</th><th>Actions</th></tr></thead>
-                    <tbody id="schoolTableBody"><tr><td colspan="5">Loading data from Firebase...</td></tr></tbody>
-                </table>
-            </div>
+            <section class="data-section">
+                <h3>Recent Sensor Readings</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead><tr><th>Time</th><th>pH Level</th><th>Turbidity (NTU)</th><th>TDS (ppm)</th><th>Status</th></tr></thead>
+                        <tbody id="readingsTableBody">
+                            <tr><td colspan="5">Initializing connection...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
 
-            <div class="pagination-controls">
-                <button class="btn btn-primary" id="prevBtn" disabled onclick="changePage(-1)">← Previous</button>
-                <span id="pageIndicator" style="font-weight: 600; color: #2d3748;">Page 1</span>
-                <button class="btn btn-primary" id="nextBtn" onclick="changePage(1)">Next →</button>
-            </div>
-        </section>
+            <section class="data-section">
+                <h3>School Testing Registry</h3>
+                
+                <div class="add-school-form">
+                    <div class="form-group"><label>Name of School <span style="color:red">*</span></label><input type="text" id="newSchoolName" placeholder="e.g. Lincoln High"></div>
+                    <div class="form-group"><label>School Head</label><input type="text" id="newSchoolHead" placeholder="e.g. Mr. Doe"></div>
+                    <div class="form-group"><label>Email</label><input type="email" id="newSchoolEmail" placeholder="e.g. head@school.edu"></div>
+                    <button class="btn btn-primary" onclick="addSchoolToDB()">+ Add School</button>
+                </div>
+
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Search by School Name (e.g. 'cani')" 
+                           oninput="handleSearch(this.value)">
+                    <div class="search-actions">
+                        <button class="btn btn-primary" onclick="searchSchools()">
+                            <img src="img/search.png" class="btn-icon"> Search
+                        </button>
+                        <button class="btn btn-cancel" onclick="clearSearch()">Clear</button>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead><tr><th>School Name</th><th>School Head</th><th>Email</th><th>Water Status</th><th>Actions</th></tr></thead>
+                        <tbody id="schoolTableBody"><tr><td colspan="5">Loading data from Firebase...</td></tr></tbody>
+                    </table>
+                </div>
+
+                <div class="pagination-controls">
+                    <button class="btn btn-primary" id="prevBtn" disabled onclick="changePage(-1)">← Previous</button>
+                    <span id="pageIndicator" style="font-weight: 600; color: #2d3748;">Page 1</span>
+                    <button class="btn btn-primary" id="nextBtn" onclick="changePage(1)">Next →</button>
+                </div>
+            </section>
+        </div>
+
+        <div id="users-section" style="display: none;">
+            <section class="data-section">
+                <h3>User Management</h3>
+                <p style="color: #4a5568; margin-bottom: 20px; font-size: 0.9rem;">Pre-register Admin or Standard users. Superadmins are hidden from this list.</p>
+                
+                <div class="add-school-form">
+                    <div class="form-group" style="flex: 2;">
+                        <label>Email Address <span style="color:red">*</span></label>
+                        <input type="email" id="newUserEmail" placeholder="name@deped.gov.ph">
+                    </div>
+                    <div class="form-group">
+                        <label>Role</label>
+                        <select id="newUserRole">
+                            <option value="user">User (Viewer)</option>
+                            <option value="admin">Admin (Editor)</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="addUserToDB()">+ Pre-Register User</button>
+                </div>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody">
+                            <tr><td colspan="3">Loading users...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <div id="logs-section" style="display: none;">
+            <section class="data-section">
+                <h3>Historical Sensor Data</h3>
+                <p style="color: #4a5568; margin-bottom: 20px; font-size: 0.9rem;">View past water quality readings (Showing latest 50 records).</p>
+                
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date & Time</th>
+                                <th>pH Level</th>
+                                <th>Turbidity (NTU)</th>
+                                <th>TDS (ppm)</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyLogsTableBody">
+                            <tr><td colspan="5">Loading history logs...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
     </main>
 
     <div class="modal-overlay" id="reportModal">
@@ -417,6 +507,7 @@
     <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy, limit, startAfter, endBefore, limitToLast, startAt, endAt } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAxWmm5YsLjnwatHOVImrpIHAxicbHWYuw",
@@ -430,17 +521,31 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const auth = getAuth(app); 
     
     // COLLECTIONS
     const schoolsCol = collection(db, "Schools");
     const waterQualityCol = collection(db, "waterQuality"); 
+    // UPDATED: Using lowercase "users" collection to match superadmin logic
+    const usersCol = collection(db, "users"); 
+
+    // --- LOGOUT FUNCTION ---
+    window.logoutUser = function() {
+        if (confirm("Are you sure you want to log out?")) {
+            signOut(auth).then(() => {
+                window.location.href = "index.html"; 
+            }).catch((error) => {
+                showAlert("Logout Error", error.message);
+            });
+        }
+    }
 
     // --- 1. REAL-TIME SENSOR DATA LISTENER ---
     const qWater = query(waterQualityCol, limit(20));
 
     onSnapshot(qWater, (snapshot) => {
         const readingsBody = document.getElementById("readingsTableBody");
-        readingsBody.innerHTML = ""; // Clear table
+        readingsBody.innerHTML = ""; 
 
         if (snapshot.empty) {
             readingsBody.innerHTML = "<tr><td colspan='5'>No sensor data found in 'waterQuality'.</td></tr>";
@@ -491,7 +596,6 @@
         const turbVal = data.turbidity !== undefined ? data.turbidity : 0;
         const tdsVal = data.tds !== undefined ? data.tds : 0;
 
-        // 1. pH Update
         document.getElementById("phValue").innerText = parseFloat(phVal).toFixed(1);
         const phEl = document.getElementById("phStatus");
         
@@ -503,7 +607,6 @@
             phEl.style.color = "#c05621"; 
         }
 
-        // 2. Turbidity Update
         document.getElementById("turbidityValue").innerText = parseFloat(turbVal).toFixed(1);
         const turbEl = document.getElementById("turbidityStatus");
 
@@ -518,7 +621,6 @@
             turbEl.style.color = "#c05621";
         }
 
-        // 3. TDS Update
         document.getElementById("tdsValue").innerText = tdsVal;
         const tdsEl = document.getElementById("tdsStatus");
 
@@ -558,14 +660,10 @@
     async function loadSchools(direction = 0, searchTerm = "") {
         let q;
 
-        // A. SEARCH MODE (Fetch ALL and Filter Client-Side)
         if (searchTerm) {
             isSearchMode = true;
-            // Fetch everything ordered by name to filter in Javascript
             q = query(schoolsCol, orderBy("schoolName")); 
-        } 
-        // B. PAGINATION MODE (Normal)
-        else {
+        } else {
             isSearchMode = false;
             if (direction === 1 && lastDoc) {
                 q = query(schoolsCol, orderBy("schoolName"), startAfter(lastDoc), limit(pageSize));
@@ -582,29 +680,24 @@
             const tbody = document.getElementById("schoolTableBody");
             tbody.innerHTML = "";
 
-            // 1. Convert snapshot to array for easy filtering
             let allDocs = [];
             snapshot.forEach(docSnap => {
                 allDocs.push({ id: docSnap.id, data: docSnap.data(), doc: docSnap });
             });
 
-            // 2. Client-Side Filtering (Case-Insensitive & Contains)
             if (isSearchMode) {
                 const termLower = searchTerm.toLowerCase();
                 allDocs = allDocs.filter(item => {
                     const name = item.data.schoolName ? item.data.schoolName.toLowerCase() : "";
-                    // 'includes' allows "cani" to find "Canida"
                     return name.includes(termLower);
                 });
             } else {
-                // In normal mode, track pagination boundaries
                 if (allDocs.length > 0) {
                     firstDoc = allDocs[0].doc;
                     lastDoc = allDocs[allDocs.length - 1].doc;
                 }
             }
 
-            // 3. Render Results
             if (allDocs.length === 0) {
                 tbody.innerHTML = "<tr><td colspan='5'>No schools found.</td></tr>";
                 if (!isSearchMode) document.getElementById("nextBtn").disabled = true;
@@ -616,7 +709,6 @@
 
                     const tr = document.createElement("tr");
                     tr.id = `row-${schoolId}`; 
-                    // UPDATED BUTTONS WITH PNG ICONS
                     tr.innerHTML = `
                         <td class="name-cell">${school.schoolName || "N/A"}</td>
                         <td class="head-cell">${school.schoolHead || "N/A"}</td>
@@ -638,7 +730,6 @@
                 });
             }
 
-            // 4. Update Controls
             if (isSearchMode) {
                 document.getElementById("pageIndicator").innerText = "Search Results";
                 document.getElementById("prevBtn").disabled = true;
@@ -656,27 +747,20 @@
         });
     }
 
-    // --- SEARCH FUNCTIONS ---
     let debounceTimeout = null;
-
-    // UPDATED: Function called by oninput event
     window.handleSearch = function(value) {
         clearTimeout(debounceTimeout);
-        // Wait 300ms after typing stops before querying
         debounceTimeout = setTimeout(() => {
             const term = value.trim();
             if (term) {
-                // If there is text, search immediately
                 currentPage = 1;
                 loadSchools(0, term);
             } else {
-                // If text is cleared, reset to normal list
                 clearSearch();
             }
         }, 300);
     }
 
-    // Function called by button
     window.searchSchools = function() {
         const term = document.getElementById("searchInput").value.trim();
         if (!term) {
@@ -694,7 +778,6 @@
         loadSchools(0); 
     }
 
-    // --- PAGE NAVIGATION ---
     window.changePage = function(step) {
         if (isSearchMode) return; 
         if (currentPage + step < 1) return;
@@ -702,11 +785,180 @@
         loadSchools(step);
     };
 
-    // Initial Load
     loadSchools(0);
 
 
-    // --- 3. UTILITY FUNCTIONS ---
+    // --- 3. TAB NAVIGATION, USER MGMT & LOGS LOGIC ---
+    let usersUnsubscribe = null;
+    let logsUnsubscribe = null;
+
+    window.switchTab = function(tabName) {
+        document.getElementById('nav-overview').classList.remove('active');
+        document.getElementById('nav-users').classList.remove('active');
+        document.getElementById('nav-logs').classList.remove('active');
+
+        document.getElementById('nav-' + tabName).classList.add('active');
+
+        document.getElementById('overview-section').style.display = 'none';
+        document.getElementById('users-section').style.display = 'none';
+        document.getElementById('logs-section').style.display = 'none';
+
+        if (tabName === 'overview') {
+            document.getElementById('overview-section').style.display = 'block';
+        } else if (tabName === 'users') {
+            document.getElementById('users-section').style.display = 'block';
+            loadUsers(); 
+        } else if (tabName === 'logs') {
+            document.getElementById('logs-section').style.display = 'block';
+            loadHistoryLogs();
+        }
+    }
+
+    // UPDATED: User Management Loading (Hides Super Admins, Adjusts Table)
+    window.loadUsers = function() {
+        if (usersUnsubscribe) usersUnsubscribe();
+        
+        const q = query(usersCol, orderBy("createdAt", "desc"));
+        
+        usersUnsubscribe = onSnapshot(q, (snapshot) => {
+            const tbody = document.getElementById("userTableBody");
+            tbody.innerHTML = "";
+            let count = 0;
+
+            snapshot.forEach(docSnap => {
+                const user = docSnap.data();
+                
+                // Skip rendering if user is superadmin
+                if (user.role && user.role.toLowerCase() === 'superadmin') return; 
+                
+                count++;
+                const tr = document.createElement("tr");
+                
+                let roleDisplay = "User";
+                let roleColor = "#48bb78"; // Green for User
+                
+                if(user.role && user.role.toLowerCase() === 'admin') {
+                    roleDisplay = "Admin";
+                    roleColor = "#3182ce"; // Blue for Admin
+                }
+
+                // Render strictly with 3 columns to match the new HTML table headers
+                tr.innerHTML = `
+                    <td style="font-weight:600;">${user.email || "Unknown Email"}</td>
+                    <td><span class="status-badge" style="background-color: ${roleColor};">${roleDisplay}</span></td>
+                    <td class="action-cell">
+                        <button class="btn btn-delete" onclick="deleteUser('${docSnap.id}')">
+                            <img src="img/trash.png" class="btn-icon" style="filter: brightness(0) invert(1);"> Delete
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            if (count === 0) {
+                tbody.innerHTML = "<tr><td colspan='3'>No manageable users found.</td></tr>";
+            }
+        }, (error) => {
+            console.error("Error loading users:", error);
+            document.getElementById("userTableBody").innerHTML = `<tr><td colspan='3' style='color: red;'>Error: ${error.message}</td></tr>`;
+        });
+    }
+
+    // UPDATED: Pre-register logic enforcing domains
+    window.addUserToDB = async function() {
+        const email = document.getElementById('newUserEmail').value.trim();
+        const role = document.getElementById('newUserRole').value;
+
+        if (!email) {
+            showAlert("Validation Error", "Please provide an email address.");
+            return;
+        }
+
+        // Enforce the DepEd domain rule
+        if (!email.endsWith("@deped.gov.ph")) {
+            showAlert("Invalid Domain", "Only @deped.gov.ph emails can be registered.");
+            return;
+        }
+
+        const btn = document.querySelector('#users-section .btn-primary');
+        const originalText = btn.innerText;
+        btn.disabled = true;
+        btn.innerText = "Saving...";
+
+        try {
+            await addDoc(usersCol, {
+                email: email,
+                role: role,
+                createdAt: new Date(),
+                lastLogin: null,
+                authMethod: 'google'
+            });
+            
+            document.getElementById('newUserEmail').value = "";
+            showAlert("Success", `User ${email} has been pre-registered as ${role.toUpperCase()}!`);
+        } catch (e) {
+            showAlert("Database Error", "Error adding user: " + e.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerText = originalText;
+        }
+    }
+
+    window.deleteUser = async function(userId) {
+        if(confirm("Are you sure you want to delete this user?")) {
+            try {
+                await deleteDoc(doc(db, "users", userId));
+                showAlert("Deleted", "User has been removed.");
+            } catch (e) {
+                showAlert("Error", "Could not delete user: " + e.message);
+            }
+        }
+    }
+
+    // History Logs Loading
+    window.loadHistoryLogs = function() {
+        if (logsUnsubscribe) logsUnsubscribe();
+        
+        const qLogs = query(waterQualityCol, orderBy("timestamp", "desc"), limit(50));
+        
+        logsUnsubscribe = onSnapshot(qLogs, (snapshot) => {
+            const tbody = document.getElementById("historyLogsTableBody");
+            tbody.innerHTML = "";
+            
+            if (snapshot.empty) {
+                tbody.innerHTML = "<tr><td colspan='5'>No historical logs found.</td></tr>";
+                return;
+            }
+            
+            snapshot.forEach(docSnap => {
+                const data = docSnap.data();
+                let timeString = "Unknown Time";
+                
+                if (data.timestamp && data.timestamp.toDate) {
+                    timeString = data.timestamp.toDate().toLocaleString(); 
+                }
+                
+                const ph = data.phLevel !== undefined ? data.phLevel : "--";
+                const turb = data.turbidity !== undefined ? data.turbidity : "--";
+                const tds = data.tds !== undefined ? data.tds : "--";
+                
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${timeString}</td>
+                    <td>${ph}</td>
+                    <td>${turb}</td>
+                    <td>${tds}</td>
+                    <td>${getOverallStatus(ph, turb, tds)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }, (error) => {
+            console.error("Error loading logs:", error);
+            document.getElementById("historyLogsTableBody").innerHTML = `<tr><td colspan='5' style='color: red;'>Error: ${error.message}</td></tr>`;
+        });
+    }
+
+    // --- 4. UTILITY & MODAL FUNCTIONS ---
 
     window.showAlert = function(title, message) {
         document.getElementById('alertTitle').innerText = title;
@@ -734,7 +986,6 @@
             try { 
                 await deleteDoc(doc(db, "Schools", pendingDeleteId)); 
                 closeConfirm();
-                // Reload current page to reflect changes
                 loadSchools(0);
             } 
             catch (e) { 
@@ -759,7 +1010,6 @@
         document.getElementById('shareModal').style.display = 'none';
     }
 
-    // EDIT FUNCTIONS
     let originalData = {}; 
 
     window.editSchool = function(id) {
@@ -804,7 +1054,6 @@
                 schoolHead: newHead,
                 email: newEmail
             });
-            // Reload to refresh view
             loadSchools(0);
         } catch (e) {
             showAlert("Error", "Could not update school: " + e.message);
@@ -821,7 +1070,6 @@
         delete originalData[id];
     }
 
-    // ADD SCHOOL FUNCTION
     window.addSchoolToDB = async function() {
         const name = document.getElementById('newSchoolName').value.trim();
         const head = document.getElementById('newSchoolHead').value.trim();
@@ -841,7 +1089,6 @@
             document.getElementById('newSchoolEmail').value = "";
             showAlert("Success", "School added successfully!");
             
-            // Reload page 1 to see new entry
             currentPage = 1;
             loadSchools(0);
 
@@ -850,7 +1097,7 @@
         }
     }
 
-    // REPORT GENERATION
+    // --- 5. REPORT GENERATION ---
     let isWaitingForReturn = false; 
 
     window.openReportModal = function(schoolName, schoolEmail) {
@@ -1029,7 +1276,6 @@
         doc.setFont(undefined, 'bold');
         doc.text(`II. Water Quality Test Results - ${school}`, 14, 60);
 
-        // GRAB REAL DATA FROM DOM OR DEFAULT TO "N/A"
         const curPh = document.getElementById("phValue").innerText;
         const curTds = document.getElementById("tdsValue").innerText;
         const curTurb = document.getElementById("turbidityValue").innerText;
