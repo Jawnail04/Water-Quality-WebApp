@@ -85,7 +85,8 @@
         
         .dashboard-grid { 
             display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            /* Updated: Fully responsive grid down to small mobile screens */
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); 
             gap: 25px; 
             margin-bottom: 30px; 
         }
@@ -101,13 +102,14 @@
             padding: 25px; 
             position: relative; 
             overflow: hidden; 
+            /* Added: Forces browsers to clip inner animations perfectly to the border radius */
+            -webkit-mask-image: -webkit-radial-gradient(white, black); 
             display: flex; 
             flex-direction: column; 
             justify-content: space-between; 
             min-height: 180px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.2); border-color: #fff; }
+        /* Note: .card:hover removed to prevent glitching */
         .card-content { position: relative; z-index: 10; }
 
         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: #2d3748; font-size: 0.9rem; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; }
@@ -135,24 +137,40 @@
             100% { transform: translateX(3px) scale(1.08); opacity: 1; filter: blur(1px); }
         }
 
+        /* --- FIXED WAVE ANIMATION --- */
         .wave-container { 
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 22%; 
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 25%; 
             overflow: hidden; border-radius: 0 0 20px 20px; pointer-events: none; opacity: 0.8;
+            -webkit-mask-image: -webkit-radial-gradient(white, black);
         }
-        .wave { position: absolute; left: 0; bottom: 0; width: 200%; background-repeat: repeat-x; }
-        .wave-mask {
-            -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 88.7'%3E%3Cpath d='M800 56.9c-155.5 0-204.9-50-405.5-49.9-200 0-250 49.9-394.5 49.9v31.8h800v-.2-31.6z' fill='%23000000'/%3E%3C/svg%3E");
-            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 88.7'%3E%3Cpath d='M800 56.9c-155.5 0-204.9-50-405.5-49.9-200 0-250 49.9-394.5 49.9v31.8h800v-.2-31.6z' fill='%23000000'/%3E%3C/svg%3E");
-            -webkit-mask-size: 50% 100%; mask-size: 50% 100%; -webkit-mask-position: bottom; mask-position: bottom; -webkit-mask-repeat: repeat-x; mask-repeat: repeat-x;
+        
+        .wave { 
+            position: absolute; left: 0; bottom: 0; width: 100%; 
+            /* New mathematically perfect looping SVG */
+            -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 120' preserveAspectRatio='none'%3E%3Cpath d='M0,60 Q250,120 500,60 T1000,60 L1000,120 L0,120 Z' fill='%23000000'/%3E%3C/svg%3E");
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 120' preserveAspectRatio='none'%3E%3Cpath d='M0,60 Q250,120 500,60 T1000,60 L1000,120 L0,120 Z' fill='%23000000'/%3E%3C/svg%3E");
+            /* Fixed pixel size to eliminate rendering gaps */
+            -webkit-mask-size: 1000px 100%; 
+            mask-size: 1000px 100%; 
+            -webkit-mask-repeat: repeat-x; 
+            mask-repeat: repeat-x;
         }
-        @keyframes moveWave { 
-            0% { transform: translateX(0) translateZ(0) scaleY(1); } 
-            50% { transform: translateX(-25%) translateZ(0) scaleY(0.95); } 
-            100% { transform: translateX(-50%) translateZ(0) scaleY(1); } 
+
+        /* Animate the mask-position for a flawless infinite scroll */
+        @keyframes moveWaveLeft { 
+            0% { -webkit-mask-position: 0px bottom; mask-position: 0px bottom; } 
+            100% { -webkit-mask-position: -1000px bottom; mask-position: -1000px bottom; } 
         }
-        .wave1 { animation: moveWave 15s linear infinite; height: 120%; opacity: 1; z-index: 1; bottom: 0; }
-        .wave2 { animation: moveWave 9s linear infinite; height: 110%; opacity: 1; z-index: 2; bottom: 0; }
-        .wave3 { animation: moveWave 5s linear infinite; height: 100%; opacity: 1; z-index: 3; bottom: 0; }
+        
+        @keyframes moveWaveRight { 
+            0% { -webkit-mask-position: 0px bottom; mask-position: 0px bottom; } 
+            100% { -webkit-mask-position: 1000px bottom; mask-position: 1000px bottom; } 
+        }
+
+        .wave1 { animation: moveWaveLeft 12s linear infinite; height: 120%; z-index: 1; bottom: 0; }
+        .wave2 { animation: moveWaveRight 8s linear infinite; height: 110%; z-index: 2; bottom: 0; }
+        .wave3 { animation: moveWaveLeft 6s linear infinite; height: 100%; z-index: 3; bottom: 0; }
+
         .ph-card .wave1 { background-color: #bee3f8; } .ph-card .wave2 { background-color: #90cdf4; } .ph-card .wave3 { background-color: #4299e1; } .ph-card .metric-value { color: #2b6cb0; }
         .turbidity-card .wave1 { background-color: #feebc8; } .turbidity-card .wave2 { background-color: #fbd38d; } .turbidity-card .wave3 { background-color: #ed8936; } .turbidity-card .metric-value { color: #c05621; }
         .tds-card .wave1 { background-color: #e9d8fd; } .tds-card .wave2 { background-color: #d6bcfa; } .tds-card .wave3 { background-color: #9f7aea; } .tds-card .metric-value { color: #6b46c1; }
