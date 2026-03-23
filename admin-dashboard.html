@@ -576,7 +576,8 @@
     <script type="module">
     import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, setDoc, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy, limit, startAfter, endBefore, limitToLast, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    // NOTE: serverTimestamp has been added to the imports below
+    import { getFirestore, collection, addDoc, setDoc, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy, limit, startAfter, endBefore, limitToLast, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAxWmm5YsLjnwatHOVImrpIHAxicbHWYuw",
@@ -667,9 +668,10 @@
                     }
                 } catch(e) { timeString = "Invalid Date"; }
 
-                const ph = data.phLevel !== undefined ? data.phLevel : "--";
-                const turb = data.turbidity !== undefined ? data.turbidity : "--";
-                const tds = data.tds !== undefined ? data.tds : "--";
+                // FIXED: Enforce 2 decimal places for historical records
+                const ph = data.phLevel !== undefined ? parseFloat(data.phLevel).toFixed(2) : "--";
+                const turb = data.turbidity !== undefined ? parseFloat(data.turbidity).toFixed(2) : "--";
+                const tds = data.tds !== undefined ? parseFloat(data.tds).toFixed(2) : "--";
 
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
@@ -743,11 +745,10 @@
         });
     }
 
-    // --- NEW: ADD USER FUNCTION (Secondary App) ---
+    // --- ADD USER FUNCTION (Secondary App) ---
     window.openAddUserModal = function() {
         document.getElementById('addUserModal').style.display = 'flex';
         document.getElementById('newUserEmail').value = "";
-        document.getElementById('newUserPassword').value = "";
         document.getElementById('newUserRole').value = "user";
     }
 
@@ -764,7 +765,6 @@
             return;
         }
 
-        // Enforce the DepEd domain rule in the admin panel too
         if (!email.endsWith("@deped.gov.ph")) {
             showAlert("Invalid Domain", "Only @deped.gov.ph emails can be registered.");
             return;
@@ -776,8 +776,6 @@
         btn.innerText = "Saving...";
 
         try {
-            // We NO LONGER use createUserWithEmailAndPassword. 
-            // We just add their email and assigned role directly to Firestore.
             await addDoc(usersCol, {
                 email: email,
                 role: role,
@@ -857,7 +855,7 @@
                 if(pendingDeleteType === "school") loadSchools(0);
                 
                 if(pendingDeleteType === "user") {
-                    showAlert("Deleted", "User record deleted from database. (Note: Account may still exist in Auth panel).");
+                    showAlert("Deleted", "User record deleted from database.");
                 }
             } 
             catch (e) { 
@@ -872,6 +870,25 @@
     const qWater = query(waterQualityCol, limit(20));
 
     onSnapshot(qWater, (snapshot) => {
+        // --- NEW: AUTOMATIC TIMESTAMP FIXER ---
+        snapshot.docChanges().forEach(async (change) => {
+            if (change.type === "added") {
+                const data = change.doc.data();
+                // Check if the ESP32 forgot to send a timestamp
+                if (data.timestamp === undefined || data.timestamp === null) {
+                    try {
+                        // Append the server's current time to this specific document
+                        await updateDoc(doc(db, "waterQuality", change.doc.id), {
+                            timestamp: serverTimestamp()
+                        });
+                    } catch (e) {
+                        console.error("Could not append timestamp:", e);
+                    }
+                }
+            }
+        });
+        // --------------------------------------
+
         const readingsBody = document.getElementById("readingsTableBody");
         readingsBody.innerHTML = ""; 
 
@@ -895,9 +912,10 @@
                 timeString = data.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             }
 
-            const ph = data.phLevel !== undefined ? data.phLevel : "--";
-            const turb = data.turbidity !== undefined ? data.turbidity : "--";
-            const tds = data.tds !== undefined ? data.tds : "--";
+            // FIXED: Enforce 2 decimal places for real-time table
+            const ph = data.phLevel !== undefined ? parseFloat(data.phLevel).toFixed(2) : "--";
+            const turb = data.turbidity !== undefined ? parseFloat(data.turbidity).toFixed(2) : "--";
+            const tds = data.tds !== undefined ? parseFloat(data.tds).toFixed(2) : "--";
 
             const tr = document.createElement("tr");
             tr.innerHTML = `
@@ -912,13 +930,17 @@
     }, (error) => {
         console.error("Error fetching water data:", error);
     });
-
+    
     function updateDashboardCards(data) {
         const phVal = data.phLevel !== undefined ? data.phLevel : 0;
         const turbVal = data.turbidity !== undefined ? data.turbidity : 0;
         const tdsVal = data.tds !== undefined ? data.tds : 0;
 
-        document.getElementById("phValue").innerText = parseFloat(phVal).toFixed(1);
+        // FIXED: Enforce exactly 2 decimal places for the large dashboard cards
+        // This will display 8.75 exactly, but turn 8.80 into just 8.8
+        document.getElementById("phValue").innerText = Number(parseFloat(phVal).toFixed(2));
+        document.getElementById("turbidityValue").innerText = Number(parseFloat(turbVal).toFixed(2));
+        document.getElementById("tdsValue").innerText = Number(parseFloat(tdsVal).toFixed(2));
         const phEl = document.getElementById("phStatus");
         
         if (phVal >= 6.5 && phVal <= 8.5) {
@@ -927,7 +949,8 @@
             phEl.innerText = "● Attention Required"; phEl.style.color = "#c05621"; 
         }
 
-        document.getElementById("turbidityValue").innerText = parseFloat(turbVal).toFixed(1);
+        // FIXED: Enforce 2 decimal places
+        document.getElementById("turbidityValue").innerText = parseFloat(turbVal).toFixed(2);
         const turbEl = document.getElementById("turbidityStatus");
 
         if (turbVal < 5) {
@@ -938,7 +961,8 @@
             turbEl.innerText = "● Cloudy / High"; turbEl.style.color = "#c05621";
         }
 
-        document.getElementById("tdsValue").innerText = tdsVal;
+        // FIXED: Enforce 2 decimal places
+        document.getElementById("tdsValue").innerText = parseFloat(tdsVal).toFixed(2);
         const tdsEl = document.getElementById("tdsStatus");
 
         if (tdsVal < 300) {
@@ -1402,9 +1426,9 @@
         const curTurb = document.getElementById("turbidityValue").innerText;
 
         const tableData = [
-            ["pH Level", `${curPh} pH`, curPh >= 6.5 && curPh <= 8.5 ? "Good" : "Check"],
-            ["Total Dissolved Solid", `${curTds} mg/L`, curTds < 600 ? "Good" : "High"],
-            ["Turbidity Level", `${curTurb} NTU`, curTurb < 5 ? "Excellent" : "Cloudy"]
+            ["pH Level", `${curPh} pH`, parseFloat(curPh) >= 6.5 && parseFloat(curPh) <= 8.5 ? "Good" : "Check"],
+            ["Total Dissolved Solid", `${curTds} mg/L`, parseFloat(curTds) < 600 ? "Good" : "High"],
+            ["Turbidity Level", `${curTurb} NTU`, parseFloat(curTurb) < 5 ? "Excellent" : "Cloudy"]
         ];
 
         doc.autoTable({
