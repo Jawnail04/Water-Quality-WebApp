@@ -473,7 +473,8 @@
 
     <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy, limit, startAfter, endBefore, limitToLast } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    // NOTE: serverTimestamp added to imports below
+    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy, limit, startAfter, endBefore, limitToLast, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     const firebaseConfig = {
@@ -508,9 +509,27 @@
     }
 
     // --- 1. REAL-TIME SENSOR DATA LISTENER ---
-    const qWater = query(waterQualityCol, limit(20));
+    const qWater = query(waterQualityCol, orderBy("timestamp", "desc"), limit(20));
 
     onSnapshot(qWater, (snapshot) => {
+        // --- NEW: AUTOMATIC TIMESTAMP FIXER ---
+        snapshot.docChanges().forEach(async (change) => {
+            if (change.type === "added") {
+                const data = change.doc.data();
+                // Check if the ESP32 forgot to send a timestamp
+                if (data.timestamp === undefined || data.timestamp === null) {
+                    try {
+                        await updateDoc(doc(db, "waterQuality", change.doc.id), {
+                            timestamp: serverTimestamp()
+                        });
+                    } catch (e) {
+                        console.error("Could not append timestamp:", e);
+                    }
+                }
+            }
+        });
+        // --------------------------------------
+
         const readingsBody = document.getElementById("readingsTableBody");
         readingsBody.innerHTML = ""; 
 
@@ -533,14 +552,19 @@
         }
 
         readings.forEach(data => {
-            let timeString = "Live Data";
-            if (data.timestamp && data.timestamp.toDate) {
-                timeString = data.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            }
+            let timeString = "Unknown Time";
+            try {
+                if (data.timestamp && data.timestamp.toDate) {
+                    timeString = data.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                } else if (data.timestamp) {
+                    timeString = new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                }
+            } catch(e) { timeString = "Live Data"; }
 
-            const ph = data.phLevel !== undefined ? data.phLevel : "--";
-            const turb = data.turbidity !== undefined ? data.turbidity : "--";
-            const tds = data.tds !== undefined ? data.tds : "--";
+            // FIXED: Enforce 2 decimal places for real-time table
+            const ph = data.phLevel !== undefined ? Number(parseFloat(data.phLevel).toFixed(2)) : "--";
+            const turb = data.turbidity !== undefined ? Number(parseFloat(data.turbidity).toFixed(2)) : "--";
+            const tds = data.tds !== undefined ? Number(parseFloat(data.tds).toFixed(2)) : "--";
 
             const tr = document.createElement("tr");
             tr.innerHTML = `
@@ -563,7 +587,8 @@
         const turbVal = data.turbidity !== undefined ? data.turbidity : 0;
         const tdsVal = data.tds !== undefined ? data.tds : 0;
 
-        document.getElementById("phValue").innerText = parseFloat(phVal).toFixed(1);
+        // FIXED: Display raw precision (e.g., 8.75) via Number & toFixed(2)
+        document.getElementById("phValue").innerText = Number(parseFloat(phVal).toFixed(2));
         const phEl = document.getElementById("phStatus");
         
         if (phVal >= 6.5 && phVal <= 8.5) {
@@ -574,7 +599,8 @@
             phEl.style.color = "#c05621"; 
         }
 
-        document.getElementById("turbidityValue").innerText = parseFloat(turbVal).toFixed(1);
+        // FIXED: Display raw precision
+        document.getElementById("turbidityValue").innerText = Number(parseFloat(turbVal).toFixed(2));
         const turbEl = document.getElementById("turbidityStatus");
 
         if (turbVal < 5) {
@@ -588,7 +614,8 @@
             turbEl.style.color = "#c05621";
         }
 
-        document.getElementById("tdsValue").innerText = tdsVal;
+        // FIXED: Display raw precision
+        document.getElementById("tdsValue").innerText = Number(parseFloat(tdsVal).toFixed(2));
         const tdsEl = document.getElementById("tdsStatus");
 
         if (tdsVal < 300) {
@@ -794,13 +821,18 @@
                 const data = docSnap.data();
                 let timeString = "Unknown Time";
                 
-                if (data.timestamp && data.timestamp.toDate) {
-                    timeString = data.timestamp.toDate().toLocaleString(); // Provides Date & Time
-                }
+                try {
+                    if (data.timestamp && data.timestamp.toDate) {
+                        timeString = data.timestamp.toDate().toLocaleString(); // Provides Date & Time
+                    } else if (data.timestamp) {
+                        timeString = new Date(data.timestamp).toLocaleString();
+                    }
+                } catch(e) { timeString = "Invalid Date"; }
                 
-                const ph = data.phLevel !== undefined ? data.phLevel : "--";
-                const turb = data.turbidity !== undefined ? data.turbidity : "--";
-                const tds = data.tds !== undefined ? data.tds : "--";
+                // FIXED: Enforce 2 decimal places for historical records
+                const ph = data.phLevel !== undefined ? Number(parseFloat(data.phLevel).toFixed(2)) : "--";
+                const turb = data.turbidity !== undefined ? Number(parseFloat(data.turbidity).toFixed(2)) : "--";
+                const tds = data.tds !== undefined ? Number(parseFloat(data.tds).toFixed(2)) : "--";
                 
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
@@ -1140,10 +1172,11 @@
         const curTds = document.getElementById("tdsValue").innerText;
         const curTurb = document.getElementById("turbidityValue").innerText;
 
+        // FIXED: Using parseFloat to ensure logic doesn't break with trailing decimals
         const tableData = [
-            ["pH Level", `${curPh} pH`, curPh >= 6.5 && curPh <= 8.5 ? "Good" : "Check"],
-            ["Total Dissolved Solid", `${curTds} mg/L`, curTds < 600 ? "Good" : "High"],
-            ["Turbidity Level", `${curTurb} NTU`, curTurb < 5 ? "Excellent" : "Cloudy"]
+            ["pH Level", `${curPh} pH`, parseFloat(curPh) >= 6.5 && parseFloat(curPh) <= 8.5 ? "Good" : "Check"],
+            ["Total Dissolved Solid", `${curTds} mg/L`, parseFloat(curTds) < 600 ? "Good" : "High"],
+            ["Turbidity Level", `${curTurb} NTU`, parseFloat(curTurb) < 5 ? "Excellent" : "Cloudy"]
         ];
 
         doc.autoTable({
