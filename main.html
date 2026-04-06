@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Water Quality Dashboard</title>
+    <title>Super Admin | AquaMonitor</title>
     
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
 
@@ -17,70 +18,159 @@
             background-size: cover;
             color: #333; 
             display: flex; 
-            min-height: 100vh; 
-            overflow-x: hidden; 
-        }
-        
-        /* --- GLASSMORPHISM MIXIN --- */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(12px);          
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-        }
-
-        /* --- SIDEBAR --- */
-        .sidebar { 
-            width: 250px; 
-            background: rgba(26, 32, 53, 0.85); 
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            color: #fff; 
-            display: flex; 
             flex-direction: column; 
-            justify-content: space-between; 
-            padding: 20px; 
-            transition: all 0.3s ease;
-            flex-shrink: 0; 
-            z-index: 100;
-            position: sticky;
-            top: 0;
-            height: 100vh;
+            height: 100vh; 
+            overflow: hidden; 
         }
-        .sidebar h2 { text-align: center; margin-bottom: 40px; font-weight: 600; letter-spacing: 1px; }
-        .nav-links a { display: block; color: #cbd5e0; text-decoration: none; padding: 15px; margin-bottom: 10px; border-radius: 8px; transition: 0.3s; }
-        .nav-links a:hover, .nav-links a.active { background-color: rgba(255, 255, 255, 0.15); color: #fff; padding-left: 20px; border: 1px solid rgba(255, 255, 255, 0.1); }
-        
-        .logout-btn {
-            display: block; color: #fc8181; text-decoration: none; padding: 15px; margin-top: 20px; 
-            border-radius: 8px; transition: 0.3s; font-weight: 600; text-align: center; 
-            border: 1px solid rgba(252, 129, 129, 0.3); background-color: rgba(252, 129, 129, 0.1);
-        }
-        .logout-btn:hover { background-color: #e53e3e; color: white; border-color: #e53e3e; }
 
+        /* --- MODERN TOP NAVBAR (AVANA STYLE) --- */
+        .top-navbar {
+            width: 100%;
+            background-color: #001489; /* Retains DepEd Blue */
+            padding: 10px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-sizing: border-box;
+            z-index: 1000;
+            flex-shrink: 0;
+            border-bottom: 3px solid #FFD700;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        /* 1. Left: Brand Logo & Text */
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .navbar-brand img {
+            width: 55px;
+            height: 55px;
+            object-fit: contain;
+        }
+
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-text .top-text {
+            color: #ffffff;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .brand-text .top-text span { color: #FFD700; }
+
+        .brand-text .main-title {
+            color: #FFD700;
+            font-size: 18px;
+            font-family: 'Times New Roman', Times, serif;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 2px;
+        }
+
+        /* 2. Center: Navigation Menu */
+        .navbar-menu {
+            display: flex;
+            align-items: center;
+            gap: 35px;
+        }
+
+        .navbar-menu a {
+            color: #e2e8f0;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        .navbar-menu a:hover, .navbar-menu a.active {
+            color: #FFD700;
+        }
+
+        /* Underline effect for active links */
+        .navbar-menu a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: #FFD700;
+            transition: width 0.3s;
+        }
+
+        .navbar-menu a:hover::after, .navbar-menu a.active::after {
+            width: 100%;
+        }
+
+        /* 3. Right: Action Button */
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .logout-btn {
+            background-color: #FF7E40; /* AVANA Style Orange Pill */
+            color: white;
+            padding: 10px 28px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(255, 126, 64, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .logout-btn:hover {
+            background-color: #fa6824;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(255, 126, 64, 0.4);
+        }
+
+        /* --- APP LAYOUT WRAPPER --- */
+        .app-layout {
+            display: flex;
+            flex: 1;
+            width: 100%;
+            overflow: hidden; 
+        }
+        
         /* --- MAIN CONTENT --- */
         .main-content { 
             flex: 1; 
             padding: 30px; 
+            height: 100%; 
             overflow-y: auto; 
             position: relative; 
             width: 100%; 
         }
+
+        /* VIEW TOGGLING */
+        .view-section {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+        .view-section.active-view {
+            display: block;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
         header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }
         
-        header h1 { 
-            font-size: 24px; 
-            color: #1a202c; 
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
-        }
-        header p {
-            color: #2d3748 !important; 
-            font-weight: 500;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
-        }
+        header h1 { font-size: 24px; color: #1a202c; text-shadow: 0 0 20px rgba(255, 255, 255, 0.8); }
+        header p { color: #2d3748 !important; font-weight: 500; text-shadow: 0 0 20px rgba(255, 255, 255, 0.8); }
         
         .user-profile { display: flex; align-items: center; gap: 10px; font-weight: 500; }
         .status-badge { background-color: #48bb78; color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; white-space: nowrap; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -117,26 +207,13 @@
         .metric-status { margin-top: 15px; font-size: 0.9rem; font-weight: 700; }
         
         /* --- ICONS & ANIMATIONS --- */
-        .icon-media {
-            width: 45px;
-            height: 45px;
-            object-fit: cover;
-            border-radius: 12px;
-            display: block;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
+        .icon-media { width: 45px; height: 45px; object-fit: cover; border-radius: 12px; display: block; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .anim-fog-img { opacity: 0.8; animation: fogDrift 6s ease-in-out infinite alternate; }
+        @keyframes fogDrift { 0% { transform: translateX(-3px) scale(1); opacity: 0.7; filter: blur(0px); } 100% { transform: translateX(3px) scale(1.08); opacity: 1; filter: blur(1px); } }
 
-        .anim-fog-img {
-            opacity: 0.8;
-            animation: fogDrift 6s ease-in-out infinite alternate;
-        }
-
-        @keyframes fogDrift {
-            0% { transform: translateX(-3px) scale(1); opacity: 0.7; filter: blur(0px); }
-            100% { transform: translateX(3px) scale(1.08); opacity: 1; filter: blur(1px); }
-        }
-
-        /* --- FIXED WAVE ANIMATION --- */
+        /* =========================================
+           FIXED WAVE ANIMATION CSS (MATH-BASED SVG)
+           ========================================= */
         .wave-container { 
             position: absolute; bottom: 0; left: 0; width: 100%; height: 25%; 
             overflow: hidden; border-radius: 0 0 20px 20px; pointer-events: none; opacity: 0.8;
@@ -166,7 +243,7 @@
         .wave1 { animation: moveWaveLeft 12s linear infinite; height: 120%; z-index: 1; bottom: 0; }
         .wave2 { animation: moveWaveRight 8s linear infinite; height: 110%; z-index: 2; bottom: 0; }
         .wave3 { animation: moveWaveLeft 6s linear infinite; height: 100%; z-index: 3; bottom: 0; }
-        
+
         .ph-card .wave1 { background-color: #bee3f8; } .ph-card .wave2 { background-color: #90cdf4; } .ph-card .wave3 { background-color: #4299e1; } .ph-card .metric-value { color: #2b6cb0; }
         .turbidity-card .wave1 { background-color: #feebc8; } .turbidity-card .wave2 { background-color: #fbd38d; } .turbidity-card .wave3 { background-color: #ed8936; } .turbidity-card .metric-value { color: #c05621; }
         .tds-card .wave1 { background-color: #e9d8fd; } .tds-card .wave2 { background-color: #d6bcfa; } .tds-card .wave3 { background-color: #9f7aea; } .tds-card .metric-value { color: #6b46c1; }
@@ -231,23 +308,34 @@
         .pagination-controls { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
         .pagination-controls button:disabled { background-color: rgba(203, 213, 224, 0.6); cursor: not-allowed; color: #718096; }
 
+        /* --- ROLE BADGES --- */
+        .role-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; }
+        .role-superadmin { background-color: #e9d8fd; color: #6b46c1; border: 1px solid #d6bcfa; }
+        .role-admin { background-color: #bee3f8; color: #2b6cb0; border: 1px solid #90cdf4; }
+        .role-user { background-color: #c6f6d5; color: #276749; border: 1px solid #9ae6b4; }
+
+        /* --- RESPONSIVE MOBILE LAYOUT --- */
         @media (max-width: 900px) {
-            body { flex-direction: column; }
-            .sidebar { 
-                width: 100%; 
-                flex-direction: row; 
-                align-items: center; 
-                justify-content: space-between; 
-                padding: 15px 20px; 
-                flex-wrap: wrap; 
-                height: auto;
-                z-index: 999;
+            body { 
+                height: auto; 
+                min-height: 100vh; 
+                overflow: auto; 
             }
-            .sidebar h2 { margin-bottom: 0; font-size: 1.2rem; }
-            .nav-links { display: flex; gap: 10px; margin-top: 0; }
-            .nav-links a { margin-bottom: 0; padding: 8px 12px; font-size: 0.9rem; }
-            .logout-btn { margin-top: 0; padding: 8px 12px; font-size: 0.9rem; }
-            .main-content { padding: 20px; }
+            .top-navbar {
+                flex-direction: column;
+                padding: 15px;
+                gap: 15px;
+                text-align: center;
+            }
+            .navbar-menu {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 15px;
+            }
+            .app-layout { 
+                overflow: visible; 
+            }
+            .main-content { padding: 20px; overflow-y: visible; height: auto; }
             .add-school-form { flex-direction: column; align-items: stretch; }
             .btn { width: 100%; }
             .search-container { flex-direction: column; align-items: stretch; }
@@ -262,257 +350,265 @@
 </head>
 <body>
 
-    <nav class="sidebar">
-        <div>
-            <h2>AquaMonitor</h2>
-            <div class="nav-links">
-                <a href="#" id="nav-overview" class="active" onclick="switchTab('overview')">Overview</a>
-                <a href="#" id="nav-users" onclick="switchTab('users')">User Management</a>
-                <a href="#" id="nav-logs" onclick="switchTab('logs')">History Logs</a>
+    <header class="top-navbar">
+        <div class="navbar-brand">
+            <img src="img/depedmabalacatlogo.png" alt="Mabalacat City Logo">
+            <div class="brand-text">
+                <div class="top-text">Republic of the Philippines <span>| DepEd Region 3</span></div>
+                <div class="main-title">SDO Mabalacat City</div>
             </div>
         </div>
-        
-        <a href="#" class="logout-btn" onclick="logoutUser()">⏏ Logout</a>
-    </nav>
 
-    <main class="main-content">
-        <header>
-            <div>
-                <h1>Dashboard Overview</h1>
-                <p style="color: #4a5568;">Real-time water quality monitoring</p>
-            </div>
-            <div class="user-profile">
-                <span>System Status:</span>
-                <span class="status-badge">Online</span>
-            </div>
-        </header>
+        <nav class="navbar-menu">
+            <a href="#" id="nav-overview" class="active" onclick="switchTab('overview')">Overview</a>
+            <a href="#" id="nav-users" onclick="switchTab('users')">User Management</a>
+            <a href="#" id="nav-logs" onclick="switchTab('logs')">History Logs</a>
+        </nav>
 
-        <div id="overview-section">
-            <section class="dashboard-grid">
-                <div class="card ph-card">
-                    <div class="wave-container">
-                        <div class="wave wave-mask wave1"></div>
-                        <div class="wave wave-mask wave2"></div>
-                        <div class="wave wave-mask wave3"></div>
-                    </div>
-                    <div class="card-content">
-                        <div class="card-header">
-                            <span>pH Level</span>
-                            <video src="img/water.mp4" autoplay loop muted playsinline class="icon-media"></video>
+        <div class="navbar-actions">
+            <a href="#" class="logout-btn" onclick="logoutUser()">Logout</a>
+        </div>
+    </header>
+
+    <div class="app-layout">
+        <main class="main-content">
+            <header>
+                <div>
+                    <h1 id="page-title">Dashboard Overview</h1>
+                    <p id="page-subtitle" style="color: #4a5568;">Real-time water quality monitoring</p>
+                </div>
+                <div class="user-profile">
+                    <span>System Status:</span>
+                    <span class="status-badge">Online</span>
+                </div>
+            </header>
+
+            <div id="overview-section">
+                <section class="dashboard-grid">
+                    <div class="card ph-card">
+                        <div class="wave-container">
+                            <div class="wave wave-mask wave1"></div>
+                            <div class="wave wave-mask wave2"></div>
+                            <div class="wave wave-mask wave3"></div>
                         </div>
-                        <div class="metric-value"><span id="phValue">--</span> <span class="metric-unit">pH</span></div>
-                        <div class="metric-status" id="phStatus">Waiting for data...</div>
-                    </div>
-                </div>
-
-                <div class="card turbidity-card">
-                    <div class="wave-container">
-                        <div class="wave wave-mask wave1"></div>
-                        <div class="wave wave-mask wave2"></div>
-                        <div class="wave wave-mask wave3"></div>
-                    </div>
-                    <div class="card-content">
-                        <div class="card-header">
-                            <span>Turbidity</span>
-                            <img src="img/fog.png" alt="Fog Icon" class="icon-media anim-fog-img">
+                        <div class="card-content">
+                            <div class="card-header">
+                                <span>pH Level</span>
+                                <video src="img/water.mp4" autoplay loop muted playsinline class="icon-media"></video>
+                            </div>
+                            <div class="metric-value"><span id="phValue">--</span> <span class="metric-unit">pH</span></div>
+                            <div class="metric-status" id="phStatus">Waiting for data...</div>
                         </div>
-                        <div class="metric-value"><span id="turbidityValue">--</span> <span class="metric-unit">NTU</span></div>
-                        <div class="metric-status" id="turbidityStatus">Waiting for data...</div>
                     </div>
-                </div>
 
-                <div class="card tds-card">
-                    <div class="wave-container">
-                        <div class="wave wave-mask wave1"></div>
-                        <div class="wave wave-mask wave2"></div>
-                        <div class="wave wave-mask wave3"></div>
-                    </div>
-                    <div class="card-content">
-                        <div class="card-header">
-                            <span>TDS (Solids)</span>
-                            <video src="img/chemical.mp4" autoplay loop muted playsinline class="icon-media"></video>
+                    <div class="card turbidity-card">
+                        <div class="wave-container">
+                            <div class="wave wave-mask wave1"></div>
+                            <div class="wave wave-mask wave2"></div>
+                            <div class="wave wave-mask wave3"></div>
                         </div>
-                        <div class="metric-value"><span id="tdsValue">--</span> <span class="metric-unit">ppm</span></div>
-                        <div class="metric-status" id="tdsStatus">Waiting for data...</div>
+                        <div class="card-content">
+                            <div class="card-header">
+                                <span>Turbidity</span>
+                                <img src="img/fog.png" alt="Fog Icon" class="icon-media anim-fog-img">
+                            </div>
+                            <div class="metric-value"><span id="turbidityValue">--</span> <span class="metric-unit">NTU</span></div>
+                            <div class="metric-status" id="turbidityStatus">Waiting for data...</div>
+                        </div>
                     </div>
-                </div>
-            </section>
 
-            <section class="data-section">
-                <h3>Recent Sensor Readings</h3>
-                <div class="table-wrapper">
-                    <table>
-                        <thead><tr><th>Time</th><th>pH Level</th><th>Turbidity (NTU)</th><th>TDS (ppm)</th><th>Status</th></tr></thead>
-                        <tbody id="readingsTableBody">
-                            <tr><td colspan="5">Initializing connection...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <section class="data-section">
-                <h3>School Testing Registry</h3>
-                
-                <div class="add-school-form">
-                    <div class="form-group"><label>Name of School <span style="color:red">*</span></label><input type="text" id="newSchoolName" placeholder="e.g. Lincoln High"></div>
-                    <div class="form-group"><label>School Head</label><input type="text" id="newSchoolHead" placeholder="e.g. Mr. Doe"></div>
-                    <div class="form-group"><label>Email</label><input type="email" id="newSchoolEmail" placeholder="e.g. head@school.edu"></div>
-                    <button class="btn btn-primary" onclick="addSchoolToDB()">+ Add School</button>
-                </div>
-
-                <div class="search-container">
-                    <input type="text" id="searchInput" placeholder="Search by School Name (e.g. 'cani')" 
-                           oninput="handleSearch(this.value)">
-                    <div class="search-actions">
-                        <button class="btn btn-primary" onclick="searchSchools()">
-                            <img src="img/search.png" class="btn-icon"> Search
-                        </button>
-                        <button class="btn btn-cancel" onclick="clearSearch()">Clear</button>
+                    <div class="card tds-card">
+                        <div class="wave-container">
+                            <div class="wave wave-mask wave1"></div>
+                            <div class="wave wave-mask wave2"></div>
+                            <div class="wave wave-mask wave3"></div>
+                        </div>
+                        <div class="card-content">
+                            <div class="card-header">
+                                <span>TDS (Solids)</span>
+                                <video src="img/chemical.mp4" autoplay loop muted playsinline class="icon-media"></video>
+                            </div>
+                            <div class="metric-value"><span id="tdsValue">--</span> <span class="metric-unit">ppm</span></div>
+                            <div class="metric-status" id="tdsStatus">Waiting for data...</div>
+                        </div>
                     </div>
-                </div>
+                </section>
 
-                <div class="table-wrapper">
-                    <table>
-                        <thead><tr><th>School Name</th><th>School Head</th><th>Email</th><th>Water Status</th><th>Actions</th></tr></thead>
-                        <tbody id="schoolTableBody"><tr><td colspan="5">Loading data from Firebase...</td></tr></tbody>
-                    </table>
-                </div>
-
-                <div class="pagination-controls">
-                    <button class="btn btn-primary" id="prevBtn" disabled onclick="changePage(-1)">← Previous</button>
-                    <span id="pageIndicator" style="font-weight: 600; color: #2d3748;">Page 1</span>
-                    <button class="btn btn-primary" id="nextBtn" onclick="changePage(1)">Next →</button>
-                </div>
-            </section>
-        </div>
-
-        <div id="users-section" style="display: none;">
-            <section class="data-section">
-                <h3>User Management</h3>
-                <p style="color: #4a5568; margin-bottom: 20px; font-size: 0.9rem;">Pre-register Admin or Standard users. Superadmins are hidden from this list.</p>
-                
-                <div class="add-school-form">
-                    <div class="form-group" style="flex: 2;">
-                        <label>Email Address <span style="color:red">*</span></label>
-                        <input type="email" id="newUserEmail" placeholder="name@deped.gov.ph">
+                <section class="data-section">
+                    <h3>Recent Sensor Readings</h3>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead><tr><th>Time</th><th>pH Level</th><th>Turbidity (NTU)</th><th>TDS (ppm)</th><th>Status</th></tr></thead>
+                            <tbody id="readingsTableBody">
+                                <tr><td colspan="5">Initializing connection...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="form-group">
-                        <label>Role</label>
-                        <select id="newUserRole">
-                            <option value="user">User (Viewer)</option>
-                            <option value="admin">Admin (Editor)</option>
-                        </select>
+                </section>
+
+                <section class="data-section">
+                    <h3>School Testing Registry</h3>
+                    
+                    <div class="add-school-form">
+                        <div class="form-group"><label>Name of School <span style="color:red">*</span></label><input type="text" id="newSchoolName" placeholder="e.g. Mabalacat School"></div>
+                        <div class="form-group"><label>School Head</label><input type="text" id="newSchoolHead" placeholder="e.g. Mr. Juan Dela Cruz"></div>
+                        <div class="form-group"><label>Email</label><input type="email" id="newSchoolEmail" placeholder="e.g. @depedmabalacat.org"></div>
+                        <button class="btn btn-primary" onclick="addSchoolToDB()">+ Add School</button>
                     </div>
-                    <button class="btn btn-primary" onclick="addUserToDB()">+ Pre-Register User</button>
+
+                    <div class="search-container">
+                        <input type="text" id="searchInput" placeholder="Search by School Name (e.g. 'Mabalacat')" 
+                               oninput="handleSearch(this.value)">
+                        <div class="search-actions">
+                            <button class="btn btn-primary" onclick="searchSchools()">
+                                <img src="img/search.png" class="btn-icon"> Search
+                            </button>
+                            <button class="btn btn-cancel" onclick="clearSearch()">Clear</button>
+                        </div>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead><tr><th>School Name</th><th>School Head</th><th>Email</th><th>Water Status</th><th>Actions</th></tr></thead>
+                            <tbody id="schoolTableBody"><tr><td colspan="5">Loading data from Firebase...</td></tr></tbody>
+                        </table>
+                    </div>
+
+                    <div class="pagination-controls">
+                        <button class="btn btn-primary" id="prevBtn" disabled onclick="changePage(-1)">← Previous</button>
+                        <span id="pageIndicator" style="font-weight: 600; color: #2d3748;">Page 1</span>
+                        <button class="btn btn-primary" id="nextBtn" onclick="changePage(1)">Next →</button>
+                    </div>
+                </section>
+            </div>
+
+            <div id="users-section" style="display: none;">
+                <section class="data-section">
+                    <h3>User Management</h3>
+                    <p style="color: #4a5568; margin-bottom: 20px; font-size: 0.9rem;">Pre-register Admin or Standard users. Superadmins are hidden from this list.</p>
+                    
+                    <div class="add-school-form">
+                        <div class="form-group" style="flex: 2;">
+                            <label>Email Address <span style="color:red">*</span></label>
+                            <input type="email" id="newUserEmail" placeholder="name@deped.gov.ph">
+                        </div>
+                        <div class="form-group">
+                            <label>Role</label>
+                            <select id="newUserRole">
+                                <option value="user">User (Viewer)</option>
+                                <option value="admin">Admin (Editor)</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" onclick="addUserToDB()">+ Pre-Register User</button>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userTableBody">
+                                <tr><td colspan="3">Loading users...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <div id="logs-section" style="display: none;">
+                <section class="data-section">
+                    <h3>Historical Sensor Data</h3>
+                    <p style="color: #4a5568; margin-bottom: 20px; font-size: 0.9rem;">View past water quality readings (Showing latest 50 records).</p>
+                    
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date & Time</th>
+                                    <th>pH Level</th>
+                                    <th>Turbidity (NTU)</th>
+                                    <th>TDS (ppm)</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyLogsTableBody">
+                                <tr><td colspan="5">Loading history logs...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+        </main>
+
+        <div class="modal-overlay" id="reportModal">
+            <div class="modal">
+                <h3>Generate Water Quality Report</h3>
+                <p style="margin-bottom: 15px; font-size: 0.9rem; color: #666;">
+                    The PDF (2 Pages) will download, and Gmail will open in a <b>new tab</b>.
+                    <br><br>
+                    <b>Page 1:</b> Descriptive Guide<br>
+                    <b>Page 2:</b> Test Results & Signatures
+                </p>
+                <div class="form-group">
+                    <label>Tested By (Name):</label>
+                    <input type="text" id="testerName" placeholder="Juan Dela Cruz">
                 </div>
-
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Email</th>
-                                <th>Role</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="userTableBody">
-                            <tr><td colspan="3">Loading users...</td></tr>
-                        </tbody>
-                    </table>
+                <input type="hidden" id="currentSchoolName">
+                <input type="hidden" id="currentSchoolEmail">
+                <div class="modal-buttons">
+                    <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="generateAndSend()">Download & Open Gmail</button>
                 </div>
-            </section>
+            </div>
         </div>
 
-        <div id="logs-section" style="display: none;">
-            <section class="data-section">
-                <h3>Historical Sensor Data</h3>
-                <p style="color: #4a5568; margin-bottom: 20px; font-size: 0.9rem;">View past water quality readings (Showing latest 50 records).</p>
-                
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Date & Time</th>
-                                <th>pH Level</th>
-                                <th>Turbidity (NTU)</th>
-                                <th>TDS (ppm)</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="historyLogsTableBody">
-                            <tr><td colspan="5">Loading history logs...</td></tr>
-                        </tbody>
-                    </table>
+        <div class="modal-overlay" id="alertModal">
+            <div class="modal">
+                <h3 id="alertTitle">Notification</h3>
+                <p id="alertMessage">Message goes here...</p>
+                <div class="modal-buttons">
+                    <button class="btn btn-primary" onclick="closeAlert()">OK</button>
                 </div>
-            </section>
-        </div>
-
-    </main>
-
-    <div class="modal-overlay" id="reportModal">
-        <div class="modal">
-            <h3>Generate Water Quality Report</h3>
-            <p style="margin-bottom: 15px; font-size: 0.9rem; color: #666;">
-                The PDF (2 Pages) will download, and Gmail will open in a <b>new tab</b>.
-                <br><br>
-                <b>Page 1:</b> Descriptive Guide<br>
-                <b>Page 2:</b> Test Results & Signatures
-            </p>
-            <div class="form-group">
-                <label>Tested By (Name):</label>
-                <input type="text" id="testerName" placeholder="Juan Dela Cruz">
-            </div>
-            <input type="hidden" id="currentSchoolName">
-            <input type="hidden" id="currentSchoolEmail">
-            <div class="modal-buttons">
-                <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="generateAndSend()">Download & Open Gmail</button>
             </div>
         </div>
+
+        <div class="modal-overlay" id="confirmModal">
+            <div class="modal">
+                <h3>Delete School?</h3>
+                <p>Are you sure you want to permanently delete this school record? This action cannot be undone.</p>
+                <div class="modal-buttons">
+                    <button class="btn btn-cancel" onclick="closeConfirm()">Cancel</button>
+                    <button class="btn btn-delete" onclick="confirmDeleteAction()">Delete</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="shareModal">
+            <div class="modal">
+                <h3>Email Copied! 📋</h3>
+                <p>The recipient email has been copied to your clipboard.</p>
+                <p style="font-size: 0.9rem; color: #666;">Click the button below to open your sharing options, then select Gmail and paste the email.</p>
+                <div class="modal-buttons">
+                    <button class="btn btn-cancel" onclick="closeShareModal()">Cancel</button>
+                    <button class="btn btn-primary" id="shareBtnAction">Open Share Options</button>
+                </div>
+            </div>
+        </div>
+
+        <img id="pdf-logo-hidden" src="/img/kagawaran_logo.png" style="display: none;" crossorigin="anonymous">
+        <img id="footer-logo-deped" src="img/deped_logo.png" style="display: none;" crossorigin="anonymous">
+        <img id="footer-logo-bagong" src="img/Bagong_Pilipinas_logo.png" style="display: none;" crossorigin="anonymous">
+        <img id="footer-logo-mabalacat" src="img/mabalacat_city_logo.png" style="display: none;" crossorigin="anonymous">
     </div>
-
-    <div class="modal-overlay" id="alertModal">
-        <div class="modal">
-            <h3 id="alertTitle">Notification</h3>
-            <p id="alertMessage">Message goes here...</p>
-            <div class="modal-buttons">
-                <button class="btn btn-primary" onclick="closeAlert()">OK</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="confirmModal">
-        <div class="modal">
-            <h3>Delete School?</h3>
-            <p>Are you sure you want to permanently delete this school record? This action cannot be undone.</p>
-            <div class="modal-buttons">
-                <button class="btn btn-cancel" onclick="closeConfirm()">Cancel</button>
-                <button class="btn btn-delete" onclick="confirmDeleteAction()">Delete</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="shareModal">
-        <div class="modal">
-            <h3>Email Copied! 📋</h3>
-            <p>The recipient email has been copied to your clipboard.</p>
-            <p style="font-size: 0.9rem; color: #666;">Click the button below to open your sharing options, then select Gmail and paste the email.</p>
-            <div class="modal-buttons">
-                <button class="btn btn-cancel" onclick="closeShareModal()">Cancel</button>
-                <button class="btn btn-primary" id="shareBtnAction">Open Share Options</button>
-            </div>
-        </div>
-    </div>
-
-    <img id="pdf-logo-hidden" src="/img/kagawaran_logo.png" style="display: none;" crossorigin="anonymous">
-    <img id="footer-logo-deped" src="img/deped_logo.png" style="display: none;" crossorigin="anonymous">
-    <img id="footer-logo-bagong" src="img/Bagong_Pilipinas_logo.png" style="display: none;" crossorigin="anonymous">
-    <img id="footer-logo-mabalacat" src="img/mabalacat_city_logo.png" style="display: none;" crossorigin="anonymous">
 
     <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    // NOTE: serverTimestamp added to imports below
-    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy, limit, startAfter, endBefore, limitToLast, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy, limit, startAfter, endBefore, limitToLast } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     const firebaseConfig = {
@@ -547,24 +643,6 @@
     const qWater = query(waterQualityCol, orderBy("timestamp", "desc"), limit(50));
 
     onSnapshot(qWater, (snapshot) => {
-        // --- NEW: AUTOMATIC TIMESTAMP FIXER ---
-        snapshot.docChanges().forEach(async (change) => {
-            if (change.type === "added") {
-                const data = change.doc.data();
-                // Check if the ESP32 forgot to send a timestamp
-                if (data.timestamp === undefined || data.timestamp === null) {
-                    try {
-                        await updateDoc(doc(db, "waterQuality", change.doc.id), {
-                            timestamp: serverTimestamp()
-                        });
-                    } catch (e) {
-                        console.error("Could not append timestamp:", e);
-                    }
-                }
-            }
-        });
-        // --------------------------------------
-
         const readingsBody = document.getElementById("readingsTableBody");
         const historyBody = document.getElementById("historyLogsTableBody");
         
@@ -595,7 +673,7 @@
             
             try {
                 if (data.timestamp && data.timestamp.toDate) {
-                    timeString = data.timestamp.toDate().toLocaleString(); 
+                    timeString = data.timestamp.toDate().toLocaleString();
                 } else if (data.timestamp) {
                     timeString = new Date(data.timestamp).toLocaleString();
                 }
@@ -603,10 +681,9 @@
                 timeString = "Invalid Date";
             }
 
-            // FIXED: Enforce 2 decimal places for tables, stripping trailing zeroes
-            const ph = data.phLevel !== undefined ? Number(parseFloat(data.phLevel).toFixed(2)) : "--";
-            const turb = data.turbidity !== undefined ? Number(parseFloat(data.turbidity).toFixed(2)) : "--";
-            const tds = data.tds !== undefined ? Number(parseFloat(data.tds).toFixed(2)) : "--";
+            const ph = data.phLevel !== undefined ? data.phLevel : "--";
+            const turb = data.turbidity !== undefined ? data.turbidity : "--";
+            const tds = data.tds !== undefined ? data.tds : "--";
             const statusHtml = getOverallStatus(ph, turb, tds);
 
             const tr = document.createElement("tr");
@@ -641,8 +718,7 @@
         const turbVal = data.turbidity !== undefined ? data.turbidity : 0;
         const tdsVal = data.tds !== undefined ? data.tds : 0;
 
-        // FIXED: Display raw precision (e.g., 8.75) via Number & toFixed(2)
-        document.getElementById("phValue").innerText = Number(parseFloat(phVal).toFixed(2));
+        document.getElementById("phValue").innerText = parseFloat(phVal).toFixed(1);
         const phEl = document.getElementById("phStatus");
         
         if (phVal >= 6.5 && phVal <= 8.5) {
@@ -653,8 +729,7 @@
             phEl.style.color = "#c05621"; 
         }
 
-        // FIXED: Display raw precision
-        document.getElementById("turbidityValue").innerText = Number(parseFloat(turbVal).toFixed(2));
+        document.getElementById("turbidityValue").innerText = parseFloat(turbVal).toFixed(1);
         const turbEl = document.getElementById("turbidityStatus");
 
         if (turbVal < 5) {
@@ -668,8 +743,7 @@
             turbEl.style.color = "#c05621";
         }
 
-        // FIXED: Display raw precision
-        document.getElementById("tdsValue").innerText = Number(parseFloat(tdsVal).toFixed(2));
+        document.getElementById("tdsValue").innerText = tdsVal;
         const tdsEl = document.getElementById("tdsStatus");
 
         if (tdsVal < 300) {
@@ -695,7 +769,7 @@
         return '<span style="color: orange; font-weight:bold;">Check</span>';
     }
 
-    // --- TAB SWITCHING (Handles all 3 sections) ---
+    // --- TAB SWITCHING ---
     let usersUnsubscribe = null;
 
     window.switchTab = function(tabName) {
@@ -711,11 +785,17 @@
 
         if (tabName === 'overview') {
             document.getElementById('overview-section').style.display = 'block';
+            document.getElementById('page-title').innerText = "Dashboard Overview";
+            document.getElementById('page-subtitle').innerText = "Real-time water quality monitoring";
         } else if (tabName === 'users') {
             document.getElementById('users-section').style.display = 'block';
+            document.getElementById('page-title').innerText = "User Management";
+            document.getElementById('page-subtitle').innerText = "Manage admins and access roles";
             loadUsers(); 
         } else if (tabName === 'logs') {
             document.getElementById('logs-section').style.display = 'block';
+            document.getElementById('page-title').innerText = "History Logs";
+            document.getElementById('page-subtitle').innerText = "Past water quality records";
         }
     }
 
@@ -1272,11 +1352,10 @@
         const curTds = document.getElementById("tdsValue").innerText;
         const curTurb = document.getElementById("turbidityValue").innerText;
 
-        // FIXED: Using parseFloat to ensure logic doesn't break with trailing decimals
         const tableData = [
-            ["pH Level", `${curPh} pH`, parseFloat(curPh) >= 6.5 && parseFloat(curPh) <= 8.5 ? "Good" : "Check"],
-            ["Total Dissolved Solid", `${curTds} mg/L`, parseFloat(curTds) < 600 ? "Good" : "High"],
-            ["Turbidity Level", `${curTurb} NTU`, parseFloat(curTurb) < 5 ? "Excellent" : "Cloudy"]
+            ["pH Level", `${curPh} pH`, curPh >= 6.5 && curPh <= 8.5 ? "Good" : "Check"],
+            ["Total Dissolved Solid", `${curTds} mg/L`, curTds < 600 ? "Good" : "High"],
+            ["Turbidity Level", `${curTurb} NTU`, curTurb < 5 ? "Excellent" : "Cloudy"]
         ];
 
         doc.autoTable({
