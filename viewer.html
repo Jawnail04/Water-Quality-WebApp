@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Super Admin | AquaMonitor</title>
+    <title>Dashboard | AquaMonitor</title>
     
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -23,19 +23,18 @@
             overflow: hidden; 
         }
 
-        /* --- MODERN TOP NAVBAR (AVANA STYLE) --- */
+        /* --- MODERN TOP NAVBAR (EXACT DEPED BRANDING) --- */
         .top-navbar {
             width: 100%;
-            background-color: #001489;
-            padding: 10px 30px;
+            background-color: #001489; /* DepEd Blue */
+            padding: 12px 30px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             box-sizing: border-box;
             z-index: 1000;
             flex-shrink: 0;
-            border-bottom: 3px solid #FFD700;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
         /* 1. Left: Brand Logo & Text */
@@ -46,40 +45,68 @@
         }
 
         .navbar-brand img {
-            width: 55px;
-            height: 55px;
+            width: 80px;
+            height: 80px;
             object-fit: contain;
         }
 
         .brand-text {
             display: flex;
             flex-direction: column;
+            justify-content: center;
         }
 
-        .brand-text .top-text {
+        .brand-text .top-text-white {
             color: #ffffff;
-            font-size: 11px;
+            font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            line-height: 1.3;
         }
 
-        .brand-text .top-text span { color: #FFD700; }
+        .brand-text .top-text-yellow {
+            color: #FFD700;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            line-height: 1.3;
+            margin-bottom: 4px;
+        }
+
+        .brand-text .deped-banner-line {
+            height: 2px;
+            background-color: #FFD700;
+            width: 100%;
+            max-width: 580px;
+            margin: 2px 0;
+        }
 
         .brand-text .main-title {
             color: #FFD700;
-            font-size: 18px;
+            font-size: 26px;
             font-family: 'Times New Roman', Times, serif;
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-top: 2px;
+            margin-top: 4px;
+            line-height: 1;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .brand-text .deped-banner-bottom {
+            color: #FFD700;
+            font-size: 11px;
+            margin-top: 6px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
 
         /* 2. Center: Navigation Menu */
         .navbar-menu {
             display: flex;
             align-items: center;
-            gap: 35px;
+            gap: 30px;
         }
 
         .navbar-menu a {
@@ -98,15 +125,9 @@
             padding: 5px 0;
         }
 
-        .navbar-menu a i {
-            font-size: 1.1rem;
-        }
+        .navbar-menu a i { font-size: 1.1rem; }
+        .navbar-menu a:hover, .navbar-menu a.active { color: #FFD700; }
 
-        .navbar-menu a:hover, .navbar-menu a.active {
-            color: #FFD700;
-        }
-
-        /* Underline effect for active links */
         .navbar-menu a::after {
             content: '';
             position: absolute;
@@ -118,15 +139,10 @@
             transition: width 0.3s;
         }
 
-        .navbar-menu a:hover::after, .navbar-menu a.active::after {
-            width: 100%;
-        }
+        .navbar-menu a:hover::after, .navbar-menu a.active::after { width: 100%; }
 
         /* 3. Right: Action Button */
-        .navbar-actions {
-            display: flex;
-            align-items: center;
-        }
+        .navbar-actions { display: flex; align-items: center; }
 
         .logout-btn {
             background-color: #FF7E40;
@@ -175,15 +191,12 @@
             display: none;
             animation: fadeIn 0.4s ease-out;
         }
-        .view-section.active-view {
-            display: block;
-        }
+        .view-section.active-view { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }
-        
-        header h1 { font-size: 24px; color: #1a202c; text-shadow: 0 0 20px rgba(255, 255, 255, 0.8); }
-        header p { color: #2d3748 !important; font-weight: 500; text-shadow: 0 0 20px rgba(255, 255, 255, 0.8); }
+        header.content-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }
+        header.content-header h1 { font-size: 24px; color: #1a202c; text-shadow: 0 0 20px rgba(255, 255, 255, 0.8); }
+        header.content-header p { color: #2d3748 !important; font-weight: 500; text-shadow: 0 0 20px rgba(255, 255, 255, 0.8); }
         
         .user-profile { display: flex; align-items: center; gap: 10px; font-weight: 500; }
         .status-badge { background-color: #48bb78; color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; white-space: nowrap; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -219,14 +232,11 @@
         .metric-unit { font-size: 1rem; color: #4a5568; font-weight: 600; }
         .metric-status { margin-top: 15px; font-size: 0.9rem; font-weight: 700; }
         
-        /* --- ICONS & ANIMATIONS --- */
         .icon-media { width: 45px; height: 45px; object-fit: cover; border-radius: 12px; display: block; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         .anim-fog-img { opacity: 0.8; animation: fogDrift 6s ease-in-out infinite alternate; }
         @keyframes fogDrift { 0% { transform: translateX(-3px) scale(1); opacity: 0.7; filter: blur(0px); } 100% { transform: translateX(3px) scale(1.08); opacity: 1; filter: blur(1px); } }
 
-        /* =========================================
-           FIXED WAVE ANIMATION CSS (MATH-BASED SVG)
-           ========================================= */
+        /* FIXED WAVE ANIMATION CSS */
         .wave-container { 
             position: absolute; bottom: 0; left: 0; width: 100%; height: 25%; 
             overflow: hidden; border-radius: 0 0 20px 20px; pointer-events: none; opacity: 0.8;
@@ -243,15 +253,8 @@
             mask-repeat: repeat-x;
         }
 
-        @keyframes moveWaveLeft { 
-            0% { -webkit-mask-position: 0px bottom; mask-position: 0px bottom; } 
-            100% { -webkit-mask-position: -1000px bottom; mask-position: -1000px bottom; } 
-        }
-        
-        @keyframes moveWaveRight { 
-            0% { -webkit-mask-position: 0px bottom; mask-position: 0px bottom; } 
-            100% { -webkit-mask-position: 1000px bottom; mask-position: 1000px bottom; } 
-        }
+        @keyframes moveWaveLeft { 0% { -webkit-mask-position: 0px bottom; mask-position: 0px bottom; } 100% { -webkit-mask-position: -1000px bottom; mask-position: -1000px bottom; } }
+        @keyframes moveWaveRight { 0% { -webkit-mask-position: 0px bottom; mask-position: 0px bottom; } 100% { -webkit-mask-position: 1000px bottom; mask-position: 1000px bottom; } }
 
         .wave1 { animation: moveWaveLeft 12s linear infinite; height: 120%; z-index: 1; bottom: 0; }
         .wave2 { animation: moveWaveRight 8s linear infinite; height: 110%; z-index: 2; bottom: 0; }
@@ -278,26 +281,13 @@
         th { color: #4a5568; font-weight: 700; font-size: 0.9rem; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.5px; }
         td { color: #2d3748; font-weight: 500; }
         tbody tr:hover { background-color: rgba(255, 255, 255, 0.3); transition: background-color 0.2s; }
-        
-        .add-school-form { 
-            background-color: rgba(255, 255, 255, 0.25);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            padding: 15px; border-radius: 10px; margin-bottom: 20px; display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; 
-        }
-        .form-group { flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 200px; }
-        .form-group label { font-size: 0.85rem; color: #2d3748; font-weight: 700; }
-        .form-group input, .form-group select { padding: 10px; background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 6px; outline: none; width: 100%; color: #1a202c; }
-        .form-group input:focus, .form-group select:focus { border-color: #4299e1; background: rgba(255, 255, 255, 0.9); }
-        .edit-input { padding: 8px; border: 1px solid #4299e1; border-radius: 4px; width: 100%; font-size: 0.9rem; background: rgba(255,255,255,0.8); }
 
         /* --- BUTTONS & ICONS --- */
         .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.15); opacity: 0.95; }
         .btn-primary { background-color: #3182ce; color: white; }
-        .btn-email { background-color: #6aaee7; color: white; padding: 6px 10px; }
-        .btn-edit { background-color: #deb053; color: white; padding: 6px 10px; }
-        .btn-save { background-color: #38a169; color: white; padding: 6px 10px; }
-        .btn-delete { background-color: #e53e3e; color: white; padding: 6px 10px; }
+        .btn-email { background-color: #6aaee7; color: white; padding: 6px 12px; }
+        .btn-cancel { background-color: #718096; color: white; }
         .action-cell { display: flex; gap: 8px; }
 
         .btn-icon { width: 18px; height: 18px; object-fit: contain; display: block; }
@@ -315,17 +305,14 @@
         .modal h3 { margin-bottom: 10px; color: #2d3748; }
         .modal p { color: #4a5568; line-height: 1.5; font-size: 0.95rem; margin-bottom: 20px; }
         .modal-buttons { margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px; }
-        .btn-cancel { background-color: #718096; color: white; }
+        
+        .form-group { flex: 1; display: flex; flex-direction: column; gap: 5px; margin-bottom: 15px; }
+        .form-group label { font-size: 0.85rem; color: #2d3748; font-weight: 700; }
+        .form-group input { padding: 10px; background: rgba(255, 255, 255, 0.6); border: 1px solid #cbd5e0; border-radius: 6px; outline: none; width: 100%; color: #1a202c; }
 
         /* --- PAGINATION --- */
         .pagination-controls { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
         .pagination-controls button:disabled { background-color: rgba(203, 213, 224, 0.6); cursor: not-allowed; color: #718096; }
-
-        /* --- ROLE BADGES --- */
-        .role-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; }
-        .role-superadmin { background-color: #e9d8fd; color: #6b46c1; border: 1px solid #d6bcfa; }
-        .role-admin { background-color: #bee3f8; color: #2b6cb0; border: 1px solid #90cdf4; }
-        .role-user { background-color: #c6f6d5; color: #276749; border: 1px solid #9ae6b4; }
 
         /* --- RESPONSIVE MOBILE LAYOUT --- */
         @media (max-width: 1200px) {
@@ -335,31 +322,16 @@
                 text-align: center;
                 gap: 15px;
             }
-            .navbar-brand {
-                flex-direction: column;
-            }
-            .navbar-menu {
-                flex-wrap: wrap;
-                justify-content: center;
-                width: 100%;
-            }
-            .brand-text .main-title {
-                font-size: 20px;
-            }
+            .navbar-brand { flex-direction: column; }
+            .navbar-menu { flex-wrap: wrap; justify-content: center; width: 100%; }
+            .brand-text .main-title { font-size: 20px; }
+            .brand-text .deped-banner-line { max-width: 100%; }
         }
         
         @media (max-width: 900px) {
-            body { 
-                height: auto; 
-                min-height: 100vh; 
-                overflow: auto; 
-            }
-            .app-layout { 
-                overflow: visible; 
-            }
+            body { height: auto; min-height: 100vh; overflow: auto; }
+            .app-layout { overflow: visible; }
             .main-content { padding: 20px; overflow-y: visible; height: auto; }
-            .add-school-form { flex-direction: column; align-items: stretch; }
-            .btn { width: 100%; }
             .search-container { flex-direction: column; align-items: stretch; }
             .search-actions { width: 100%; }
             .search-actions .btn { flex: 1; }
@@ -376,8 +348,11 @@
         <div class="navbar-brand">
             <img src="img/depedmabalacatlogo.png" alt="Mabalacat City Logo">
             <div class="brand-text">
-                <div class="top-text">Republic of the Philippines <span>| DepEd Region 3</span></div>
-                <div class="main-title">SDO Mabalacat City</div>
+                <div class="top-text-white">Republic of the Philippines</div>
+                <div class="top-text-yellow">Department of Education | Region 3 - Central Luzon</div>
+                <div class="deped-banner-line"></div>
+                <div class="main-title">Schools Division of Mabalacat City</div>
+                <div class="deped-banner-bottom">P. Burgos St., Poblacion, Mabalacat City, Pampanga</div>
             </div>
         </div>
 
@@ -387,9 +362,6 @@
             </a>
             <a id="nav-history" onclick="switchView('history')">
                 <i class="ri-history-line"></i> History Logs
-            </a>
-            <a id="nav-users" onclick="switchView('users')">
-                <i class="ri-user-settings-line"></i> User Management
             </a>
         </nav>
 
@@ -402,7 +374,7 @@
 
     <div class="app-layout">
         <main class="main-content">
-            <header>
+            <header class="content-header">
                 <div>
                     <h1 id="page-title">Dashboard Overview</h1>
                     <p id="page-subtitle" style="color: #4a5568;">Real-time water quality monitoring</p>
@@ -479,14 +451,7 @@
                 <section class="data-section">
                     <h3>School Testing Registry</h3>
                     
-                    <div class="add-school-form">
-                        <div class="form-group"><label>Name of School <span style="color:red">*</span></label><input type="text" id="newSchoolName" placeholder="e.g. Mabalacat School"></div>
-                        <div class="form-group"><label>School Head</label><input type="text" id="newSchoolHead" placeholder="e.g. Mr. Juan Dela Cruz"></div>
-                        <div class="form-group"><label>Email</label><input type="email" id="newSchoolEmail" placeholder="e.g. @depedmabalacat.org"></div>
-                        <button class="btn btn-primary" onclick="addSchoolToDB()">+ Add School</button>
-                    </div>
-
-                    <div class="search-container">
+                    <div class="search-container" style="margin-top: 15px;">
                         <input type="text" id="searchInput" placeholder="Search by School Name (e.g. 'Mabalacat')" 
                                oninput="handleSearch(this.value)">
                         <div class="search-actions">
@@ -527,24 +492,6 @@
                 </section>
             </div>
 
-            <div id="users-view" class="view-section">
-                <section class="data-section">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                        <h3>System Users</h3>
-                        <button class="btn btn-primary" onclick="openAddUserModal()">
-                            <img src="img/plus.png" onerror="this.style.display='none'" class="btn-icon"> + Add User
-                        </button>
-                    </div>
-
-                    <div class="table-wrapper">
-                        <table>
-                            <thead><tr><th>Email</th><th>Current Role</th><th>Last Login</th><th>Actions</th></tr></thead>
-                            <tbody id="usersTableBody"><tr><td colspan="4">Loading users...</td></tr></tbody>
-                        </table>
-                    </div>
-                </section>
-            </div>
-
         </main>
     </div>
 
@@ -552,56 +499,6 @@
     <img id="footer-logo-deped" src="img/deped_logo.png" style="display: none;" crossorigin="anonymous">
     <img id="footer-logo-bagong" src="img/Bagong_Pilipinas_logo.png" style="display: none;" crossorigin="anonymous">
     <img id="footer-logo-mabalacat" src="img/mabalacat_city_logo.png" style="display: none;" crossorigin="anonymous">
-
-    <div class="modal-overlay" id="editUserModal">
-        <div class="modal">
-            <h3>Manage User Role</h3>
-            <p>Update the permissions for this user.</p>
-            <input type="hidden" id="editUserId">
-            <div class="form-group">
-                <label>User Email</label>
-                <input type="text" id="editUserEmail" disabled style="background: rgba(0,0,0,0.05);">
-            </div>
-            <br>
-            <div class="form-group">
-                <label>Assign Role</label>
-                <select id="editUserRole">
-                    <option value="user">User (Viewer)</option>
-                    <option value="admin">Admin (Editor)</option>
-                    <option value="superadmin">Super Admin</option>
-                </select>
-            </div>
-            <div class="modal-buttons">
-                <button class="btn btn-cancel" onclick="closeEditUserModal()">Cancel</button>
-                <button class="btn btn-save" onclick="saveUserRole()">Save Changes</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="addUserModal">
-        <div class="modal">
-            <h3>Pre-register User</h3>
-            <p>Assign a role to an official DepEd email. They will gain access upon their first Google Sign-In.</p>
-            
-            <div class="form-group">
-                <label>Email Address</label>
-                <input type="email" id="newUserEmail" placeholder="name@deped.gov.ph">
-            </div>
-            <br>
-            <div class="form-group">
-                <label>Assign Role</label>
-                <select id="newUserRole">
-                    <option value="user">User (Viewer)</option>
-                    <option value="admin">Admin (Editor)</option>
-                </select>
-            </div>
-
-            <div class="modal-buttons">
-                <button class="btn btn-cancel" onclick="closeAddUserModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="createNewUser()">Pre-Register User</button>
-            </div>
-        </div>
-    </div>
 
     <div class="modal-overlay" id="reportModal">
         <div class="modal">
@@ -635,17 +532,6 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="confirmModal">
-        <div class="modal">
-            <h3>Delete Record?</h3>
-            <p>Are you sure you want to permanently delete this record? This action cannot be undone.</p>
-            <div class="modal-buttons">
-                <button class="btn btn-cancel" onclick="closeConfirm()">Cancel</button>
-                <button class="btn btn-delete" onclick="confirmDeleteAction()">Delete</button>
-            </div>
-        </div>
-    </div>
-
     <div class="modal-overlay" id="shareModal">
         <div class="modal">
             <h3>Email Copied! 📋</h3>
@@ -659,9 +545,9 @@
     </div>
 
     <script type="module">
-    import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, setDoc, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy, limit, startAfter, endBefore, limitToLast, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, collection, onSnapshot, doc, query, orderBy, limit, startAfter, endBefore, limitToLast } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAxWmm5YsLjnwatHOVImrpIHAxicbHWYuw",
@@ -681,7 +567,6 @@
     // COLLECTIONS
     const schoolsCol = collection(db, "Schools");
     const waterQualityCol = collection(db, "waterQuality"); 
-    const usersCol = collection(db, "users");
 
     // --- VIEW SWITCHING LOGIC ---
     window.switchView = function(viewName) {
@@ -699,12 +584,6 @@
             document.getElementById('page-title').innerText = "History Logs";
             document.getElementById('page-subtitle').innerText = "Past water quality records";
             loadHistoryLogs(); 
-        } else if (viewName === 'users') {
-            document.getElementById('users-view').classList.add('active-view');
-            document.getElementById('nav-users').classList.add('active');
-            document.getElementById('page-title').innerText = "User Management";
-            document.getElementById('page-subtitle').innerText = "Manage admins and access roles";
-            loadUsers(); 
         }
     }
 
@@ -724,25 +603,21 @@
     let historyUnsubscribe = null;
 
     function loadHistoryLogs() {
-        if (historyUnsubscribe) return; // Prevent multiple listeners
+        if (historyUnsubscribe) return; 
 
         const tbody = document.getElementById("historyTableBody");
-        
-        // 1. The Query: Using "orderBy" to sort new to old
         const qHistory = query(waterQualityCol, orderBy("timestamp", "desc"), limit(50));
 
         historyUnsubscribe = onSnapshot(qHistory, (snapshot) => {
             tbody.innerHTML = "";
 
             if (snapshot.empty) {
-                tbody.innerHTML = "<tr><td colspan='5'>No history logs found. (Check 'timestamp' field in database)</td></tr>";
+                tbody.innerHTML = "<tr><td colspan='5'>No history logs found.</td></tr>";
                 return;
             }
 
             snapshot.forEach(doc => {
                 const data = doc.data();
-                
-                // 2. Safe Time Formatting
                 let timeString = "Unknown Time";
                 try {
                     if (data.timestamp && data.timestamp.toDate) {
@@ -769,189 +644,12 @@
         }, (error) => {
             console.error("Error fetching history:", error);
             if (error.code === 'failed-precondition') {
-                 tbody.innerHTML = `<tr><td colspan='5' style='color: orange; font-weight:bold; background:#fff3cd;'>
-                    ⚠️ ACTION REQUIRED: Open browser console (F12) and click the Firebase Index link.
-                 </td></tr>`;
+                 tbody.innerHTML = `<tr><td colspan='5' style='color: orange; font-weight:bold; background:#fff3cd;'>⚠️ ACTION REQUIRED: Open browser console (F12) and click the Firebase Index link.</td></tr>`;
             } else {
                  tbody.innerHTML = `<tr><td colspan='5' style='color:red;'>Error: ${error.message}</td></tr>`;
             }
         });
     }
-
-    // --- USER MANAGEMENT LOGIC ---
-    let usersUnsubscribe = null;
-
-    function loadUsers() {
-        if (usersUnsubscribe) return; 
-
-        usersUnsubscribe = onSnapshot(usersCol, (snapshot) => {
-            const tbody = document.getElementById("usersTableBody");
-            tbody.innerHTML = "";
-
-            if (snapshot.empty) {
-                tbody.innerHTML = "<tr><td colspan='4'>No users found in database.</td></tr>";
-                return;
-            }
-
-            snapshot.forEach(docSnap => {
-                const user = docSnap.data();
-                const userId = docSnap.id;
-                
-                let roleClass = "role-user";
-                if(user.role === 'superadmin') roleClass = "role-superadmin";
-                else if(user.role === 'admin') roleClass = "role-admin";
-
-                let lastLogin = "Never";
-                if(user.lastLogin && user.lastLogin.toDate) {
-                    lastLogin = user.lastLogin.toDate().toLocaleString();
-                }
-
-                const tr = document.createElement("tr");
-                tr.innerHTML = `
-                    <td style="font-weight:600;">${user.email || "Unknown Email"}</td>
-                    <td><span class="role-badge ${roleClass}">${user.role || "User"}</span></td>
-                    <td>${lastLogin}</td>
-                    <td class="action-cell">
-                        <button class="btn btn-edit" title="Edit Role" onclick="openEditUserModal('${userId}', '${user.email}', '${user.role}')">
-                            <img src="img/edit.png" class="btn-icon">
-                        </button>
-                        <button class="btn btn-delete" title="Delete User" onclick="openDeleteUserModal('${userId}')">
-                            <img src="img/trash.png" class="btn-icon">
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }, (error) => {
-            console.error("Error loading users:", error);
-            document.getElementById("usersTableBody").innerHTML = `<tr><td colspan='4' style='color:red;'>Error: ${error.message}</td></tr>`;
-        });
-    }
-
-    // --- NEW: ADD USER FUNCTION (Secondary App) ---
-    window.openAddUserModal = function() {
-        document.getElementById('addUserModal').style.display = 'flex';
-        document.getElementById('newUserEmail').value = "";
-        document.getElementById('newUserPassword').value = "";
-        document.getElementById('newUserRole').value = "user";
-    }
-
-    window.closeAddUserModal = function() {
-        document.getElementById('addUserModal').style.display = 'none';
-    }
-
-    window.createNewUser = async function() {
-        const email = document.getElementById('newUserEmail').value.trim();
-        const role = document.getElementById('newUserRole').value;
-
-        if (!email) {
-            showAlert("Validation Error", "Please provide an email address.");
-            return;
-        }
-
-        // Enforce the DepEd domain rule in the admin panel too
-        if (!email.endsWith("@deped.gov.ph")) {
-            showAlert("Invalid Domain", "Only @deped.gov.ph emails can be registered.");
-            return;
-        }
-
-        const btn = document.querySelector('#addUserModal .btn-primary');
-        const originalText = btn.innerText;
-        btn.disabled = true;
-        btn.innerText = "Saving...";
-
-        try {
-            // We NO LONGER use createUserWithEmailAndPassword. 
-            // We just add their email and assigned role directly to Firestore.
-            await addDoc(usersCol, {
-                email: email,
-                role: role,
-                createdAt: new Date(),
-                lastLogin: null,
-                authMethod: 'google'
-            });
-
-            closeAddUserModal();
-            showAlert("Success", `User ${email} has been pre-registered as ${role.toUpperCase()}!`);
-
-        } catch (error) {
-            console.error(error);
-            showAlert("Database Error", "Failed to add user: " + error.message);
-        } finally {
-            btn.disabled = false;
-            btn.innerText = originalText;
-        }
-    }
-
-    window.openEditUserModal = function(id, email, role) {
-        document.getElementById('editUserId').value = id;
-        document.getElementById('editUserEmail').value = email;
-        document.getElementById('editUserRole').value = role || 'user';
-        document.getElementById('editUserModal').style.display = 'flex';
-    }
-
-    window.closeEditUserModal = function() {
-        document.getElementById('editUserModal').style.display = 'none';
-    }
-
-    window.saveUserRole = async function() {
-        const id = document.getElementById('editUserId').value;
-        const newRole = document.getElementById('editUserRole').value;
-        
-        try {
-            await updateDoc(doc(db, "users", id), {
-                role: newRole
-            });
-            closeEditUserModal();
-            showAlert("Success", "User role updated successfully.");
-        } catch (e) {
-            showAlert("Error", "Failed to update role: " + e.message);
-        }
-    }
-
-    // REUSE CONFIRM MODAL FOR USER DELETION
-    let pendingDeleteType = ""; // 'school' or 'user'
-    let pendingDeleteId = null;
-
-    window.openDeleteModal = function(docId) {
-        pendingDeleteType = "school";
-        pendingDeleteId = docId;
-        document.getElementById('confirmModal').style.display = 'flex';
-    }
-
-    window.openDeleteUserModal = function(docId) {
-        pendingDeleteType = "user";
-        pendingDeleteId = docId;
-        document.getElementById('confirmModal').style.display = 'flex';
-    }
-
-    window.closeConfirm = function() {
-        pendingDeleteId = null;
-        pendingDeleteType = "";
-        document.getElementById('confirmModal').style.display = 'none';
-    }
-
-    window.confirmDeleteAction = async function() {
-        if(pendingDeleteId) {
-            try { 
-                let colName = pendingDeleteType === "school" ? "Schools" : "users";
-                await deleteDoc(doc(db, colName, pendingDeleteId)); 
-                
-                closeConfirm();
-                
-                if(pendingDeleteType === "school") loadSchools(0);
-                
-                if(pendingDeleteType === "user") {
-                    showAlert("Deleted", "User record deleted from database. (Note: Account may still exist in Auth panel).");
-                }
-            } 
-            catch (e) { 
-                closeConfirm();
-                showAlert("Error", "Failed to delete: " + e.message); 
-            }
-        }
-    }
-
 
     // --- 1. REAL-TIME SENSOR DATA LISTENER ---
     const qWater = query(waterQualityCol, limit(20));
@@ -1045,9 +743,7 @@
         return '<span style="color: orange; font-weight:bold;">Check</span>';
     }
 
-
-    // --- 2. SCHOOLS LOGIC (PAGINATION + CLIENT-SIDE SEARCH) ---
-
+    // --- 2. SCHOOLS LOGIC (PAGINATION + CLIENT-SIDE SEARCH ONLY) ---
     let schoolsUnsubscribe = null;
     let currentPage = 1;
     const pageSize = 5; 
@@ -1102,11 +798,9 @@
             } else {
                 allDocs.forEach(item => {
                     const school = item.data;
-                    const schoolId = item.id;
                     const statusHtml = `<td><span style="color: #a0aec0;">--</span></td>`;
 
                     const tr = document.createElement("tr");
-                    tr.id = `row-${schoolId}`; 
                     tr.innerHTML = `
                         <td class="name-cell">${school.schoolName || "N/A"}</td>
                         <td class="head-cell">${school.schoolHead || "N/A"}</td>
@@ -1114,13 +808,7 @@
                         ${statusHtml}
                         <td class="action-cell">
                             <button class="btn btn-email" title="Send Report" onclick="openReportModal('${school.schoolName}', '${school.email}')">
-                                <img src="img/gmail.png" class="btn-icon">
-                            </button>
-                            <button class="btn btn-edit" title="Edit" onclick="editSchool('${schoolId}')">
-                                <img src="img/edit.png" class="btn-icon">
-                            </button>
-                            <button class="btn btn-delete" title="Delete" onclick="openDeleteModal('${schoolId}')">
-                                <img src="img/trash.png" class="btn-icon">
+                                <img src="img/gmail.png" class="btn-icon" style="margin-right: 5px;"> Report
                             </button>
                         </td>
                     `;
@@ -1211,95 +899,6 @@
 
     window.closeShareModal = function() {
         document.getElementById('shareModal').style.display = 'none';
-    }
-
-    // EDIT SCHOOL FUNCTIONS
-    let originalData = {}; 
-
-    window.editSchool = function(id) {
-        const row = document.getElementById(`row-${id}`);
-        if(!row) return;
-
-        const nameCell = row.querySelector('.name-cell');
-        const headCell = row.querySelector('.head-cell');
-        const emailCell = row.querySelector('.email-cell');
-        const actionsCell = row.querySelector('.action-cell');
-
-        originalData[id] = {
-            name: nameCell.innerText,
-            head: headCell.innerText,
-            email: emailCell.innerText,
-            actions: actionsCell.innerHTML
-        };
-
-        nameCell.innerHTML = `<input type="text" id="edit-name-${id}" value="${originalData[id].name}" class="edit-input">`;
-        headCell.innerHTML = `<input type="text" id="edit-head-${id}" value="${originalData[id].head === "N/A" ? "" : originalData[id].head}" class="edit-input">`;
-        emailCell.innerHTML = `<input type="email" id="edit-email-${id}" value="${originalData[id].email === "N/A" ? "" : originalData[id].email}" class="edit-input">`;
-
-        actionsCell.innerHTML = `
-            <button class="btn btn-save" onclick="saveSchool('${id}')">💾 Save</button>
-            <button class="btn btn-cancel" onclick="cancelEdit('${id}')">❌</button>
-        `;
-    }
-
-    window.saveSchool = async function(id) {
-        const newName = document.getElementById(`edit-name-${id}`).value.trim();
-        const newHead = document.getElementById(`edit-head-${id}`).value.trim();
-        const newEmail = document.getElementById(`edit-email-${id}`).value.trim();
-
-        if(!newName) {
-            showAlert("Validation Error", "School Name cannot be empty.");
-            return;
-        }
-
-        try {
-            await updateDoc(doc(db, "Schools", id), {
-                schoolName: newName,
-                schoolHead: newHead,
-                email: newEmail
-            });
-            loadSchools(0);
-        } catch (e) {
-            showAlert("Error", "Could not update school: " + e.message);
-        }
-    }
-
-    window.cancelEdit = function(id) {
-        const row = document.getElementById(`row-${id}`);
-        if(!row || !originalData[id]) return;
-        row.querySelector('.name-cell').innerText = originalData[id].name;
-        row.querySelector('.head-cell').innerText = originalData[id].head;
-        row.querySelector('.email-cell').innerText = originalData[id].email;
-        row.querySelector('.action-cell').innerHTML = originalData[id].actions;
-        delete originalData[id];
-    }
-
-    // ADD SCHOOL FUNCTION
-    window.addSchoolToDB = async function() {
-        const name = document.getElementById('newSchoolName').value.trim();
-        const head = document.getElementById('newSchoolHead').value.trim();
-        const email = document.getElementById('newSchoolEmail').value.trim();
-
-        if(!name) { 
-            showAlert("Missing Information", "Please enter the School Name."); 
-            return; 
-        }
-
-        try {
-            await addDoc(schoolsCol, {
-                schoolName: name, schoolHead: head, email: email, createdAt: new Date()
-            });
-            document.getElementById('newSchoolName').value = "";
-            document.getElementById('newSchoolHead').value = "";
-            document.getElementById('newSchoolEmail').value = "";
-            showAlert("Success", "School added successfully!");
-            
-            currentPage = 1;
-            loadSchools(0);
-
-        } catch (e) {
-            showAlert("Database Error", "Error saving to database: " + e.message);
-        }
     }
 
     // REPORT GENERATION

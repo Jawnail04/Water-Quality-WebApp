@@ -1433,29 +1433,30 @@
         let finalY_TDS = doc.lastAutoTable.finalY;
 
         let bottomStartY = Math.max(finalY_pH, finalY_TDS) + 10;
+        
+        // === UPDATED PDF TABLE ===
         doc.autoTable({
             startY: bottomStartY,
             head: [
                 [
-                    { content: 'Turbidity Level', colSpan: 3, styles: { halign: 'center', fillColor: [220, 220, 220], textColor: 0 } }, 
-                    { content: 'TDS Level', colSpan: 2, styles: { halign: 'center', fillColor: [220, 220, 220], textColor: 0 } },
-                    { content: 'Hardness Level', colSpan: 2, styles: { halign: 'center', fillColor: [220, 220, 220], textColor: 0 } }
+                    { content: 'Turbidity Level', colSpan: 3, styles: { halign: 'center', fillColor: [220, 220, 220], textColor: 0, lineWidth: 0.1, lineColor: [150, 150, 150] } }, 
+                    { content: 'Hardness Level', colSpan: 2, styles: { halign: 'center', fillColor: [220, 220, 220], textColor: 0, lineWidth: 0.1, lineColor: [150, 150, 150] } }
                 ],
-                ['Range (NTU)', 'Rating', 'Description', 'Range (mg/L)', 'Rating', 'Range (mg/L)', 'Rating']
+                ['Range (NTU)', 'Rating', 'Description', 'Range (mg/L)', 'Rating']
             ],
             body: [
-                ['< 5', 'Excellent', 'Very clear', '<300', 'Excellent', '0-25', 'Very soft'],
-                ['5-10', 'Good', 'Clear', '300-600', 'Good', '25-50', 'Soft'],
-                ['10-25', 'Fair', 'Slightly clear', '600-900', 'Fair', '50-100', 'Mod. soft'],
-                ['25-50', 'Marginal', 'Mod. cloudy', '900-1,200', 'Marginal', '100-150', 'Slightly hard'],
-                ['50-100', 'Poor', 'Cloudy', '1,200-1,500', 'Poor', '150-200', 'Mod. hard'],
-                ['100-500', '', 'Very cloudy', '>1,500', 'Unacceptable', '200-300', 'Hard'],
-                ['500-1000', 'Unacceptable', 'Muddy', '', '', '300-600', 'Very hard'],
-                ['>1000', '', 'Very muddy', '', '', '>600', 'Ext. hard']
+                ['< 5', 'Excellent', 'Very clear', '0-25', 'Very soft'],
+                ['5-10', 'Good', 'Clear', '25-50', 'Soft'],
+                ['10-25', 'Fair', 'Slightly clear', '50-100', 'Mod. soft'],
+                ['25-50', 'Marginal', 'Mod. cloudy', '100-150', 'Slightly hard'],
+                ['50-100', 'Poor', 'Cloudy', '150-200', 'Mod. hard'],
+                ['100-500', '', 'Very cloudy', '200-300', 'Hard'],
+                ['500-1000', 'Unacceptable', 'Muddy', '300-600', 'Very hard'],
+                ['>1000', '', 'Very muddy', '>600', 'Ext. hard']
             ],
             theme: 'grid',
-            styles: { fontSize: 7, cellPadding: 1.5 },
-            margin: { left: 10, right: 10 }
+            styles: { fontSize: 7, cellPadding: 1.5, lineColor: [150, 150, 150], lineWidth: 0.1 },
+            margin: { left: 14, right: 14 }
         });
 
         addFooter(doc, 1);
@@ -1466,7 +1467,6 @@
         doc.setFont(undefined, 'bold');
         doc.text(`II. Water Quality Test Results - ${school}`, 14, 60);
 
-        // GRAB REAL DATA FROM DOM OR DEFAULT TO "N/A"
         const curPh = document.getElementById("phValue").innerText;
         const curTds = document.getElementById("tdsValue").innerText;
         const curTurb = document.getElementById("turbidityValue").innerText;
