@@ -1209,29 +1209,29 @@
 
         let bottomStartY = Math.max(finalY_pH, finalY_TDS_small) + 10;
 
-        // TABLE 3: Turbidity and Hardness (Bottom)
+        // TABLE 3: Turbidity (Bottom)
         doc.autoTable({
             startY: bottomStartY,
             head: [
                 [
-                    { content: 'Turbidity Level', colSpan: 3, styles: { halign: 'center', fillColor: [220, 220, 220], textColor: 0, lineWidth: 0.1, lineColor: [150, 150, 150] } }, 
-                    { content: 'Hardness Level', colSpan: 2, styles: { halign: 'center', fillColor: [220, 220, 220], textColor: 0, lineWidth: 0.1, lineColor: [150, 150, 150] } }
+                    { content: 'Turbidity Level', colSpan: 3, styles: { halign: 'center', fillColor: [220, 220, 220], textColor: 0, lineWidth: 0.1, lineColor: [150, 150, 150] } }
                 ],
-                ['Range (NTU)', 'Rating', 'Description', 'Range (mg/L)', 'Rating']
+                ['Range (NTU)', 'Rating', 'Description']
             ],
             body: [
-                ['< 5', 'Excellent', 'Very clear', '0-25', 'Very soft'],
-                ['5-10', 'Good', 'Clear', '25-50', 'Soft'],
-                ['10-25', 'Fair', 'Slightly clear', '50-100', 'Mod. soft'],
-                ['25-50', 'Marginal', 'Mod. cloudy', '100-150', 'Slightly hard'],
-                ['50-100', 'Poor', 'Cloudy', '150-200', 'Mod. hard'],
-                ['100-500', '', 'Very cloudy', '200-300', 'Hard'],
-                ['500-1000', 'Unacceptable', 'Muddy', '300-600', 'Very hard'],
-                ['>1000', '', 'Very muddy', '>600', 'Ext. hard']
+                ['< 5', 'Excellent', 'Very clear'],
+                ['5-10', 'Good', 'Clear'],
+                ['10-25', 'Fair', 'Slightly clear'],
+                ['25-50', 'Marginal', 'Mod. cloudy'],
+                ['50-100', 'Poor', 'Cloudy'],
+                ['100-500', '', 'Very cloudy'],
+                ['500-1000', 'Unacceptable', 'Muddy'],
+                ['>1000', '', 'Very muddy']
             ],
             theme: 'grid',
-            styles: { fontSize: 7, cellPadding: 1.5, lineColor: [150, 150, 150], lineWidth: 0.1 },
-            margin: { left: 14, right: 14 }
+            styles: { fontSize: 8, cellPadding: 1.5, lineColor: [150, 150, 150], lineWidth: 0.1 },
+            margin: { left: 14 },
+            tableWidth: 80
         });
 
         addFooter(doc, 1);
@@ -1242,15 +1242,20 @@
         doc.setFont(undefined, 'bold');
         doc.text(`II. Water Quality Test Results - ${school}`, 14, 60);
 
-        const curPh = document.getElementById("phValue").innerText;
-        const curTds = document.getElementById("tdsValue").innerText;
-        const curTurb = document.getElementById("turbidityValue").innerText;
+        const curPh = parseFloat(document.getElementById("phValue").innerText) || 0;
+        const curTds = parseFloat(document.getElementById("tdsValue").innerText) || 0;
+        const curTurb = parseFloat(document.getElementById("turbidityValue").innerText) || 0;
+
+        // Determine individual statuses for table
+        const phStatus = (curPh >= 6.5 && curPh <= 8.5) ? "Good" : "Check";
+        const tdsStatus = (curTds < 600) ? "Good" : "High";
+        const turbStatus = (curTurb < 10) ? "Good" : "Cloudy";
 
         // Ensure TDS is kept in the final results table
         const tableData = [
-            ["pH Level", `${curPh} pH`, curPh >= 6.5 && curPh <= 8.5 ? "Good" : "Check"],
-            ["Total Dissolved Solid", `${curTds} mg/L`, curTds < 600 ? "Good" : "High"],
-            ["Turbidity Level", `${curTurb} NTU`, curTurb < 5 ? "Excellent" : "Cloudy"]
+            ["pH Level", `${curPh} pH`, phStatus],
+            ["Total Dissolved Solid", `${curTds} mg/L`, tdsStatus],
+            ["Turbidity Level", `${curTurb} NTU`, turbStatus]
         ];
 
         doc.autoTable({
@@ -1262,9 +1267,23 @@
             styles: { fontSize: 10, cellPadding: 3 }
         });
 
+        // Determine overall safety remark
+        const isSafe = (curPh >= 6.5 && curPh <= 8.5) && (curTds < 600) && (curTurb < 10);
+        const remarkResult = isSafe ? "Safe to use" : "Not safe to use";
+
         let sigY = doc.lastAutoTable.finalY + 20;
+        doc.setFont(undefined, 'bold');
+        doc.text(`REMARKS : ${remarkResult}`, 14, sigY);
+
+        // Non-drinkable disclaimer added here
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'italic');
+        doc.setTextColor(200, 0, 0); 
+        doc.text("Disclaimer: Please note that the water is NOT intended for drinking purposes.", 14, sigY + 8);
+
+        doc.setTextColor(0, 0, 0); 
+        doc.setFontSize(10);
         doc.setFont(undefined, 'normal');
-        doc.text("REMARKS : _________________________________________________", 14, sigY);
         doc.text("Tested by:", 14, sigY + 25);
         doc.setFont(undefined, 'bold');
         doc.text(tester.toUpperCase(), 14, sigY + 35); 
