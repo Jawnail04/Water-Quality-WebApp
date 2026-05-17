@@ -499,14 +499,23 @@
 
             <div id="history-view" class="view-section">
                 <section class="data-section">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap: wrap; gap: 15px;">
                         <h3>Historical Data Logs</h3>
+                        
+                        <div class="form-group" style="min-width: 250px;">
+                            <label style="margin-bottom: 5px;">Filter by School:</label>
+                            <select id="historySchoolSelect" onchange="loadHistoryLogs(this.value)" style="padding: 8px; border-radius: 6px; border: 1px solid #cbd5e0;">
+                                <option value="">-- Select a School --</option>
+                            </select>
+                        </div>
                     </div>
                     
                     <div class="table-wrapper">
                         <table>
                             <thead><tr><th>Timestamp</th><th>pH Level</th><th>Turbidity (NTU)</th><th>TDS (ppm)</th><th>Status</th></tr></thead>
-                            <tbody id="historyTableBody"><tr><td colspan="5">Loading logs...</td></tr></tbody>
+                            <tbody id="historyTableBody">
+                                <tr><td colspan="5">Please select a school to view its history logs...</td></tr>
+                            </tbody>
                         </table>
                     </div>
                 </section>
@@ -683,7 +692,9 @@
             document.getElementById('nav-history').classList.add('active');
             document.getElementById('page-title').innerText = "History Logs";
             document.getElementById('page-subtitle').innerText = "Past water quality records";
-            loadHistoryLogs(); 
+            
+            // Populate the dropdown when the view opens
+            populateSchoolDropdown(); 
         } else if (viewName === 'users') {
             document.getElementById('users-view').classList.add('active-view');
             document.getElementById('nav-users').classList.add('active');
@@ -707,27 +718,65 @@
 
     // --- HISTORY LOGS LOGIC ---
     let historyUnsubscribe = null;
+    let schoolDropdownUnsubscribe = null;
 
-    function loadHistoryLogs() {
-        if (historyUnsubscribe) return; // Prevent multiple listeners
+    // Fetch schools for the dropdown
+    window.populateSchoolDropdown = function() {
+        const select = document.getElementById("historySchoolSelect");
+
+        if (schoolDropdownUnsubscribe) return; // Prevent multiple listeners
+
+        schoolDropdownUnsubscribe = onSnapshot(query(schoolsCol, orderBy("schoolName")), (snapshot) => {
+            const currentValue = select.value;
+            select.innerHTML = '<option value="">-- Select a School --</option>';
+
+            snapshot.forEach(docSnap => {
+                const school = docSnap.data();
+                const option = document.createElement("option");
+                option.value = docSnap.id; // Using the Firestore Document ID as the value
+                option.textContent = school.schoolName;
+                select.appendChild(option);
+            });
+
+            if (currentValue) select.value = currentValue; // Keep selection if it updates
+        });
+    }
+
+    // Load logs for the specifically selected school
+    window.loadHistoryLogs = function(schoolId) {
+        if (historyUnsubscribe) {
+            historyUnsubscribe(); // Stop listening to previous school's data
+            historyUnsubscribe = null;
+        }
 
         const tbody = document.getElementById("historyTableBody");
+
+        if (!schoolId) {
+            tbody.innerHTML = "<tr><td colspan='5'>Please select a school to view its history logs...</td></tr>";
+            return;
+        }
+
+        tbody.innerHTML = "<tr><td colspan='5'>Loading logs...</td></tr>";
         
-        // 1. The Query: Using "orderBy" to sort new to old
-        const qHistory = query(waterQualityCol, orderBy("timestamp", "desc"), limit(50));
+        // The Query: Filter by schoolId, then order by newest first
+        const qHistory = query(
+            waterQualityCol, 
+            where("schoolId", "==", schoolId), 
+            orderBy("timestamp", "desc"), 
+            limit(50)
+        );
 
         historyUnsubscribe = onSnapshot(qHistory, (snapshot) => {
             tbody.innerHTML = "";
 
             if (snapshot.empty) {
-                tbody.innerHTML = "<tr><td colspan='5'>No history logs found. (Check 'timestamp' field in database)</td></tr>";
+                tbody.innerHTML = "<tr><td colspan='5'>No history logs found for this school.</td></tr>";
                 return;
             }
 
             snapshot.forEach(doc => {
                 const data = doc.data();
                 
-                // 2. Safe Time Formatting
                 let timeString = "Unknown Time";
                 try {
                     if (data.timestamp && data.timestamp.toDate) {
@@ -737,9 +786,9 @@
                     }
                 } catch(e) { timeString = "Invalid Date"; }
 
-                const ph = data.phLevel !== undefined ? data.phLevel : "--";
-                const turb = data.turbidity !== undefined ? data.turbidity : "--";
-                const tds = data.tds !== undefined ? data.tds : "--";
+                const ph = data.phLevel !== undefined ? parseFloat(data.phLevel).toFixed(2) : "--";
+                const turb = data.turbidity !== undefined ? parseFloat(data.turbidity).toFixed(2) : "--";
+                const tds = data.tds !== undefined ? parseFloat(data.tds).toFixed(2) : "--";
 
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
@@ -755,7 +804,7 @@
             console.error("Error fetching history:", error);
             if (error.code === 'failed-precondition') {
                  tbody.innerHTML = `<tr><td colspan='5' style='color: orange; font-weight:bold; background:#fff3cd;'>
-                    ⚠️ ACTION REQUIRED: Open browser console (F12) and click the Firebase Index link.
+                    ⚠️ ACTION REQUIRED: Firestore requires a composite index to filter by School and order by Time. Open your browser console (F12) and click the Firebase link provided to automatically create the index.
                  </td></tr>`;
             } else {
                  tbody.innerHTML = `<tr><td colspan='5' style='color:red;'>Error: ${error.message}</td></tr>`;
@@ -961,14 +1010,31 @@
 
         readings.forEach(data => {
             let timeString = "Live Data";
-            if (data.timestamp && data.timestamp.toDate) {
-                timeString = data.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            // 1. Robust Timestamp Handling
+            if (data.timestamp) {
+                if (typeof data.timestamp.toDate === 'function') {
+                    // It's a Firestore Timestamp object
+                    timeString = data.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                } else {
+                    // It's a standard date string or Unix timestamp number
+                    const parsedDate = new Date(data.timestamp);
+                    if (!isNaN(parsedDate.getTime())) { // Ensure it's a valid date
+                        timeString = parsedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    }
+                }
+            } else {
+                // 2. Fallback for completely missing/empty timestamps
+                // Automatically assigns the time the data was loaded into the table
+                const fallbackDate = new Date();
+                timeString = fallbackDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             }
 
+            // 3. Fallback for missing sensor data
             const ph = data.phLevel !== undefined ? data.phLevel : "--";
             const turb = data.turbidity !== undefined ? data.turbidity : "--";
             const tds = data.tds !== undefined ? data.tds : "--";
-
+            
             const tr = document.createElement("tr");
             tr.innerHTML = `
                 <td>${timeString}</td>
@@ -979,16 +1045,16 @@
             `;
             readingsBody.appendChild(tr);
         });
-    }, (error) => {
-        console.error("Error fetching water data:", error);
-    });
+        }, (error) => {
+            console.error("Error fetching water data:", error);
+        });
 
     function updateDashboardCards(data) {
         const phVal = data.phLevel !== undefined ? data.phLevel : 0;
         const turbVal = data.turbidity !== undefined ? data.turbidity : 0;
         const tdsVal = data.tds !== undefined ? data.tds : 0;
 
-        document.getElementById("phValue").innerText = parseFloat(phVal).toFixed(1);
+        document.getElementById("phValue").innerText = parseFloat(phVal).toFixed(2);
         const phEl = document.getElementById("phStatus");
         
         if (phVal >= 6.5 && phVal <= 8.5) {
@@ -997,12 +1063,12 @@
             phEl.innerText = "● Attention Required"; phEl.style.color = "#c05621"; 
         }
 
-        document.getElementById("turbidityValue").innerText = parseFloat(turbVal).toFixed(1);
+        document.getElementById("turbidityValue").innerText = parseFloat(turbVal).toFixed(2);
         const turbEl = document.getElementById("turbidityStatus");
 
         if (turbVal < 5) {
             turbEl.innerText = "● Clear / Excellent"; turbEl.style.color = "#2f855a";
-        } else if (turbVal < 10) {
+        } else if (turbVal <= 10) {
              turbEl.innerText = "● Good"; turbEl.style.color = "#2f855a";
         } else {
             turbEl.innerText = "● Cloudy / High"; turbEl.style.color = "#c05621";
@@ -1013,7 +1079,7 @@
 
         if (tdsVal < 300) {
             tdsEl.innerText = "● Excellent"; tdsEl.style.color = "#2f855a";
-        } else if (tdsVal < 600) {
+        } else if (tdsVal <= 600) {
             tdsEl.innerText = "● Good"; tdsEl.style.color = "#2b6cb0"; 
         } else {
             tdsEl.innerText = "● High Solids"; tdsEl.style.color = "#c05621";
@@ -1024,7 +1090,7 @@
         const p = parseFloat(ph) || 0;
         const t = parseFloat(turb) || 0;
         const s = parseFloat(tds) || 0;
-        if ((p >= 6.5 && p <= 8.5) && t < 10 && s < 1000) {
+        if ((p >= 6.5 && p <= 8.5) && t <= 10 && s <= 600) {
             return '<span style="color: green; font-weight:bold;">Normal</span>';
         }
         return '<span style="color: orange; font-weight:bold;">Check</span>';
@@ -1434,7 +1500,6 @@
 
         let bottomStartY = Math.max(finalY_pH, finalY_TDS) + 10;
         
-        // === UPDATED PDF TABLE (Hardness Removed) ===
         doc.autoTable({
             startY: bottomStartY,
             head: [
@@ -1471,15 +1536,48 @@
         const curTds = parseFloat(document.getElementById("tdsValue").innerText);
         const curTurb = parseFloat(document.getElementById("turbidityValue").innerText);
 
-        // Determine individual statuses for table
-        const phStatus = (curPh >= 6.5 && curPh <= 8.5) ? "Good" : "Check";
-        const tdsStatus = (curTds < 600) ? "Good" : "High";
-        const turbStatus = (curTurb < 10) ? "Good" : "Cloudy"; 
+        // --- NEW LOGIC FOR DESCRIPTIVE VALUES ---
+        let phStatus = "--";
+        if (!isNaN(curPh)) {
+            if (curPh < 3.5) phStatus = "Ultra acidic";
+            else if (curPh <= 4.4) phStatus = "Extremely acidic";
+            else if (curPh <= 5.0) phStatus = "Very strongly acidic";
+            else if (curPh <= 5.5) phStatus = "Strongly acidic";
+            else if (curPh <= 6.0) phStatus = "Moderately acidic";
+            else if (curPh <= 6.5) phStatus = "Slightly acidic";
+            else if (curPh <= 7.3) phStatus = "Neutral";
+            else if (curPh <= 7.8) phStatus = "Slightly alkaline";
+            else if (curPh <= 8.4) phStatus = "Moderately alkaline";
+            else if (curPh <= 9.0) phStatus = "Strongly alkaline";
+            else phStatus = "Very strongly alkaline";
+        }
+
+        let tdsStatus = "--";
+        if (!isNaN(curTds)) {
+            if (curTds < 300) tdsStatus = "Excellent";
+            else if (curTds <= 600) tdsStatus = "Good";
+            else if (curTds <= 900) tdsStatus = "Fair";
+            else if (curTds <= 1200) tdsStatus = "Poor";
+            else tdsStatus = "Unacceptable";
+        }
+
+        let turbStatus = "--";
+        if (!isNaN(curTurb)) {
+            if (curTurb < 5) turbStatus = "Excellent (Very clear)";
+            else if (curTurb <= 10) turbStatus = "Good (Clear)";
+            else if (curTurb <= 25) turbStatus = "Fair (Slightly clear)";
+            else if (curTurb <= 50) turbStatus = "Marginal (Mod. cloudy)";
+            else if (curTurb <= 100) turbStatus = "Poor (Cloudy)";
+            else if (curTurb <= 500) turbStatus = "Very cloudy";
+            else if (curTurb <= 1000) turbStatus = "Unacceptable (Muddy)";
+            else turbStatus = "Very muddy";
+        }
+        // ----------------------------------------
 
         const tableData = [
-            ["pH Level", `${curPh} pH`, phStatus],
-            ["Total Dissolved Solid", `${curTds} mg/L`, tdsStatus],
-            ["Turbidity Level", `${curTurb} NTU`, turbStatus]
+            ["pH Level", isNaN(curPh) ? "--" : `${curPh} pH`, phStatus],
+            ["Total Dissolved Solid", isNaN(curTds) ? "--" : `${curTds} mg/L`, tdsStatus],
+            ["Turbidity Level", isNaN(curTurb) ? "--" : `${curTurb} NTU`, turbStatus]
         ];
 
         doc.autoTable({
@@ -1492,14 +1590,13 @@
         });
 
         // Determine overall safety remark
-        const isSafe = (curPh >= 6.5 && curPh <= 8.5) && (curTds < 600) && (curTurb < 10);
+        const isSafe = (curPh >= 6.5 && curPh <= 8.5) && (curTds <= 600) && (curTurb <= 10);
         const remarkResult = isSafe ? "Safe to use" : "Not safe to use";
 
         let sigY = doc.lastAutoTable.finalY + 20;
         doc.setFont(undefined, 'bold');
         doc.text(`REMARKS : ${remarkResult}`, 14, sigY);
 
-        // Non-drinkable disclaimer added here
         doc.setFontSize(9);
         doc.setFont(undefined, 'italic');
         doc.setTextColor(200, 0, 0); 
