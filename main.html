@@ -8,6 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         /* --- CSS STYLES --- */
@@ -376,6 +377,9 @@
             <a id="nav-history" onclick="switchView('history')">
                 <i class="ri-history-line"></i> <span>History Logs</span>
             </a>
+            <a id="nav-users" onclick="switchView('users')">
+                <i class="ri-user-settings-line"></i> <span>User Management</span>
+            </a>
             <a href="#" onclick="handleLogout()" class="logout-link">
                 <i class="ri-logout-box-r-line"></i> <span>Logout</span>
             </a>
@@ -496,14 +500,52 @@
 
             <div id="history-view" class="view-section">
                 <section class="data-section">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap: wrap; gap: 15px;">
                         <h3>Historical Data Logs</h3>
+                        
+                        <div style="display:flex; gap: 15px; flex-wrap: wrap;">
+                            <div class="form-group" style="min-width: 200px;">
+                                <label style="margin-bottom: 5px;">Filter by Month:</label>
+                                <input type="month" id="historyMonthSelect" onchange="applyHistoryFilters()" style="padding: 8px; border-radius: 6px; border: 1px solid #cbd5e0; outline: none; background: rgba(255, 255, 255, 0.9);">
+                            </div>
+                            
+                            <div class="form-group" style="min-width: 250px;">
+                                <label style="margin-bottom: 5px;">Filter by School:</label>
+                                <select id="historySchoolSelect" onchange="applyHistoryFilters()" style="padding: 8px; border-radius: 6px; border: 1px solid #cbd5e0;">
+                                    <option value="">-- Select a School --</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="chart-container" style="position: relative; height:40vh; width:100%; margin-bottom: 30px; display: none;">
+                        <canvas id="monthlyHistoryChart"></canvas>
                     </div>
                     
                     <div class="table-wrapper">
                         <table>
                             <thead><tr><th>Timestamp</th><th>pH Level</th><th>Turbidity (NTU)</th><th>TDS (ppm)</th><th>Status</th></tr></thead>
-                            <tbody id="historyTableBody"><tr><td colspan="5">Loading logs...</td></tr></tbody>
+                            <tbody id="historyTableBody">
+                                <tr><td colspan="5">Please select a school to view its history logs...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <div id="users-view" class="view-section">
+                <section class="data-section">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                        <h3>System Users</h3>
+                        <button class="btn btn-primary" onclick="openAddUserModal()">
+                            <img src="img/plus.png" onerror="this.style.display='none'" class="btn-icon"> + Add User
+                        </button>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead><tr><th>Email</th><th>Current Role</th><th>Last Login</th><th>Actions</th></tr></thead>
+                            <tbody id="usersTableBody"><tr><td colspan="4">Loading users...</td></tr></tbody>
                         </table>
                     </div>
                 </section>
@@ -516,6 +558,56 @@
     <img id="footer-logo-deped" src="img/deped_logo.png" style="display: none;" crossorigin="anonymous">
     <img id="footer-logo-bagong" src="img/Bagong_Pilipinas_logo.png" style="display: none;" crossorigin="anonymous">
     <img id="footer-logo-mabalacat" src="img/mabalacat_city_logo.png" style="display: none;" crossorigin="anonymous">
+
+    <div class="modal-overlay" id="editUserModal">
+        <div class="modal">
+            <h3>Manage User Role</h3>
+            <p>Update the permissions for this user.</p>
+            <input type="hidden" id="editUserId">
+            <div class="form-group">
+                <label>User Email</label>
+                <input type="text" id="editUserEmail" disabled style="background: rgba(0,0,0,0.05);">
+            </div>
+            <br>
+            <div class="form-group">
+                <label>Assign Role</label>
+                <select id="editUserRole">
+                    <option value="user">User (Viewer)</option>
+                    <option value="admin">Admin (Editor)</option>
+                    <option value="superadmin">Super Admin</option>
+                </select>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-cancel" onclick="closeEditUserModal()">Cancel</button>
+                <button class="btn btn-save" onclick="saveUserRole()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="addUserModal">
+        <div class="modal">
+            <h3>Pre-register User</h3>
+            <p>Assign a role to an official DepEd email. They will gain access upon their first Google Sign-In.</p>
+            
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="newUserEmail" placeholder="name@deped.gov.ph">
+            </div>
+            <br>
+            <div class="form-group">
+                <label>Assign Role</label>
+                <select id="newUserRole">
+                    <option value="user">User (Viewer)</option>
+                    <option value="admin">Admin (Editor)</option>
+                </select>
+            </div>
+
+            <div class="modal-buttons">
+                <button class="btn btn-cancel" onclick="closeAddUserModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="createNewUser()">Pre-Register User</button>
+            </div>
+        </div>
+    </div>
 
     <div class="modal-overlay" id="reportModal">
         <div class="modal">
@@ -530,8 +622,11 @@
                 <label>Tested By (Name):</label>
                 <input type="text" id="testerName" placeholder="Juan Dela Cruz">
             </div>
+            
+            <input type="hidden" id="currentSchoolId">
             <input type="hidden" id="currentSchoolName">
             <input type="hidden" id="currentSchoolEmail">
+            
             <div class="modal-buttons">
                 <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
                 <button class="btn btn-primary" onclick="generateAndSend()">Download & Open Gmail</button>
@@ -595,6 +690,7 @@
     // COLLECTIONS
     const schoolsCol = collection(db, "Schools");
     const waterQualityCol = collection(db, "waterQuality"); 
+    const usersCol = collection(db, "users");
 
     // --- VIEW SWITCHING LOGIC ---
     window.switchView = function(viewName) {
@@ -611,7 +707,15 @@
             document.getElementById('nav-history').classList.add('active');
             document.getElementById('page-title').innerText = "History Logs";
             document.getElementById('page-subtitle').innerText = "Past water quality records";
-            loadHistoryLogs(); 
+            
+            // Populate the dropdown when the view opens
+            populateSchoolDropdown(); 
+        } else if (viewName === 'users') {
+            document.getElementById('users-view').classList.add('active-view');
+            document.getElementById('nav-users').classList.add('active');
+            document.getElementById('page-title').innerText = "User Management";
+            document.getElementById('page-subtitle').innerText = "Manage admins and access roles";
+            loadUsers(); 
         }
     }
 
@@ -627,21 +731,87 @@
         }
     }
 
-    // --- HISTORY LOGS LOGIC ---
+    // --- HISTORY LOGS LOGIC (WITH CALENDAR FILTER) ---
     let historyUnsubscribe = null;
+    let schoolDropdownUnsubscribe = null;
+    let historyChartInstance = null; 
 
-    function loadHistoryLogs() {
-        if (historyUnsubscribe) return; 
+    // Fetch schools for the dropdown
+    window.populateSchoolDropdown = function() {
+        const select = document.getElementById("historySchoolSelect");
+        if (schoolDropdownUnsubscribe) return; 
+
+        schoolDropdownUnsubscribe = onSnapshot(query(schoolsCol, orderBy("schoolName")), (snapshot) => {
+            const currentValue = select.value;
+            select.innerHTML = '<option value="">-- Select a School --</option>';
+
+            snapshot.forEach(docSnap => {
+                const school = docSnap.data();
+                const option = document.createElement("option");
+                option.value = docSnap.id; 
+                option.textContent = school.schoolName;
+                select.appendChild(option);
+            });
+
+            if (currentValue) select.value = currentValue; 
+        });
+    }
+
+    // UPDATED: Central function to apply both Month and School filters
+    window.applyHistoryFilters = function() {
+        const schoolId = document.getElementById("historySchoolSelect").value;
+        const monthValue = document.getElementById("historyMonthSelect").value;
+        
+        if (historyUnsubscribe) {
+            historyUnsubscribe(); 
+            historyUnsubscribe = null;
+        }
 
         const tbody = document.getElementById("historyTableBody");
+        const chartContainer = document.getElementById("chart-container");
+
+        if (!schoolId) {
+            tbody.innerHTML = "<tr><td colspan='5'>Please select a school to view its history logs...</td></tr>";
+            chartContainer.style.display = "none";
+            return;
+        }
+
+        tbody.innerHTML = "<tr><td colspan='5'>Loading logs...</td></tr>";
+        chartContainer.style.display = "block"; 
         
-        const qHistory = query(waterQualityCol, orderBy("timestamp", "desc"), limit(50));
+        let qHistory;
+
+        // If a month is selected, filter by date range
+        if (monthValue) {
+            const [year, month] = monthValue.split('-');
+            const startDate = new Date(year, month - 1, 1);
+            const endDate = new Date(year, month, 1); // 1st day of next month
+
+            qHistory = query(
+                waterQualityCol, 
+                where("schoolId", "==", schoolId), 
+                where("timestamp", ">=", startDate),
+                where("timestamp", "<", endDate),
+                orderBy("timestamp", "desc")
+            );
+        } else {
+            // Default query: no month filter, limit to latest 200
+            qHistory = query(
+                waterQualityCol, 
+                where("schoolId", "==", schoolId), 
+                orderBy("timestamp", "desc"), 
+                limit(200)
+            );
+        }
 
         historyUnsubscribe = onSnapshot(qHistory, (snapshot) => {
             tbody.innerHTML = "";
+            const groupedData = {}; // Grouped by YYYY-MM or YYYY-MM-DD
 
             if (snapshot.empty) {
-                tbody.innerHTML = "<tr><td colspan='5'>No history logs found. (Check 'timestamp' field in database)</td></tr>";
+                tbody.innerHTML = "<tr><td colspan='5'>No history logs found for this selection.</td></tr>";
+                if(historyChartInstance) historyChartInstance.destroy();
+                chartContainer.style.display = "none";
                 return;
             }
 
@@ -649,17 +819,38 @@
                 const data = doc.data();
                 
                 let timeString = "Unknown Time";
+                let parsedDate = null;
                 try {
                     if (data.timestamp && data.timestamp.toDate) {
-                        timeString = data.timestamp.toDate().toLocaleString(); 
+                        parsedDate = data.timestamp.toDate();
                     } else if (data.timestamp) {
-                        timeString = new Date(data.timestamp).toLocaleString();
+                        parsedDate = new Date(data.timestamp);
                     }
-                } catch(e) { timeString = "Invalid Date"; }
+                    if(parsedDate) timeString = parsedDate.toLocaleString(); 
+                } catch(e) { }
 
-                const ph = data.phLevel !== undefined ? data.phLevel : "--";
-                const turb = data.turbidity !== undefined ? data.turbidity : "--";
-                const tds = data.tds !== undefined ? data.tds : "--";
+                const phRaw = parseFloat(data.phLevel);
+                const turbRaw = parseFloat(data.turbidity);
+                const tdsRaw = parseFloat(data.tds);
+
+                const ph = !isNaN(phRaw) ? phRaw.toFixed(2) : "--";
+                const turb = !isNaN(turbRaw) ? turbRaw.toFixed(2) : "--";
+                const tds = !isNaN(tdsRaw) ? tdsRaw.toFixed(2) : "--";
+
+                // --- DYNAMIC GROUPING LOGIC ---
+                if (parsedDate) {
+                    // If month is selected, group by Day (YYYY-MM-DD), else group by Month (YYYY-MM)
+                    const groupKey = monthValue 
+                        ? `${parsedDate.getFullYear()}-${String(parsedDate.getMonth() + 1).padStart(2, '0')}-${String(parsedDate.getDate()).padStart(2, '0')}`
+                        : `${parsedDate.getFullYear()}-${String(parsedDate.getMonth() + 1).padStart(2, '0')}`;
+                    
+                    if (!groupedData[groupKey]) {
+                        groupedData[groupKey] = { ph: [], turb: [], tds: [] };
+                    }
+                    if (!isNaN(phRaw)) groupedData[groupKey].ph.push(phRaw);
+                    if (!isNaN(turbRaw)) groupedData[groupKey].turb.push(turbRaw);
+                    if (!isNaN(tdsRaw)) groupedData[groupKey].tds.push(tdsRaw);
+                }
 
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
@@ -671,11 +862,15 @@
                 `;
                 tbody.appendChild(tr);
             });
+
+            // --- RENDER CHART ---
+            renderHistoryChart(groupedData, monthValue);
+
         }, (error) => {
             console.error("Error fetching history:", error);
             if (error.code === 'failed-precondition') {
                  tbody.innerHTML = `<tr><td colspan='5' style='color: orange; font-weight:bold; background:#fff3cd;'>
-                    ⚠️ ACTION REQUIRED: Open browser console (F12) and click the Firebase Index link.
+                    ⚠️ ACTION REQUIRED: Firestore requires a composite index to filter by School and Timestamp. Open your browser console (F12) and click the Firebase link provided to automatically create the index.
                  </td></tr>`;
             } else {
                  tbody.innerHTML = `<tr><td colspan='5' style='color:red;'>Error: ${error.message}</td></tr>`;
@@ -683,25 +878,257 @@
         });
     }
 
-    // REUSE CONFIRM MODAL FOR DELETION
+    // Function to calculate averages and render the Chart.js graph
+    function renderHistoryChart(groupedData, isMonthlyView) {
+        const ctx = document.getElementById('monthlyHistoryChart').getContext('2d');
+        
+        if (historyChartInstance) {
+            historyChartInstance.destroy();
+        }
+
+        // Sort chronologically (oldest to newest)
+        const labels = Object.keys(groupedData).sort();
+        
+        const avgCalc = (arr) => arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2) : 0;
+
+        const phAverages = labels.map(key => avgCalc(groupedData[key].ph));
+        const turbAverages = labels.map(key => avgCalc(groupedData[key].turb));
+        const tdsAverages = labels.map(key => avgCalc(groupedData[key].tds));
+
+        // Format labels based on the view
+        const formattedLabels = labels.map(label => {
+            const parts = label.split('-');
+            if (parts.length === 3) { // YYYY-MM-DD
+                const date = new Date(parts[0], parts[1] - 1, parts[2]);
+                return date.toLocaleDateString('default', { month: 'short', day: 'numeric' });
+            } else { // YYYY-MM
+                const date = new Date(parts[0], parts[1] - 1);
+                return date.toLocaleString('default', { month: 'short', year: 'numeric' });
+            }
+        });
+
+        historyChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: formattedLabels,
+                datasets: [
+                    {
+                        label: 'Avg pH Level',
+                        data: phAverages,
+                        borderColor: '#3182ce',
+                        backgroundColor: 'rgba(49, 130, 206, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: 'Avg Turbidity (NTU)',
+                        data: turbAverages,
+                        borderColor: '#dd6b20',
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        tension: 0.3
+                    },
+                    {
+                        label: 'Avg TDS (ppm)',
+                        data: tdsAverages,
+                        borderColor: '#805ad5',
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) { label += ': '; }
+                                if (context.parsed.y !== null) { label += context.parsed.y; }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+
+    // --- USER MANAGEMENT LOGIC ---
+    let usersUnsubscribe = null;
+
+    function loadUsers() {
+        if (usersUnsubscribe) return; 
+
+        usersUnsubscribe = onSnapshot(usersCol, (snapshot) => {
+            const tbody = document.getElementById("usersTableBody");
+            tbody.innerHTML = "";
+
+            if (snapshot.empty) {
+                tbody.innerHTML = "<tr><td colspan='4'>No users found in database.</td></tr>";
+                return;
+            }
+
+            snapshot.forEach(docSnap => {
+                const user = docSnap.data();
+                const userId = docSnap.id;
+                
+                let roleClass = "role-user";
+                if(user.role === 'superadmin') roleClass = "role-superadmin";
+                else if(user.role === 'admin') roleClass = "role-admin";
+
+                let lastLogin = "Never";
+                if(user.lastLogin && user.lastLogin.toDate) {
+                    lastLogin = user.lastLogin.toDate().toLocaleString();
+                }
+
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td style="font-weight:600;">${user.email || "Unknown Email"}</td>
+                    <td><span class="role-badge ${roleClass}">${user.role || "User"}</span></td>
+                    <td>${lastLogin}</td>
+                    <td class="action-cell">
+                        <button class="btn btn-edit" title="Edit Role" onclick="openEditUserModal('${userId}', '${user.email}', '${user.role}')">
+                            <img src="img/edit.png" class="btn-icon">
+                        </button>
+                        <button class="btn btn-delete" title="Delete User" onclick="openDeleteUserModal('${userId}')">
+                            <img src="img/trash.png" class="btn-icon">
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }, (error) => {
+            console.error("Error loading users:", error);
+            document.getElementById("usersTableBody").innerHTML = `<tr><td colspan='4' style='color:red;'>Error: ${error.message}</td></tr>`;
+        });
+    }
+
+    // --- ADD USER FUNCTION ---
+    window.openAddUserModal = function() {
+        document.getElementById('addUserModal').style.display = 'flex';
+        document.getElementById('newUserEmail').value = "";
+        document.getElementById('newUserPassword').value = "";
+        document.getElementById('newUserRole').value = "user";
+    }
+
+    window.closeAddUserModal = function() {
+        document.getElementById('addUserModal').style.display = 'none';
+    }
+
+    window.createNewUser = async function() {
+        const email = document.getElementById('newUserEmail').value.trim();
+        const role = document.getElementById('newUserRole').value;
+
+        if (!email) {
+            showAlert("Validation Error", "Please provide an email address.");
+            return;
+        }
+
+        if (!email.endsWith("@deped.gov.ph")) {
+            showAlert("Invalid Domain", "Only @deped.gov.ph emails can be registered.");
+            return;
+        }
+
+        const btn = document.querySelector('#addUserModal .btn-primary');
+        const originalText = btn.innerText;
+        btn.disabled = true;
+        btn.innerText = "Saving...";
+
+        try {
+            await addDoc(usersCol, {
+                email: email,
+                role: role,
+                createdAt: new Date(),
+                lastLogin: null,
+                authMethod: 'google'
+            });
+
+            closeAddUserModal();
+            showAlert("Success", `User ${email} has been pre-registered as ${role.toUpperCase()}!`);
+
+        } catch (error) {
+            console.error(error);
+            showAlert("Database Error", "Failed to add user: " + error.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerText = originalText;
+        }
+    }
+
+    window.openEditUserModal = function(id, email, role) {
+        document.getElementById('editUserId').value = id;
+        document.getElementById('editUserEmail').value = email;
+        document.getElementById('editUserRole').value = role || 'user';
+        document.getElementById('editUserModal').style.display = 'flex';
+    }
+
+    window.closeEditUserModal = function() {
+        document.getElementById('editUserModal').style.display = 'none';
+    }
+
+    window.saveUserRole = async function() {
+        const id = document.getElementById('editUserId').value;
+        const newRole = document.getElementById('editUserRole').value;
+        
+        try {
+            await updateDoc(doc(db, "users", id), {
+                role: newRole
+            });
+            closeEditUserModal();
+            showAlert("Success", "User role updated successfully.");
+        } catch (e) {
+            showAlert("Error", "Failed to update role: " + e.message);
+        }
+    }
+
+    // CONFIRM MODALS
+    let pendingDeleteType = ""; // 'school' or 'user'
     let pendingDeleteId = null;
 
     window.openDeleteModal = function(docId) {
+        pendingDeleteType = "school";
+        pendingDeleteId = docId;
+        document.getElementById('confirmModal').style.display = 'flex';
+    }
+
+    window.openDeleteUserModal = function(docId) {
+        pendingDeleteType = "user";
         pendingDeleteId = docId;
         document.getElementById('confirmModal').style.display = 'flex';
     }
 
     window.closeConfirm = function() {
         pendingDeleteId = null;
+        pendingDeleteType = "";
         document.getElementById('confirmModal').style.display = 'none';
     }
 
     window.confirmDeleteAction = async function() {
         if(pendingDeleteId) {
             try { 
-                await deleteDoc(doc(db, "Schools", pendingDeleteId)); 
+                let colName = pendingDeleteType === "school" ? "Schools" : "users";
+                await deleteDoc(doc(db, colName, pendingDeleteId)); 
+                
                 closeConfirm();
-                loadSchools(0);
+                
+                if(pendingDeleteType === "school") loadSchools(0);
+                
+                if(pendingDeleteType === "user") {
+                    showAlert("Deleted", "User record deleted from database. (Note: Account may still exist in Auth panel).");
+                }
             } 
             catch (e) { 
                 closeConfirm();
@@ -709,7 +1136,6 @@
             }
         }
     }
-
 
     // --- 1. REAL-TIME SENSOR DATA LISTENER ---
     const qWater = query(waterQualityCol, limit(20));
@@ -734,14 +1160,25 @@
 
         readings.forEach(data => {
             let timeString = "Live Data";
-            if (data.timestamp && data.timestamp.toDate) {
-                timeString = data.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            if (data.timestamp) {
+                if (typeof data.timestamp.toDate === 'function') {
+                    timeString = data.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                } else {
+                    const parsedDate = new Date(data.timestamp);
+                    if (!isNaN(parsedDate.getTime())) { 
+                        timeString = parsedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    }
+                }
+            } else {
+                const fallbackDate = new Date();
+                timeString = fallbackDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             }
 
-            const ph = data.phLevel !== undefined ? data.phLevel : "--";
-            const turb = data.turbidity !== undefined ? data.turbidity : "--";
-            const tds = data.tds !== undefined ? data.tds : "--";
-
+            const ph = data.phLevel !== undefined ? parseFloat(data.phLevel).toFixed(2) : "--";
+            const turb = data.turbidity !== undefined ? parseFloat(data.turbidity).toFixed(2) : "--";
+            const tds = data.tds !== undefined ? parseFloat(data.tds).toFixed(2) : "--";
+            
             const tr = document.createElement("tr");
             tr.innerHTML = `
                 <td>${timeString}</td>
@@ -752,16 +1189,16 @@
             `;
             readingsBody.appendChild(tr);
         });
-    }, (error) => {
-        console.error("Error fetching water data:", error);
-    });
+        }, (error) => {
+            console.error("Error fetching water data:", error);
+        });
 
     function updateDashboardCards(data) {
         const phVal = data.phLevel !== undefined ? data.phLevel : 0;
         const turbVal = data.turbidity !== undefined ? data.turbidity : 0;
         const tdsVal = data.tds !== undefined ? data.tds : 0;
 
-        document.getElementById("phValue").innerText = parseFloat(phVal).toFixed(1);
+        document.getElementById("phValue").innerText = parseFloat(phVal).toFixed(2);
         const phEl = document.getElementById("phStatus");
         
         if (phVal >= 6.5 && phVal <= 8.5) {
@@ -770,23 +1207,23 @@
             phEl.innerText = "● Attention Required"; phEl.style.color = "#c05621"; 
         }
 
-        document.getElementById("turbidityValue").innerText = parseFloat(turbVal).toFixed(1);
+        document.getElementById("turbidityValue").innerText = parseFloat(turbVal).toFixed(2);
         const turbEl = document.getElementById("turbidityStatus");
 
         if (turbVal < 5) {
             turbEl.innerText = "● Clear / Excellent"; turbEl.style.color = "#2f855a";
-        } else if (turbVal < 10) {
+        } else if (turbVal <= 10) {
              turbEl.innerText = "● Good"; turbEl.style.color = "#2f855a";
         } else {
             turbEl.innerText = "● Cloudy / High"; turbEl.style.color = "#c05621";
         }
 
-        document.getElementById("tdsValue").innerText = tdsVal;
+        document.getElementById("tdsValue").innerText = parseFloat(tdsVal).toFixed(2); 
         const tdsEl = document.getElementById("tdsStatus");
 
         if (tdsVal < 300) {
             tdsEl.innerText = "● Excellent"; tdsEl.style.color = "#2f855a";
-        } else if (tdsVal < 600) {
+        } else if (tdsVal <= 600) {
             tdsEl.innerText = "● Good"; tdsEl.style.color = "#2b6cb0"; 
         } else {
             tdsEl.innerText = "● High Solids"; tdsEl.style.color = "#c05621";
@@ -797,7 +1234,7 @@
         const p = parseFloat(ph) || 0;
         const t = parseFloat(turb) || 0;
         const s = parseFloat(tds) || 0;
-        if ((p >= 6.5 && p <= 8.5) && t < 10 && s < 1000) {
+        if ((p >= 6.5 && p <= 8.5) && t <= 10 && s <= 600) {
             return '<span style="color: green; font-weight:bold;">Normal</span>';
         }
         return '<span style="color: orange; font-weight:bold;">Check</span>';
@@ -805,7 +1242,6 @@
 
 
     // --- 2. SCHOOLS LOGIC (PAGINATION + CLIENT-SIDE SEARCH) ---
-
     let schoolsUnsubscribe = null;
     let currentPage = 1;
     const pageSize = 5; 
@@ -871,7 +1307,7 @@
                         <td class="email-cell">${school.email || "N/A"}</td>
                         ${statusHtml}
                         <td class="action-cell">
-                            <button class="btn btn-email" title="Send Report" onclick="openReportModal('${school.schoolName}', '${school.email}')">
+                            <button class="btn btn-email" title="Send Report" onclick="openReportModal('${schoolId}', '${school.schoolName}', '${school.email}')">
                                 <img src="img/gmail.png" class="btn-icon">
                             </button>
                             <button class="btn btn-edit" title="Edit" onclick="editSchool('${schoolId}')">
@@ -1063,7 +1499,9 @@
     // REPORT GENERATION
     let isWaitingForReturn = false; 
 
-    window.openReportModal = function(schoolName, schoolEmail) {
+    // UPDATED: Accepts schoolId and sets the hidden input
+    window.openReportModal = function(schoolId, schoolName, schoolEmail) {
+        document.getElementById('currentSchoolId').value = schoolId;
         document.getElementById('currentSchoolName').value = schoolName;
         document.getElementById('currentSchoolEmail').value = schoolEmail;
         document.getElementById('reportModal').style.display = 'flex';
@@ -1245,6 +1683,23 @@
         const curPh = parseFloat(document.getElementById("phValue").innerText) || 0;
         const curTds = parseFloat(document.getElementById("tdsValue").innerText) || 0;
         const curTurb = parseFloat(document.getElementById("turbidityValue").innerText) || 0;
+
+        // --- NEW: SAVE DATA TO FIRESTORE HISTORY LOG ---
+        const schoolId = document.getElementById('currentSchoolId').value;
+        try {
+            await addDoc(waterQualityCol, {
+                schoolId: schoolId,
+                phLevel: isNaN(curPh) ? 0 : curPh,
+                tds: isNaN(curTds) ? 0 : curTds,
+                turbidity: isNaN(curTurb) ? 0 : curTurb,
+                timestamp: new Date() // Forces accurate timestamp execution
+            });
+            console.log("History log saved successfully.");
+        } catch (error) {
+            console.error("Failed to save history log:", error);
+            showAlert("Warning", "Report generated, but failed to save history log to database.");
+        }
+        // -----------------------------------------------
 
         // Determine individual statuses for table
         const phStatus = (curPh >= 6.5 && curPh <= 8.5) ? "Good" : "Check";

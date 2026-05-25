@@ -8,6 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         /* --- CSS STYLES --- */
@@ -19,6 +20,7 @@
             color: #333; 
             display: flex; 
             flex-direction: column; 
+            /* Fixed Dashboard height to prevent page jumping */
             height: 100vh; 
             overflow: hidden; 
         }
@@ -35,6 +37,7 @@
             z-index: 1000;
             flex-shrink: 0;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border-bottom: 2px solid #FFD700;
         }
 
         /* 1. Left: Brand Logo & Text */
@@ -165,6 +168,7 @@
             background-color: #fa6824;
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(255, 126, 64, 0.4);
+            color: #fff;
         }
 
         /* --- APP LAYOUT WRAPPER --- */
@@ -287,6 +291,9 @@
         .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.15); opacity: 0.95; }
         .btn-primary { background-color: #3182ce; color: white; }
         .btn-email { background-color: #6aaee7; color: white; padding: 6px 12px; }
+        .btn-edit { background-color: #deb053; color: white; padding: 6px 10px; }
+        .btn-save { background-color: #38a169; color: white; padding: 6px 10px; }
+        .btn-delete { background-color: #e53e3e; color: white; padding: 6px 10px; }
         .btn-cancel { background-color: #718096; color: white; }
         .action-cell { display: flex; gap: 8px; }
 
@@ -297,6 +304,17 @@
         .search-container input { padding: 10px; background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 6px; flex: 1; outline: none; }
         .search-container input:focus { background: rgba(255, 255, 255, 0.9); border-color: #4299e1; }
         .search-actions { display: flex; gap: 10px; }
+        
+        .add-school-form { 
+            background-color: rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 15px; border-radius: 10px; margin-bottom: 20px; display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; 
+        }
+        .form-group { flex: 1; display: flex; flex-direction: column; gap: 5px; margin-bottom: 15px; }
+        .form-group label { font-size: 0.85rem; color: #2d3748; font-weight: 700; }
+        .form-group input, .form-group select { padding: 10px; background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 6px; outline: none; width: 100%; color: #1a202c; }
+        .form-group input:focus, .form-group select:focus { border-color: #4299e1; background: rgba(255, 255, 255, 0.9); }
+        .edit-input { padding: 8px; border: 1px solid #4299e1; border-radius: 4px; width: 100%; font-size: 0.9rem; background: rgba(255,255,255,0.8); }
 
         /* --- MODALS --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; backdrop-filter: blur(8px); }
@@ -305,10 +323,6 @@
         .modal h3 { margin-bottom: 10px; color: #2d3748; }
         .modal p { color: #4a5568; line-height: 1.5; font-size: 0.95rem; margin-bottom: 20px; }
         .modal-buttons { margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px; }
-        
-        .form-group { flex: 1; display: flex; flex-direction: column; gap: 5px; margin-bottom: 15px; }
-        .form-group label { font-size: 0.85rem; color: #2d3748; font-weight: 700; }
-        .form-group input { padding: 10px; background: rgba(255, 255, 255, 0.6); border: 1px solid #cbd5e0; border-radius: 6px; outline: none; width: 100%; color: #1a202c; }
 
         /* --- PAGINATION --- */
         .pagination-controls { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
@@ -451,7 +465,14 @@
                 <section class="data-section">
                     <h3>School Testing Registry</h3>
                     
-                    <div class="search-container" style="margin-top: 15px;">
+                    <div class="add-school-form" style="margin-top: 15px; margin-bottom: 0;">
+                        <div class="form-group" style="margin-bottom: 0;"><label>Name of School <span style="color:red">*</span></label><input type="text" id="newSchoolName" placeholder="e.g. Mabalacat School"></div>
+                        <div class="form-group" style="margin-bottom: 0;"><label>School Head</label><input type="text" id="newSchoolHead" placeholder="e.g. Mr. Juan Dela Cruz"></div>
+                        <div class="form-group" style="margin-bottom: 0;"><label>Email</label><input type="email" id="newSchoolEmail" placeholder="e.g. @depedmabalacat.org"></div>
+                        <button class="btn btn-primary" onclick="addSchoolToDB()">+ Add School</button>
+                    </div>
+
+                    <div class="search-container" style="margin-top: 20px;">
                         <input type="text" id="searchInput" placeholder="Search by School Name (e.g. 'Mabalacat')" 
                                oninput="handleSearch(this.value)">
                         <div class="search-actions">
@@ -479,14 +500,34 @@
 
             <div id="history-view" class="view-section">
                 <section class="data-section">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap: wrap; gap: 15px;">
                         <h3>Historical Data Logs</h3>
+                        
+                        <div style="display:flex; gap: 15px; flex-wrap: wrap;">
+                            <div class="form-group" style="min-width: 200px; margin-bottom: 0;">
+                                <label style="margin-bottom: 5px;">Filter by Month:</label>
+                                <input type="month" id="historyMonthSelect" onchange="applyHistoryFilters()" style="padding: 8px; border-radius: 6px; border: 1px solid #cbd5e0; outline: none; background: rgba(255, 255, 255, 0.9);">
+                            </div>
+                            
+                            <div class="form-group" style="min-width: 250px; margin-bottom: 0;">
+                                <label style="margin-bottom: 5px;">Filter by School:</label>
+                                <select id="historySchoolSelect" onchange="applyHistoryFilters()" style="padding: 8px; border-radius: 6px; border: 1px solid #cbd5e0;">
+                                    <option value="">-- Select a School --</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="chart-container" style="position: relative; height:40vh; width:100%; margin-bottom: 30px; display: none;">
+                        <canvas id="monthlyHistoryChart"></canvas>
                     </div>
                     
                     <div class="table-wrapper">
                         <table>
                             <thead><tr><th>Timestamp</th><th>pH Level</th><th>Turbidity (NTU)</th><th>TDS (ppm)</th><th>Status</th></tr></thead>
-                            <tbody id="historyTableBody"><tr><td colspan="5">Loading logs...</td></tr></tbody>
+                            <tbody id="historyTableBody">
+                                <tr><td colspan="5">Please select a school to view its history logs...</td></tr>
+                            </tbody>
                         </table>
                     </div>
                 </section>
@@ -513,8 +554,11 @@
                 <label>Tested By (Name):</label>
                 <input type="text" id="testerName" placeholder="Juan Dela Cruz">
             </div>
+            
+            <input type="hidden" id="currentSchoolId">
             <input type="hidden" id="currentSchoolName">
             <input type="hidden" id="currentSchoolEmail">
+            
             <div class="modal-buttons">
                 <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
                 <button class="btn btn-primary" onclick="generateAndSend()">Download & Open Gmail</button>
@@ -528,6 +572,17 @@
             <p id="alertMessage">Message goes here...</p>
             <div class="modal-buttons">
                 <button class="btn btn-primary" onclick="closeAlert()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal">
+            <h3>Delete Record?</h3>
+            <p>Are you sure you want to permanently delete this record? This action cannot be undone.</p>
+            <div class="modal-buttons">
+                <button class="btn btn-cancel" onclick="closeConfirm()">Cancel</button>
+                <button class="btn btn-delete" onclick="confirmDeleteAction()">Delete</button>
             </div>
         </div>
     </div>
@@ -547,7 +602,7 @@
     <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, onSnapshot, doc, query, orderBy, limit, startAfter, endBefore, limitToLast } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, doc, addDoc, updateDoc, deleteDoc, query, orderBy, limit, startAfter, endBefore, limitToLast, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAxWmm5YsLjnwatHOVImrpIHAxicbHWYuw",
@@ -583,7 +638,7 @@
             document.getElementById('nav-history').classList.add('active');
             document.getElementById('page-title').innerText = "History Logs";
             document.getElementById('page-subtitle').innerText = "Past water quality records";
-            loadHistoryLogs(); 
+            populateSchoolDropdown(); 
         }
     }
 
@@ -599,37 +654,120 @@
         }
     }
 
-    // --- HISTORY LOGS LOGIC ---
+    // --- HISTORY LOGS LOGIC (WITH CALENDAR FILTER) ---
     let historyUnsubscribe = null;
+    let schoolDropdownUnsubscribe = null;
+    let historyChartInstance = null; 
 
-    function loadHistoryLogs() {
-        if (historyUnsubscribe) return; 
+    window.populateSchoolDropdown = function() {
+        const select = document.getElementById("historySchoolSelect");
+        if (schoolDropdownUnsubscribe) return; 
+
+        schoolDropdownUnsubscribe = onSnapshot(query(schoolsCol, orderBy("schoolName")), (snapshot) => {
+            const currentValue = select.value;
+            select.innerHTML = '<option value="">-- Select a School --</option>';
+
+            snapshot.forEach(docSnap => {
+                const school = docSnap.data();
+                const option = document.createElement("option");
+                option.value = docSnap.id; 
+                option.textContent = school.schoolName;
+                select.appendChild(option);
+            });
+
+            if (currentValue) select.value = currentValue; 
+        });
+    }
+
+    window.applyHistoryFilters = function() {
+        const schoolId = document.getElementById("historySchoolSelect").value;
+        const monthValue = document.getElementById("historyMonthSelect").value;
+        
+        if (historyUnsubscribe) {
+            historyUnsubscribe(); 
+            historyUnsubscribe = null;
+        }
 
         const tbody = document.getElementById("historyTableBody");
-        const qHistory = query(waterQualityCol, orderBy("timestamp", "desc"), limit(50));
+        const chartContainer = document.getElementById("chart-container");
+
+        if (!schoolId) {
+            tbody.innerHTML = "<tr><td colspan='5'>Please select a school to view its history logs...</td></tr>";
+            chartContainer.style.display = "none";
+            return;
+        }
+
+        tbody.innerHTML = "<tr><td colspan='5'>Loading logs...</td></tr>";
+        chartContainer.style.display = "block"; 
+        
+        let qHistory;
+
+        if (monthValue) {
+            const [year, month] = monthValue.split('-');
+            const startDate = new Date(year, month - 1, 1);
+            const endDate = new Date(year, month, 1); 
+
+            qHistory = query(
+                waterQualityCol, 
+                where("schoolId", "==", schoolId), 
+                where("timestamp", ">=", startDate),
+                where("timestamp", "<", endDate),
+                orderBy("timestamp", "desc")
+            );
+        } else {
+            qHistory = query(
+                waterQualityCol, 
+                where("schoolId", "==", schoolId), 
+                orderBy("timestamp", "desc"), 
+                limit(200)
+            );
+        }
 
         historyUnsubscribe = onSnapshot(qHistory, (snapshot) => {
             tbody.innerHTML = "";
+            const groupedData = {}; 
 
             if (snapshot.empty) {
-                tbody.innerHTML = "<tr><td colspan='5'>No history logs found.</td></tr>";
+                tbody.innerHTML = "<tr><td colspan='5'>No history logs found for this selection.</td></tr>";
+                if(historyChartInstance) historyChartInstance.destroy();
+                chartContainer.style.display = "none";
                 return;
             }
 
             snapshot.forEach(doc => {
                 const data = doc.data();
+                
                 let timeString = "Unknown Time";
+                let parsedDate = null;
                 try {
                     if (data.timestamp && data.timestamp.toDate) {
-                        timeString = data.timestamp.toDate().toLocaleString(); 
+                        parsedDate = data.timestamp.toDate();
                     } else if (data.timestamp) {
-                        timeString = new Date(data.timestamp).toLocaleString();
+                        parsedDate = new Date(data.timestamp);
                     }
-                } catch(e) { timeString = "Invalid Date"; }
+                    if(parsedDate) timeString = parsedDate.toLocaleString(); 
+                } catch(e) { }
 
-                const ph = data.phLevel !== undefined ? data.phLevel : "--";
-                const turb = data.turbidity !== undefined ? data.turbidity : "--";
-                const tds = data.tds !== undefined ? data.tds : "--";
+                const phRaw = parseFloat(data.phLevel);
+                const turbRaw = parseFloat(data.turbidity);
+                const tdsRaw = parseFloat(data.tds);
+
+                const ph = !isNaN(phRaw) ? phRaw.toFixed(2) : "--";
+                const turb = !isNaN(turbRaw) ? turbRaw.toFixed(2) : "--";
+                const tds = !isNaN(tdsRaw) ? tdsRaw.toFixed(2) : "--";
+
+                if (parsedDate) {
+                    const groupKey = monthValue 
+                        ? `${parsedDate.getFullYear()}-${String(parsedDate.getMonth() + 1).padStart(2, '0')}-${String(parsedDate.getDate()).padStart(2, '0')}`
+                        : `${parsedDate.getFullYear()}-${String(parsedDate.getMonth() + 1).padStart(2, '0')}`;
+                    
+                    if (!groupedData[groupKey]) {
+                        groupedData[groupKey] = { ph: [], turb: [], tds: [] };
+                    }
+                    if (!isNaN(phRaw)) groupedData[groupKey].ph.push(phRaw);
+                    if (!isNaN(turbRaw)) groupedData[groupKey].turb.push(turbRaw);
+                    if (!isNaN(tdsRaw)) groupedData[groupKey].tds.push(tdsRaw);
+                }
 
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
@@ -641,12 +779,96 @@
                 `;
                 tbody.appendChild(tr);
             });
+
+            renderHistoryChart(groupedData, monthValue);
+
         }, (error) => {
             console.error("Error fetching history:", error);
             if (error.code === 'failed-precondition') {
-                 tbody.innerHTML = `<tr><td colspan='5' style='color: orange; font-weight:bold; background:#fff3cd;'>⚠️ ACTION REQUIRED: Open browser console (F12) and click the Firebase Index link.</td></tr>`;
+                 tbody.innerHTML = `<tr><td colspan='5' style='color: orange; font-weight:bold; background:#fff3cd;'>
+                    ⚠️ ACTION REQUIRED: Firestore requires a composite index to filter by School and Timestamp. Open your browser console (F12) and click the Firebase link provided to automatically create the index.
+                 </td></tr>`;
             } else {
                  tbody.innerHTML = `<tr><td colspan='5' style='color:red;'>Error: ${error.message}</td></tr>`;
+            }
+        });
+    }
+
+    function renderHistoryChart(groupedData, isMonthlyView) {
+        const ctx = document.getElementById('monthlyHistoryChart').getContext('2d');
+        
+        if (historyChartInstance) {
+            historyChartInstance.destroy();
+        }
+
+        const labels = Object.keys(groupedData).sort();
+        const avgCalc = (arr) => arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2) : 0;
+
+        const phAverages = labels.map(key => avgCalc(groupedData[key].ph));
+        const turbAverages = labels.map(key => avgCalc(groupedData[key].turb));
+        const tdsAverages = labels.map(key => avgCalc(groupedData[key].tds));
+
+        const formattedLabels = labels.map(label => {
+            const parts = label.split('-');
+            if (parts.length === 3) { 
+                const date = new Date(parts[0], parts[1] - 1, parts[2]);
+                return date.toLocaleDateString('default', { month: 'short', day: 'numeric' });
+            } else { 
+                const date = new Date(parts[0], parts[1] - 1);
+                return date.toLocaleString('default', { month: 'short', year: 'numeric' });
+            }
+        });
+
+        historyChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: formattedLabels,
+                datasets: [
+                    {
+                        label: 'Avg pH Level',
+                        data: phAverages,
+                        borderColor: '#3182ce',
+                        backgroundColor: 'rgba(49, 130, 206, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: 'Avg Turbidity (NTU)',
+                        data: turbAverages,
+                        borderColor: '#dd6b20',
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        tension: 0.3
+                    },
+                    {
+                        label: 'Avg TDS (ppm)',
+                        data: tdsAverages,
+                        borderColor: '#805ad5',
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) { label += ': '; }
+                                if (context.parsed.y !== null) { label += context.parsed.y; }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: { y: { beginAtZero: true } }
             }
         });
     }
@@ -676,12 +898,20 @@
             let timeString = "Live Data";
             if (data.timestamp && data.timestamp.toDate) {
                 timeString = data.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            } else if (data.timestamp) {
+                const parsedDate = new Date(data.timestamp);
+                if (!isNaN(parsedDate.getTime())) { 
+                    timeString = parsedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                }
+            } else {
+                const fallbackDate = new Date();
+                timeString = fallbackDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             }
 
-            const ph = data.phLevel !== undefined ? data.phLevel : "--";
-            const turb = data.turbidity !== undefined ? data.turbidity : "--";
-            const tds = data.tds !== undefined ? data.tds : "--";
-
+            const ph = data.phLevel !== undefined ? parseFloat(data.phLevel).toFixed(2) : "--";
+            const turb = data.turbidity !== undefined ? parseFloat(data.turbidity).toFixed(2) : "--";
+            const tds = data.tds !== undefined ? parseFloat(data.tds).toFixed(2) : "--";
+            
             const tr = document.createElement("tr");
             tr.innerHTML = `
                 <td>${timeString}</td>
@@ -701,7 +931,7 @@
         const turbVal = data.turbidity !== undefined ? data.turbidity : 0;
         const tdsVal = data.tds !== undefined ? data.tds : 0;
 
-        document.getElementById("phValue").innerText = parseFloat(phVal).toFixed(1);
+        document.getElementById("phValue").innerText = parseFloat(phVal).toFixed(2);
         const phEl = document.getElementById("phStatus");
         
         if (phVal >= 6.5 && phVal <= 8.5) {
@@ -710,7 +940,7 @@
             phEl.innerText = "● Attention Required"; phEl.style.color = "#c05621"; 
         }
 
-        document.getElementById("turbidityValue").innerText = parseFloat(turbVal).toFixed(1);
+        document.getElementById("turbidityValue").innerText = parseFloat(turbVal).toFixed(2);
         const turbEl = document.getElementById("turbidityStatus");
 
         if (turbVal < 5) {
@@ -721,7 +951,7 @@
             turbEl.innerText = "● Cloudy / High"; turbEl.style.color = "#c05621";
         }
 
-        document.getElementById("tdsValue").innerText = tdsVal;
+        document.getElementById("tdsValue").innerText = parseFloat(tdsVal).toFixed(2); 
         const tdsEl = document.getElementById("tdsStatus");
 
         if (tdsVal < 300) {
@@ -743,7 +973,7 @@
         return '<span style="color: orange; font-weight:bold;">Check</span>';
     }
 
-    // --- 2. SCHOOLS LOGIC (PAGINATION + CLIENT-SIDE SEARCH ONLY) ---
+    // --- 2. SCHOOLS LOGIC (PAGINATION + CLIENT-SIDE SEARCH) ---
     let schoolsUnsubscribe = null;
     let currentPage = 1;
     const pageSize = 5; 
@@ -798,17 +1028,25 @@
             } else {
                 allDocs.forEach(item => {
                     const school = item.data;
+                    const schoolId = item.id;
                     const statusHtml = `<td><span style="color: #a0aec0;">--</span></td>`;
 
                     const tr = document.createElement("tr");
+                    tr.id = `row-${schoolId}`; 
                     tr.innerHTML = `
                         <td class="name-cell">${school.schoolName || "N/A"}</td>
                         <td class="head-cell">${school.schoolHead || "N/A"}</td>
                         <td class="email-cell">${school.email || "N/A"}</td>
                         ${statusHtml}
                         <td class="action-cell">
-                            <button class="btn btn-email" title="Send Report" onclick="openReportModal('${school.schoolName}', '${school.email}')">
+                            <button class="btn btn-email" title="Send Report" onclick="openReportModal('${schoolId}', '${school.schoolName}', '${school.email}')">
                                 <img src="img/gmail.png" class="btn-icon" style="margin-right: 5px;"> Report
+                            </button>
+                            <button class="btn btn-edit" title="Edit" onclick="editSchool('${schoolId}')">
+                                <img src="img/edit.png" class="btn-icon">
+                            </button>
+                            <button class="btn btn-delete" title="Delete" onclick="openDeleteModal('${schoolId}')">
+                                <img src="img/trash.png" class="btn-icon">
                             </button>
                         </td>
                     `;
@@ -901,10 +1139,127 @@
         document.getElementById('shareModal').style.display = 'none';
     }
 
+    // EDIT SCHOOL FUNCTIONS
+    let originalData = {}; 
+
+    window.editSchool = function(id) {
+        const row = document.getElementById(`row-${id}`);
+        if(!row) return;
+
+        const nameCell = row.querySelector('.name-cell');
+        const headCell = row.querySelector('.head-cell');
+        const emailCell = row.querySelector('.email-cell');
+        const actionsCell = row.querySelector('.action-cell');
+
+        originalData[id] = {
+            name: nameCell.innerText,
+            head: headCell.innerText,
+            email: emailCell.innerText,
+            actions: actionsCell.innerHTML
+        };
+
+        nameCell.innerHTML = `<input type="text" id="edit-name-${id}" value="${originalData[id].name}" class="edit-input">`;
+        headCell.innerHTML = `<input type="text" id="edit-head-${id}" value="${originalData[id].head === "N/A" ? "" : originalData[id].head}" class="edit-input">`;
+        emailCell.innerHTML = `<input type="email" id="edit-email-${id}" value="${originalData[id].email === "N/A" ? "" : originalData[id].email}" class="edit-input">`;
+
+        actionsCell.innerHTML = `
+            <button class="btn btn-save" onclick="saveSchool('${id}')">💾 Save</button>
+            <button class="btn btn-cancel" onclick="cancelEdit('${id}')">❌</button>
+        `;
+    }
+
+    window.saveSchool = async function(id) {
+        const newName = document.getElementById(`edit-name-${id}`).value.trim();
+        const newHead = document.getElementById(`edit-head-${id}`).value.trim();
+        const newEmail = document.getElementById(`edit-email-${id}`).value.trim();
+
+        if(!newName) {
+            showAlert("Validation Error", "School Name cannot be empty.");
+            return;
+        }
+
+        try {
+            await updateDoc(doc(db, "Schools", id), {
+                schoolName: newName,
+                schoolHead: newHead,
+                email: newEmail
+            });
+            loadSchools(0);
+        } catch (e) {
+            showAlert("Error", "Could not update school: " + e.message);
+        }
+    }
+
+    window.cancelEdit = function(id) {
+        const row = document.getElementById(`row-${id}`);
+        if(!row || !originalData[id]) return;
+        row.querySelector('.name-cell').innerText = originalData[id].name;
+        row.querySelector('.head-cell').innerText = originalData[id].head;
+        row.querySelector('.email-cell').innerText = originalData[id].email;
+        row.querySelector('.action-cell').innerHTML = originalData[id].actions;
+        delete originalData[id];
+    }
+
+    // ADD SCHOOL FUNCTION
+    window.addSchoolToDB = async function() {
+        const name = document.getElementById('newSchoolName').value.trim();
+        const head = document.getElementById('newSchoolHead').value.trim();
+        const email = document.getElementById('newSchoolEmail').value.trim();
+
+        if(!name) { 
+            showAlert("Missing Information", "Please enter the School Name."); 
+            return; 
+        }
+
+        try {
+            await addDoc(schoolsCol, {
+                schoolName: name, schoolHead: head, email: email, createdAt: new Date()
+            });
+            document.getElementById('newSchoolName').value = "";
+            document.getElementById('newSchoolHead').value = "";
+            document.getElementById('newSchoolEmail').value = "";
+            showAlert("Success", "School added successfully!");
+            
+            currentPage = 1;
+            loadSchools(0);
+
+        } catch (e) {
+            showAlert("Database Error", "Error saving to database: " + e.message);
+        }
+    }
+
+    // REUSE CONFIRM MODAL FOR DELETION
+    let pendingDeleteId = null;
+
+    window.openDeleteModal = function(docId) {
+        pendingDeleteId = docId;
+        document.getElementById('confirmModal').style.display = 'flex';
+    }
+
+    window.closeConfirm = function() {
+        pendingDeleteId = null;
+        document.getElementById('confirmModal').style.display = 'none';
+    }
+
+    window.confirmDeleteAction = async function() {
+        if(pendingDeleteId) {
+            try { 
+                await deleteDoc(doc(db, "Schools", pendingDeleteId)); 
+                closeConfirm();
+                loadSchools(0);
+            } 
+            catch (e) { 
+                closeConfirm();
+                showAlert("Error", "Failed to delete: " + e.message); 
+            }
+        }
+    }
+
     // REPORT GENERATION
     let isWaitingForReturn = false; 
 
-    window.openReportModal = function(schoolName, schoolEmail) {
+    window.openReportModal = function(schoolId, schoolName, schoolEmail) {
+        document.getElementById('currentSchoolId').value = schoolId;
         document.getElementById('currentSchoolName').value = schoolName;
         document.getElementById('currentSchoolEmail').value = schoolEmail;
         document.getElementById('reportModal').style.display = 'flex';
@@ -1016,6 +1371,7 @@
         doc.setFont(undefined, 'normal');
         doc.text(`Reference for: ${school}`, 14, 65);
 
+        // TABLE 1: pH Range (Top Left)
         doc.autoTable({
             startY: 70,
             head: [['Denomination', 'pH Range']],
@@ -1032,6 +1388,7 @@
         });
         let finalY_pH = doc.lastAutoTable.finalY;
 
+        // TABLE 2: TDS Level (Top Right)
         doc.autoTable({
             startY: 70, 
             head: [['Level of TDS (mg/L)', 'Rating']],
@@ -1044,9 +1401,11 @@
             tableWidth: 80,
             margin: { left: 110 } 
         });
-        let finalY_TDS = doc.lastAutoTable.finalY;
+        let finalY_TDS_small = doc.lastAutoTable.finalY;
 
-        let bottomStartY = Math.max(finalY_pH, finalY_TDS) + 10;
+        let bottomStartY = Math.max(finalY_pH, finalY_TDS_small) + 10;
+
+        // TABLE 3: Turbidity & Hardness (Bottom)
         doc.autoTable({
             startY: bottomStartY,
             head: [
@@ -1080,9 +1439,26 @@
         doc.setFont(undefined, 'bold');
         doc.text(`II. Water Quality Test Results - ${school}`, 14, 60);
 
-        const curPh = document.getElementById("phValue").innerText;
-        const curTds = document.getElementById("tdsValue").innerText;
-        const curTurb = document.getElementById("turbidityValue").innerText;
+        const curPh = parseFloat(document.getElementById("phValue").innerText) || 0;
+        const curTds = parseFloat(document.getElementById("tdsValue").innerText) || 0;
+        const curTurb = parseFloat(document.getElementById("turbidityValue").innerText) || 0;
+
+        // --- SAVE DATA TO FIRESTORE HISTORY LOG ---
+        const schoolId = document.getElementById('currentSchoolId').value;
+        try {
+            await addDoc(waterQualityCol, {
+                schoolId: schoolId,
+                phLevel: isNaN(curPh) ? 0 : curPh,
+                tds: isNaN(curTds) ? 0 : curTds,
+                turbidity: isNaN(curTurb) ? 0 : curTurb,
+                timestamp: new Date() // Forces accurate timestamp execution
+            });
+            console.log("History log saved successfully.");
+        } catch (error) {
+            console.error("Failed to save history log:", error);
+            showAlert("Warning", "Report generated, but failed to save history log to database.");
+        }
+        // -----------------------------------------------
 
         const tableData = [
             ["pH Level", `${curPh} pH`, curPh >= 6.5 && curPh <= 8.5 ? "Good" : "Check"],
