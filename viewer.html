@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | AquaMonitor</title>
+    <title>Viewer | AquaMonitor</title>
     
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -20,222 +20,78 @@
             color: #333; 
             display: flex; 
             flex-direction: column; 
-            /* Fixed Dashboard height to prevent page jumping */
             height: 100vh; 
             overflow: hidden; 
         }
 
-        /* --- MODERN TOP NAVBAR (EXACT DEPED BRANDING) --- */
-        .top-navbar {
+        /* --- DEPED HEADER BANNER & NAV --- */
+        .deped-banner {
             width: 100%;
-            background-color: #001489; /* DepEd Blue */
-            padding: 12px 30px;
+            background-color: #001489;
+            padding: 15px 30px;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 20px;
             box-sizing: border-box;
             z-index: 1000;
             flex-shrink: 0;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             border-bottom: 2px solid #FFD700;
         }
 
-        /* 1. Left: Brand Logo & Text */
-        .navbar-brand {
-            display: flex;
-            align-items: center;
-            gap: 15px;
+        .header-brand { display: flex; align-items: center; gap: 20px; }
+        .header-brand img { width: 80px; height: 80px; object-fit: contain; }
+        .deped-banner-text { display: flex; flex-direction: column; }
+        
+        .deped-banner-top {
+            color: #ffffff; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.4;
         }
+        .deped-banner-top span { color: #FFD700; }
+        .deped-banner-line { height: 2px; background-color: #FFD700; margin: 4px 0; width: 100%; max-width: 580px; }
+        .deped-banner-title { color: #FFD700; font-size: 24px; font-family: 'Times New Roman', Times, serif; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+        .deped-banner-bottom { color: #FFD700; font-size: 11px; text-transform: uppercase; margin-top: 4px; font-weight: 600; }
 
-        .navbar-brand img {
-            width: 80px;
-            height: 80px;
-            object-fit: contain;
+        /* --- HORIZONTAL NAVIGATION --- */
+        .header-nav { display: flex; align-items: center; gap: 10px; }
+        .header-nav a { 
+            display: flex; align-items: center; gap: 8px; color: #e2e8f0; text-decoration: none; padding: 10px 16px; border-radius: 8px; transition: 0.3s; cursor: pointer; font-weight: 600; font-size: 0.95rem;
         }
-
-        .brand-text {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .brand-text .top-text-white {
-            color: #ffffff;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            line-height: 1.3;
-        }
-
-        .brand-text .top-text-yellow {
-            color: #FFD700;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            line-height: 1.3;
-            margin-bottom: 4px;
-        }
-
-        .brand-text .deped-banner-line {
-            height: 2px;
-            background-color: #FFD700;
-            width: 100%;
-            max-width: 580px;
-            margin: 2px 0;
-        }
-
-        .brand-text .main-title {
-            color: #FFD700;
-            font-size: 26px;
-            font-family: 'Times New Roman', Times, serif;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 4px;
-            line-height: 1;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-        }
-
-        .brand-text .deped-banner-bottom {
-            color: #FFD700;
-            font-size: 11px;
-            margin-top: 6px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-
-        /* 2. Center: Navigation Menu */
-        .navbar-menu {
-            display: flex;
-            align-items: center;
-            gap: 30px;
-        }
-
-        .navbar-menu a {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #e2e8f0;
-            text-decoration: none;
-            font-size: 0.95rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: color 0.3s;
-            position: relative;
-            cursor: pointer;
-            padding: 5px 0;
-        }
-
-        .navbar-menu a i { font-size: 1.1rem; }
-        .navbar-menu a:hover, .navbar-menu a.active { color: #FFD700; }
-
-        .navbar-menu a::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -5px;
-            left: 0;
-            background-color: #FFD700;
-            transition: width 0.3s;
-        }
-
-        .navbar-menu a:hover::after, .navbar-menu a.active::after { width: 100%; }
-
-        /* 3. Right: Action Button */
-        .navbar-actions { display: flex; align-items: center; }
-
-        .logout-btn {
-            background-color: #FF7E40;
-            color: white;
-            padding: 10px 28px;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(255, 126, 64, 0.3);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .logout-btn:hover {
-            background-color: #fa6824;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(255, 126, 64, 0.4);
-            color: #fff;
-        }
+        .header-nav a:hover, .header-nav a.active { background-color: rgba(255, 215, 0, 0.15); color: #FFD700; }
+        .header-nav .logout-link { color: #fc8181 !important; border: 1px solid rgba(252, 129, 129, 0.3); margin-left: 10px; }
+        .header-nav .logout-link:hover { background-color: rgba(229, 62, 62, 0.2) !important; border-color: #fc8181 !important; color: #fff !important; }
 
         /* --- APP LAYOUT WRAPPER --- */
-        .app-layout {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            width: 100%;
-            overflow: hidden; 
-        }
-        
-        /* --- MAIN CONTENT --- */
-        .main-content { 
-            flex: 1; 
-            padding: 30px; 
-            height: 100%; 
-            overflow-y: auto; 
-            position: relative; 
-            width: 100%; 
-        }
+        .app-layout { display: flex; flex-direction: column; flex: 1; width: 100%; overflow: hidden; }
+        .main-content { flex: 1; padding: 30px; height: 100%; overflow-y: auto; position: relative; width: 100%; }
 
         /* VIEW TOGGLING */
-        .view-section {
-            display: none;
-            animation: fadeIn 0.4s ease-out;
-        }
+        .view-section { display: none; animation: fadeIn 0.4s ease-out; }
         .view-section.active-view { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        header.content-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }
-        header.content-header h1 { font-size: 24px; color: #1a202c; text-shadow: 0 0 20px rgba(255, 255, 255, 0.8); }
-        header.content-header p { color: #2d3748 !important; font-weight: 500; text-shadow: 0 0 20px rgba(255, 255, 255, 0.8); }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }
+        header h1 { font-size: 24px; color: #1a202c; text-shadow: 0 0 20px rgba(255, 255, 255, 0.8); }
+        header p { color: #2d3748 !important; font-weight: 500; text-shadow: 0 0 20px rgba(255, 255, 255, 0.8); }
         
         .user-profile { display: flex; align-items: center; gap: 10px; font-weight: 500; }
         .status-badge { background-color: #48bb78; color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; white-space: nowrap; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         
-        .dashboard-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); 
-            gap: 25px; 
-            margin-bottom: 30px; 
-        }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 25px; margin-bottom: 30px; }
 
         /* --- CARD STYLES --- */
         .card { 
-            background: rgba(255, 255, 255, 0.4); 
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-            border-radius: 20px; 
-            padding: 25px; 
-            position: relative; 
-            overflow: hidden; 
-            -webkit-mask-image: -webkit-radial-gradient(white, black); 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: space-between; 
-            min-height: 180px;
+            background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            border-radius: 20px; padding: 25px; position: relative; overflow: hidden; 
+            -webkit-mask-image: -webkit-radial-gradient(white, black); display: flex; flex-direction: column; justify-content: space-between; min-height: 180px;
         }
         .card-content { position: relative; z-index: 10; }
-
         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: #2d3748; font-size: 0.9rem; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; }
         .metric-value { font-size: 2.5rem; font-weight: 800; margin-bottom: 5px; color: #1a202c; }
         .metric-unit { font-size: 1rem; color: #4a5568; font-weight: 600; }
         .metric-status { margin-top: 15px; font-size: 0.9rem; font-weight: 700; }
         
+        /* --- ICONS & ANIMATIONS --- */
         .icon-media { width: 45px; height: 45px; object-fit: cover; border-radius: 12px; display: block; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         .anim-fog-img { opacity: 0.8; animation: fogDrift 6s ease-in-out infinite alternate; }
         @keyframes fogDrift { 0% { transform: translateX(-3px) scale(1); opacity: 0.7; filter: blur(0px); } 100% { transform: translateX(3px) scale(1.08); opacity: 1; filter: blur(1px); } }
@@ -251,10 +107,7 @@
             position: absolute; left: 0; bottom: 0; width: 100%; height: 100%;
             -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 120' preserveAspectRatio='none'%3E%3Cpath d='M0,60 Q250,120 500,60 T1000,60 L1000,120 L0,120 Z' fill='%23000000'/%3E%3C/svg%3E");
             mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 120' preserveAspectRatio='none'%3E%3Cpath d='M0,60 Q250,120 500,60 T1000,60 L1000,120 L0,120 Z' fill='%23000000'/%3E%3C/svg%3E");
-            -webkit-mask-size: 1000px 100%; 
-            mask-size: 1000px 100%; 
-            -webkit-mask-repeat: repeat-x; 
-            mask-repeat: repeat-x;
+            -webkit-mask-size: 1000px 100%; mask-size: 1000px 100%; -webkit-mask-repeat: repeat-x; mask-repeat: repeat-x;
         }
 
         @keyframes moveWaveLeft { 0% { -webkit-mask-position: 0px bottom; mask-position: 0px bottom; } 100% { -webkit-mask-position: -1000px bottom; mask-position: -1000px bottom; } }
@@ -269,28 +122,26 @@
         .tds-card .wave1 { background-color: #e9d8fd; } .tds-card .wave2 { background-color: #d6bcfa; } .tds-card .wave3 { background-color: #9f7aea; } .tds-card .metric-value { color: #6b46c1; }
 
         /* --- DATA SECTION --- */
-        .data-section { 
-            background: rgba(255, 255, 255, 0.35); 
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            padding: 25px; 
-            border-radius: 15px; 
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1); 
-            margin-bottom: 30px; 
-        }
+        .data-section { background: rgba(255, 255, 255, 0.35); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.5); padding: 25px; border-radius: 15px; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1); margin-bottom: 30px; }
         .table-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
         table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 600px; }
         th, td { text-align: left; padding: 15px; border-bottom: 1px solid rgba(113, 128, 150, 0.2); }
         th { color: #4a5568; font-weight: 700; font-size: 0.9rem; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.5px; }
         td { color: #2d3748; font-weight: 500; }
         tbody tr:hover { background-color: rgba(255, 255, 255, 0.3); transition: background-color 0.2s; }
+        
+        .add-school-form { background-color: rgba(255, 255, 255, 0.25); border: 1px solid rgba(255, 255, 255, 0.4); padding: 15px; border-radius: 10px; margin-bottom: 20px; display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; }
+        .form-group { flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 200px; }
+        .form-group label { font-size: 0.85rem; color: #2d3748; font-weight: 700; }
+        .form-group input, .form-group select { padding: 10px; background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 6px; outline: none; width: 100%; color: #1a202c; }
+        .form-group input:focus, .form-group select:focus { border-color: #4299e1; background: rgba(255, 255, 255, 0.9); }
+        .edit-input { padding: 8px; border: 1px solid #4299e1; border-radius: 4px; width: 100%; font-size: 0.9rem; background: rgba(255,255,255,0.8); }
 
         /* --- BUTTONS & ICONS --- */
         .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.15); opacity: 0.95; }
         .btn-primary { background-color: #3182ce; color: white; }
-        .btn-email { background-color: #6aaee7; color: white; padding: 6px 12px; }
+        .btn-email { background-color: #6aaee7; color: white; padding: 6px 10px; }
         .btn-edit { background-color: #deb053; color: white; padding: 6px 10px; }
         .btn-save { background-color: #38a169; color: white; padding: 6px 10px; }
         .btn-delete { background-color: #e53e3e; color: white; padding: 6px 10px; }
@@ -304,17 +155,6 @@
         .search-container input { padding: 10px; background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 6px; flex: 1; outline: none; }
         .search-container input:focus { background: rgba(255, 255, 255, 0.9); border-color: #4299e1; }
         .search-actions { display: flex; gap: 10px; }
-        
-        .add-school-form { 
-            background-color: rgba(255, 255, 255, 0.25);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            padding: 15px; border-radius: 10px; margin-bottom: 20px; display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; 
-        }
-        .form-group { flex: 1; display: flex; flex-direction: column; gap: 5px; margin-bottom: 15px; }
-        .form-group label { font-size: 0.85rem; color: #2d3748; font-weight: 700; }
-        .form-group input, .form-group select { padding: 10px; background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 6px; outline: none; width: 100%; color: #1a202c; }
-        .form-group input:focus, .form-group select:focus { border-color: #4299e1; background: rgba(255, 255, 255, 0.9); }
-        .edit-input { padding: 8px; border: 1px solid #4299e1; border-radius: 4px; width: 100%; font-size: 0.9rem; background: rgba(255,255,255,0.8); }
 
         /* --- MODALS --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; backdrop-filter: blur(8px); }
@@ -323,29 +163,31 @@
         .modal h3 { margin-bottom: 10px; color: #2d3748; }
         .modal p { color: #4a5568; line-height: 1.5; font-size: 0.95rem; margin-bottom: 20px; }
         .modal-buttons { margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px; }
-
+        
         /* --- PAGINATION --- */
         .pagination-controls { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
         .pagination-controls button:disabled { background-color: rgba(203, 213, 224, 0.6); cursor: not-allowed; color: #718096; }
 
-        /* --- RESPONSIVE MOBILE LAYOUT --- */
+        /* --- ROLE BADGES --- */
+        .role-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; }
+        .role-superadmin { background-color: #e9d8fd; color: #6b46c1; border: 1px solid #d6bcfa; }
+        .role-admin { background-color: #bee3f8; color: #2b6cb0; border: 1px solid #90cdf4; }
+        .role-user { background-color: #c6f6d5; color: #276749; border: 1px solid #9ae6b4; }
+
+        /* --- MOBILE LAYOUT OVERRIDES --- */
         @media (max-width: 1200px) {
-            .top-navbar {
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-                gap: 15px;
-            }
-            .navbar-brand { flex-direction: column; }
-            .navbar-menu { flex-wrap: wrap; justify-content: center; width: 100%; }
-            .brand-text .main-title { font-size: 20px; }
-            .brand-text .deped-banner-line { max-width: 100%; }
+            .deped-banner { flex-direction: column; align-items: center; text-align: center; gap: 15px; }
+            .header-brand { flex-direction: column; }
+            .header-nav { flex-wrap: wrap; justify-content: center; width: 100%; }
+            .deped-banner-title { font-size: 20px; }
         }
         
         @media (max-width: 900px) {
             body { height: auto; min-height: 100vh; overflow: auto; }
             .app-layout { overflow: visible; }
             .main-content { padding: 20px; overflow-y: visible; height: auto; }
+            .add-school-form { flex-direction: column; align-items: stretch; }
+            .btn { width: 100%; }
             .search-container { flex-direction: column; align-items: stretch; }
             .search-actions { width: 100%; }
             .search-actions .btn { flex: 1; }
@@ -358,37 +200,40 @@
 </head>
 <body>
 
-    <header class="top-navbar">
-        <div class="navbar-brand">
+    <div id="hidden-export-container" style="position: absolute; left: -9999px; top: -9999px; width: 1000px; height: 400px; background: white;">
+        <canvas id="hiddenExportChart"></canvas>
+    </div>
+
+    <div class="deped-banner">
+        <div class="header-brand">
             <img src="img/depedmabalacatlogo.png" alt="Mabalacat City Logo">
-            <div class="brand-text">
-                <div class="top-text-white">Republic of the Philippines</div>
-                <div class="top-text-yellow">Department of Education | Region 3 - Central Luzon</div>
+            <div class="deped-banner-text">
+                <div class="deped-banner-top">
+                    Republic of the Philippines<br>
+                    <span>Department of Education | Region 3 - Central Luzon</span>
+                </div>
                 <div class="deped-banner-line"></div>
-                <div class="main-title">Schools Division of Mabalacat City</div>
+                <div class="deped-banner-title">Schools Division of Mabalacat City</div>
                 <div class="deped-banner-bottom">P. Burgos St., Poblacion, Mabalacat City, Pampanga</div>
             </div>
         </div>
 
-        <nav class="navbar-menu">
+        <div class="header-nav">
             <a id="nav-dashboard" onclick="switchView('dashboard')" class="active">
-                <i class="ri-dashboard-line"></i> Overview
+                <i class="ri-dashboard-line"></i> <span>Overview</span>
             </a>
             <a id="nav-history" onclick="switchView('history')">
-                <i class="ri-history-line"></i> History Logs
+                <i class="ri-history-line"></i> <span>History Logs</span>
             </a>
-        </nav>
-
-        <div class="navbar-actions">
-            <a href="#" class="logout-btn" onclick="handleLogout()">
-                <i class="ri-logout-box-r-line"></i> Logout
+            <a href="#" onclick="handleLogout()" class="logout-link">
+                <i class="ri-logout-box-r-line"></i> <span>Logout</span>
             </a>
         </div>
-    </header>
+    </div>
 
     <div class="app-layout">
         <main class="main-content">
-            <header class="content-header">
+            <header>
                 <div>
                     <h1 id="page-title">Dashboard Overview</h1>
                     <p id="page-subtitle" style="color: #4a5568;">Real-time water quality monitoring</p>
@@ -465,14 +310,7 @@
                 <section class="data-section">
                     <h3>School Testing Registry</h3>
                     
-                    <div class="add-school-form" style="margin-top: 15px; margin-bottom: 0;">
-                        <div class="form-group" style="margin-bottom: 0;"><label>Name of School <span style="color:red">*</span></label><input type="text" id="newSchoolName" placeholder="e.g. Mabalacat School"></div>
-                        <div class="form-group" style="margin-bottom: 0;"><label>School Head</label><input type="text" id="newSchoolHead" placeholder="e.g. Mr. Juan Dela Cruz"></div>
-                        <div class="form-group" style="margin-bottom: 0;"><label>Email</label><input type="email" id="newSchoolEmail" placeholder="e.g. @depedmabalacat.org"></div>
-                        <button class="btn btn-primary" onclick="addSchoolToDB()">+ Add School</button>
-                    </div>
-
-                    <div class="search-container" style="margin-top: 20px;">
+                    <div class="search-container">
                         <input type="text" id="searchInput" placeholder="Search by School Name (e.g. 'Mabalacat')" 
                                oninput="handleSearch(this.value)">
                         <div class="search-actions">
@@ -500,20 +338,53 @@
 
             <div id="history-view" class="view-section">
                 <section class="data-section">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap: wrap; gap: 15px;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; flex-wrap: wrap; gap: 15px;">
                         <h3>Historical Data Logs</h3>
                         
-                        <div style="display:flex; gap: 15px; flex-wrap: wrap;">
-                            <div class="form-group" style="min-width: 200px; margin-bottom: 0;">
-                                <label style="margin-bottom: 5px;">Filter by Month:</label>
-                                <input type="month" id="historyMonthSelect" onchange="applyHistoryFilters()" style="padding: 8px; border-radius: 6px; border: 1px solid #cbd5e0; outline: none; background: rgba(255, 255, 255, 0.9);">
-                            </div>
-                            
-                            <div class="form-group" style="min-width: 250px; margin-bottom: 0;">
+                        <div style="display:flex; gap: 15px; flex-wrap: wrap; align-items: flex-end;">
+                            <div class="form-group" style="min-width: 250px;">
                                 <label style="margin-bottom: 5px;">Filter by School:</label>
                                 <select id="historySchoolSelect" onchange="applyHistoryFilters()" style="padding: 8px; border-radius: 6px; border: 1px solid #cbd5e0;">
                                     <option value="">-- Select a School --</option>
                                 </select>
+                            </div>
+
+                            <div class="form-group" style="min-width: 150px;">
+                                <label style="margin-bottom: 5px;">Year:</label>
+                                <select id="historyYearSelect" onchange="applyHistoryFilters()" style="padding: 8px; border-radius: 6px; border: 1px solid #cbd5e0;">
+                                    <option value="">-- Select Year --</option>
+                                    <option value="2024">2024</option>
+                                    <option value="2025">2025</option>
+                                    <option value="2026" selected>2026</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group" style="min-width: 150px;">
+                                <label style="margin-bottom: 5px;">Month:</label>
+                                <select id="historyMonthSelect" onchange="applyHistoryFilters()" style="padding: 8px; border-radius: 6px; border: 1px solid #cbd5e0;">
+                                    <option value="">Whole Year</option>
+                                    <option value="0">January</option>
+                                    <option value="1">February</option>
+                                    <option value="2">March</option>
+                                    <option value="3">April</option>
+                                    <option value="4">May</option>
+                                    <option value="5">June</option>
+                                    <option value="6">July</option>
+                                    <option value="7">August</option>
+                                    <option value="8">September</option>
+                                    <option value="9">October</option>
+                                    <option value="10">November</option>
+                                    <option value="11">December</option>
+                                </select>
+                            </div>
+
+                            <div style="display: flex; gap: 10px;">
+                                <button class="btn btn-save" id="downloadGraphBtn" onclick="openExportGraphModal('download')" style="display: none; height: 38px;">
+                                    <i class="ri-download-2-line"></i> Download Detailed Graph
+                                </button>
+                                <button class="btn btn-primary" id="exportGraphBtn" onclick="openExportGraphModal('email')" style="display: none; height: 38px;">
+                                    <img src="img/gmail.png" class="btn-icon" style="filter: brightness(0) invert(1);"> Email Detailed Graph
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -532,7 +403,6 @@
                     </div>
                 </section>
             </div>
-
         </main>
     </div>
 
@@ -546,19 +416,14 @@
             <h3>Generate Water Quality Report</h3>
             <p style="margin-bottom: 15px; font-size: 0.9rem; color: #666;">
                 The PDF (2 Pages) will download, and Gmail will open in a <b>new tab</b>.
-                <br><br>
-                <b>Page 1:</b> Descriptive Guide<br>
-                <b>Page 2:</b> Test Results & Signatures
             </p>
             <div class="form-group">
                 <label>Tested By (Name):</label>
                 <input type="text" id="testerName" placeholder="Juan Dela Cruz">
             </div>
-            
             <input type="hidden" id="currentSchoolId">
             <input type="hidden" id="currentSchoolName">
             <input type="hidden" id="currentSchoolEmail">
-            
             <div class="modal-buttons">
                 <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
                 <button class="btn btn-primary" onclick="generateAndSend()">Download & Open Gmail</button>
@@ -576,17 +441,6 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="confirmModal">
-        <div class="modal">
-            <h3>Delete Record?</h3>
-            <p>Are you sure you want to permanently delete this record? This action cannot be undone.</p>
-            <div class="modal-buttons">
-                <button class="btn btn-cancel" onclick="closeConfirm()">Cancel</button>
-                <button class="btn btn-delete" onclick="confirmDeleteAction()">Delete</button>
-            </div>
-        </div>
-    </div>
-
     <div class="modal-overlay" id="shareModal">
         <div class="modal">
             <h3>Email Copied! 📋</h3>
@@ -599,932 +453,653 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="exportGraphModal">
+        <div class="modal">
+            <h3>Export Analytics Graph</h3>
+            <p>Select the timeframe for the detailed graph and data report.</p>
+            <input type="hidden" id="exportActionType">
+            <div class="form-group">
+                <label>Year</label>
+                <select id="exportYear">
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                    <option value="2026" selected>2026</option>
+                </select>
+            </div>
+            <br>
+            <div class="form-group">
+                <label>Month</label>
+                <select id="exportMonth">
+                    <option value="">Whole Year</option>
+                    <option value="0">January</option>
+                    <option value="1">February</option>
+                    <option value="2">March</option>
+                    <option value="3">April</option>
+                    <option value="4">May</option>
+                    <option value="5">June</option>
+                    <option value="6">July</option>
+                    <option value="7">August</option>
+                    <option value="8">September</option>
+                    <option value="9">October</option>
+                    <option value="10">November</option>
+                    <option value="11">December</option>
+                </select>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-cancel" onclick="closeExportGraphModal()">Cancel</button>
+                <button class="btn btn-primary" id="confirmExportBtn" onclick="processGraphExport()">Generate Report</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, onSnapshot, doc, addDoc, updateDoc, deleteDoc, query, orderBy, limit, startAfter, endBefore, limitToLast, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, onSnapshot, query, orderBy, limit, startAfter, endBefore, limitToLast, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyAxWmm5YsLjnwatHOVImrpIHAxicbHWYuw",
-        authDomain: "water-quality-db-d2dff.firebaseapp.com",
-        projectId: "water-quality-db-d2dff",
-        storageBucket: "water-quality-db-d2dff.firebasestorage.app",
-        messagingSenderId: "499791448587",
-        appId: "1:499791448587:web:a11b55aa1af45bdf78550e",
-        measurementId: "G-5L40CDJPG5"
-    };
+        const firebaseConfig = {
+            apiKey: "AIzaSyAxWmm5YsLjnwatHOVImrpIHAxicbHWYuw",
+            authDomain: "water-quality-db-d2dff.firebaseapp.com",
+            projectId: "water-quality-db-d2dff",
+            storageBucket: "water-quality-db-d2dff.firebasestorage.app",
+            messagingSenderId: "499791448587",
+            appId: "1:499791448587:web:a11b55aa1af45bdf78550e",
+            measurementId: "G-5L40CDJPG5"
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app); 
+        const db = getFirestore(app);
+        const waterQualityCol = collection(db, "waterQuality");
+        const schoolsCol = collection(db, "Schools");
 
-    // Main App
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app); 
-    const db = getFirestore(app);
-    
-    // COLLECTIONS
-    const schoolsCol = collection(db, "Schools");
-    const waterQualityCol = collection(db, "waterQuality"); 
-
-    // --- VIEW SWITCHING LOGIC ---
-    window.switchView = function(viewName) {
-        document.querySelectorAll('.navbar-menu a').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active-view'));
-
-        if (viewName === 'dashboard') {
-            document.getElementById('dashboard-view').classList.add('active-view');
-            document.getElementById('nav-dashboard').classList.add('active');
-            document.getElementById('page-title').innerText = "Dashboard Overview";
-            document.getElementById('page-subtitle').innerText = "Real-time water quality monitoring";
-        } else if (viewName === 'history') {
-            document.getElementById('history-view').classList.add('active-view');
-            document.getElementById('nav-history').classList.add('active');
-            document.getElementById('page-title').innerText = "History Logs";
-            document.getElementById('page-subtitle').innerText = "Past water quality records";
-            populateSchoolDropdown(); 
+        // --- HELPER FUNCTIONS FOR DETAILED DESCRIPTIVE VALUES ---
+        function getPhDescription(ph) {
+            if (ph < 3.5) return "Ultra acidic";
+            if (ph >= 3.5 && ph <= 4.4) return "Extremely acidic";
+            if (ph >= 4.5 && ph <= 5.0) return "Very strongly acidic";
+            if (ph >= 5.1 && ph <= 5.5) return "Strongly acidic";
+            if (ph >= 5.6 && ph <= 6.0) return "Moderately acidic";
+            if (ph >= 6.1 && ph <= 6.5) return "Slightly acidic";
+            if (ph >= 6.6 && ph <= 7.3) return "Neutral";
+            if (ph >= 7.4 && ph <= 7.8) return "Slightly alkaline";
+            if (ph >= 7.9 && ph <= 8.4) return "Moderately alkaline";
+            if (ph >= 8.5 && ph <= 9.0) return "Strongly alkaline";
+            return "Very strongly alkaline";
         }
-    }
 
-    // --- LOGOUT FUNCTION ---
-    window.handleLogout = async function() {
-        if (!confirm("Are you sure you want to log out?")) return;
-        try {
-            await signOut(auth);
-            window.location.href = "index.html"; 
-        } catch (error) {
-            console.error("Logout Error:", error);
-            showAlert("Logout Failed", error.message);
+        function getTdsDescription(tds) {
+            if (tds < 300) return "Excellent";
+            if (tds >= 300 && tds <= 600) return "Good";
+            if (tds >= 601 && tds <= 900) return "Fair";
+            if (tds >= 901 && tds <= 1200) return "Poor";
+            return "Unacceptable";
         }
-    }
 
-    // --- HISTORY LOGS LOGIC (WITH CALENDAR FILTER) ---
-    let historyUnsubscribe = null;
-    let schoolDropdownUnsubscribe = null;
-    let historyChartInstance = null; 
+        function getTurbidityDescription(turb) {
+            if (turb < 5) return "Excellent (Very clear)";
+            if (turb >= 5 && turb <= 10) return "Good (Clear)";
+            if (turb >= 11 && turb <= 25) return "Fair (Slightly clear)";
+            if (turb >= 26 && turb <= 50) return "Marginal (Mod. cloudy)";
+            if (turb >= 51 && turb <= 100) return "Poor (Cloudy)";
+            if (turb >= 101 && turb <= 500) return "Very cloudy";
+            if (turb >= 501 && turb <= 1000) return "Unacceptable (Muddy)";
+            return "Very muddy";
+        }
 
-    window.populateSchoolDropdown = function() {
-        const select = document.getElementById("historySchoolSelect");
-        if (schoolDropdownUnsubscribe) return; 
+        function getOverallStatus(ph, turb, tds) {
+            const p = parseFloat(ph) || 0; const t = parseFloat(turb) || 0; const s = parseFloat(tds) || 0;
+            if ((p >= 6.5 && p <= 8.5) && t <= 10 && s <= 600) return '<span style="color: green; font-weight:bold;">Normal</span>';
+            return '<span style="color: orange; font-weight:bold;">Check</span>';
+        }
 
-        schoolDropdownUnsubscribe = onSnapshot(query(schoolsCol, orderBy("schoolName")), (snapshot) => {
-            const currentValue = select.value;
-            select.innerHTML = '<option value="">-- Select a School --</option>';
+        // --- UI UTILS ---
+        window.switchView = function(viewName) {
+            document.querySelectorAll('.header-nav a').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active-view'));
+            document.getElementById(viewName + '-view').classList.add('active-view');
+            document.getElementById('nav-' + viewName).classList.add('active');
+            if(viewName === 'history') window.populateSchoolDropdown();
+        }
 
-            snapshot.forEach(docSnap => {
-                const school = docSnap.data();
-                const option = document.createElement("option");
-                option.value = docSnap.id; 
-                option.textContent = school.schoolName;
-                select.appendChild(option);
+        window.handleLogout = async function() {
+            if (confirm("Log out?")) { await signOut(auth); window.location.href = "index.html"; }
+        }
+
+        window.showAlert = function(title, message) {
+            document.getElementById('alertTitle').innerText = title;
+            document.getElementById('alertMessage').innerText = message;
+            document.getElementById('alertModal').style.display = 'flex';
+        }
+        window.closeAlert = () => document.getElementById('alertModal').style.display = 'none';
+        window.closeModal = () => document.getElementById('reportModal').style.display = 'none';
+        window.openShareModal = function(shareFunction) {
+            document.getElementById('shareModal').style.display = 'flex';
+            const shareBtn = document.getElementById('shareBtnAction');
+            const newBtn = shareBtn.cloneNode(true);
+            shareBtn.parentNode.replaceChild(newBtn, shareBtn);
+            newBtn.onclick = async () => { await shareFunction(); document.getElementById('shareModal').style.display = 'none'; };
+        }
+        window.closeShareModal = () => document.getElementById('shareModal').style.display = 'none';
+
+        // --- DASHBOARD REAL-TIME ---
+        onSnapshot(query(waterQualityCol, orderBy("timestamp", "desc"), limit(20)), (snapshot) => {
+            const tbody = document.getElementById("readingsTableBody");
+            tbody.innerHTML = ""; 
+            if (snapshot.empty) return tbody.innerHTML = "<tr><td colspan='5'>No sensor data.</td></tr>";
+
+            let readings = [];
+            snapshot.forEach(doc => readings.push(doc.data()));
+
+            if (readings.length > 0) {
+                const data = readings[0];
+                const phVal = data.phLevel || 0; const turbVal = data.turbidity || 0; const tdsVal = data.tds || 0;
+                document.getElementById("phValue").innerText = parseFloat(phVal).toFixed(2);
+                document.getElementById("phStatus").innerText = (phVal >= 6.5 && phVal <= 8.5) ? "● Optimal Range" : "● Attention Required";
+                document.getElementById("phStatus").style.color = (phVal >= 6.5 && phVal <= 8.5) ? "#2f855a" : "#c05621";
+                
+                document.getElementById("turbidityValue").innerText = parseFloat(turbVal).toFixed(2);
+                document.getElementById("turbidityStatus").innerText = turbVal <= 10 ? "● Good/Clear" : "● Cloudy/High";
+                document.getElementById("turbidityStatus").style.color = turbVal <= 10 ? "#2f855a" : "#c05621";
+                
+                document.getElementById("tdsValue").innerText = parseFloat(tdsVal).toFixed(2);
+                document.getElementById("tdsStatus").innerText = tdsVal <= 600 ? "● Good" : "● High Solids";
+                document.getElementById("tdsStatus").style.color = tdsVal <= 600 ? (tdsVal < 300 ? "#2f855a" : "#2b6cb0") : "#c05621";
+            }
+
+            readings.forEach(data => {
+                let tStr = "Live";
+                if (data.timestamp && data.timestamp.toDate) tStr = data.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                else if (data.timestamp) tStr = new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                const ph = data.phLevel !== undefined ? parseFloat(data.phLevel).toFixed(2) : "--";
+                const turb = data.turbidity !== undefined ? parseFloat(data.turbidity).toFixed(2) : "--";
+                const tds = data.tds !== undefined ? parseFloat(data.tds).toFixed(2) : "--";
+                
+                tbody.innerHTML += `<tr><td>${tStr}</td><td>${ph}</td><td>${turb}</td><td>${tds}</td><td>${getOverallStatus(ph, turb, tds)}</td></tr>`;
             });
-
-            if (currentValue) select.value = currentValue; 
         });
-    }
 
-    window.applyHistoryFilters = function() {
-        const schoolId = document.getElementById("historySchoolSelect").value;
-        const monthValue = document.getElementById("historyMonthSelect").value;
-        
-        if (historyUnsubscribe) {
-            historyUnsubscribe(); 
-            historyUnsubscribe = null;
+        // --- SCHOOLS PAGINATION ---
+        let schoolsUnsubscribe = null;
+        let currentPage = 1;
+        const pageSize = 5; 
+        let firstDoc = null; 
+        let lastDoc = null;  
+        let isSearchMode = false; 
+
+        async function loadSchools(direction = 0, searchTerm = "") {
+            let q;
+            if (searchTerm) {
+                isSearchMode = true;
+                q = query(schoolsCol, orderBy("schoolName")); 
+            } else {
+                isSearchMode = false;
+                if (direction === 1 && lastDoc) q = query(schoolsCol, orderBy("schoolName"), startAfter(lastDoc), limit(pageSize));
+                else if (direction === -1 && firstDoc) q = query(schoolsCol, orderBy("schoolName"), endBefore(firstDoc), limitToLast(pageSize));
+                else q = query(schoolsCol, orderBy("schoolName"), limit(pageSize));
+            }
+
+            if (schoolsUnsubscribe) schoolsUnsubscribe();
+
+            schoolsUnsubscribe = onSnapshot(q, (snapshot) => {
+                const tbody = document.getElementById("schoolTableBody");
+                tbody.innerHTML = "";
+                let allDocs = [];
+                snapshot.forEach(docSnap => allDocs.push({ id: docSnap.id, data: docSnap.data(), doc: docSnap }));
+
+                if (isSearchMode) {
+                    const termLower = searchTerm.toLowerCase();
+                    allDocs = allDocs.filter(item => (item.data.schoolName || "").toLowerCase().includes(termLower));
+                } else if (allDocs.length > 0) {
+                    firstDoc = allDocs[0].doc; lastDoc = allDocs[allDocs.length - 1].doc;
+                }
+
+                if (allDocs.length === 0) {
+                    tbody.innerHTML = "<tr><td colspan='5'>No schools found.</td></tr>";
+                    if (!isSearchMode) document.getElementById("nextBtn").disabled = true;
+                } else {
+                    allDocs.forEach(item => {
+                        const school = item.data;
+                        tbody.innerHTML += `
+                            <tr id="row-${item.id}">
+                                <td class="name-cell">${school.schoolName || "N/A"}</td>
+                                <td class="head-cell">${school.schoolHead || "N/A"}</td>
+                                <td class="email-cell">${school.email || "N/A"}</td>
+                                <td><span style="color: #a0aec0;">--</span></td>
+                                <td class="action-cell">
+                                    <button class="btn btn-email" title="Send Report" onclick="openReportModal('${item.id}', '${school.schoolName}', '${school.email}')"><img src="img/gmail.png" class="btn-icon"></button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                if (isSearchMode) {
+                    document.getElementById("pageIndicator").innerText = "Search Results";
+                    document.getElementById("prevBtn").disabled = true; document.getElementById("nextBtn").disabled = true;
+                } else {
+                    document.getElementById("pageIndicator").innerText = `Page ${currentPage}`;
+                    document.getElementById("prevBtn").disabled = (currentPage === 1);
+                    document.getElementById("nextBtn").disabled = (snapshot.docs.length < pageSize);
+                }
+            }, (error) => { document.getElementById("schoolTableBody").innerHTML = `<tr><td colspan='5' style='color: red;'>Error: ${error.message}</td></tr>`; });
         }
 
-        const tbody = document.getElementById("historyTableBody");
-        const chartContainer = document.getElementById("chart-container");
+        let debounceTimeout = null;
+        window.handleSearch = function(value) {
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(() => { const term = value.trim(); if (term) { currentPage = 1; loadSchools(0, term); } else { clearSearch(); } }, 300);
+        }
+        window.searchSchools = function() {
+            const term = document.getElementById("searchInput").value.trim();
+            if (!term) return showAlert("Input Required", "Please enter a school name to search.");
+            currentPage = 1; loadSchools(0, term);
+        }
+        window.clearSearch = function() { document.getElementById("searchInput").value = ""; isSearchMode = false; currentPage = 1; loadSchools(0); }
+        window.changePage = function(step) { if (isSearchMode || currentPage + step < 1) return; currentPage += step; loadSchools(step); };
+        loadSchools(0);
 
-        if (!schoolId) {
-            tbody.innerHTML = "<tr><td colspan='5'>Please select a school to view its history logs...</td></tr>";
-            chartContainer.style.display = "none";
-            return;
+        // --- HISTORY LOGS LOGIC ---
+        let historyUnsubscribe = null;
+        let historyChartInstance = null; 
+        let hiddenExportChartInstance = null;
+
+        window.populateSchoolDropdown = function() {
+            onSnapshot(query(schoolsCol, orderBy("schoolName")), (snapshot) => {
+                const select = document.getElementById("historySchoolSelect");
+                const curr = select.value;
+                select.innerHTML = '<option value="">-- Select a School --</option>';
+                snapshot.forEach(d => {
+                    const s = d.data();
+                    const opt = document.createElement("option");
+                    opt.value = d.id; opt.textContent = s.schoolName; opt.setAttribute("data-email", s.email || "");
+                    select.appendChild(opt);
+                });
+                if(curr) select.value = curr;
+            });
         }
 
-        tbody.innerHTML = "<tr><td colspan='5'>Loading logs...</td></tr>";
-        chartContainer.style.display = "block"; 
-        
-        let qHistory;
-
-        if (monthValue) {
-            const [year, month] = monthValue.split('-');
-            const startDate = new Date(year, month - 1, 1);
-            const endDate = new Date(year, month, 1); 
-
-            qHistory = query(
-                waterQualityCol, 
-                where("schoolId", "==", schoolId), 
-                where("timestamp", ">=", startDate),
-                where("timestamp", "<", endDate),
-                orderBy("timestamp", "desc")
-            );
-        } else {
-            qHistory = query(
-                waterQualityCol, 
-                where("schoolId", "==", schoolId), 
-                orderBy("timestamp", "desc"), 
-                limit(200)
-            );
-        }
-
-        historyUnsubscribe = onSnapshot(qHistory, (snapshot) => {
-            tbody.innerHTML = "";
-            const groupedData = {}; 
-
-            if (snapshot.empty) {
-                tbody.innerHTML = "<tr><td colspan='5'>No history logs found for this selection.</td></tr>";
-                if(historyChartInstance) historyChartInstance.destroy();
-                chartContainer.style.display = "none";
+        window.applyHistoryFilters = function() {
+            const schoolId = document.getElementById("historySchoolSelect").value;
+            const yearValue = document.getElementById("historyYearSelect").value;
+            const monthValue = document.getElementById("historyMonthSelect").value;
+            
+            if (historyUnsubscribe) { historyUnsubscribe(); historyUnsubscribe = null; }
+            if (!schoolId) {
+                document.getElementById("historyTableBody").innerHTML = "<tr><td colspan='5'>Please select a school to view its history logs...</td></tr>";
+                document.getElementById("chart-container").style.display = "none";
+                document.getElementById("exportGraphBtn").style.display = "none";
+                document.getElementById("downloadGraphBtn").style.display = "none";
                 return;
             }
 
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                
-                let timeString = "Unknown Time";
-                let parsedDate = null;
-                try {
-                    if (data.timestamp && data.timestamp.toDate) {
-                        parsedDate = data.timestamp.toDate();
-                    } else if (data.timestamp) {
-                        parsedDate = new Date(data.timestamp);
-                    }
-                    if(parsedDate) timeString = parsedDate.toLocaleString(); 
-                } catch(e) { }
+            document.getElementById("historyTableBody").innerHTML = "<tr><td colspan='5'>Loading logs...</td></tr>";
+            document.getElementById("chart-container").style.display = "block"; 
+            document.getElementById("exportGraphBtn").style.display = "inline-flex"; 
+            document.getElementById("downloadGraphBtn").style.display = "inline-flex"; 
 
-                const phRaw = parseFloat(data.phLevel);
-                const turbRaw = parseFloat(data.turbidity);
-                const tdsRaw = parseFloat(data.tds);
+            let qHistory;
+            if (yearValue) {
+                const y = parseInt(yearValue);
+                let startD = (monthValue !== "") ? new Date(y, parseInt(monthValue), 1) : new Date(y, 0, 1);
+                let endD = (monthValue !== "") ? new Date(y, parseInt(monthValue) + 1, 1) : new Date(y + 1, 0, 1);
+                qHistory = query(waterQualityCol, where("schoolId", "==", schoolId), where("timestamp", ">=", startD), where("timestamp", "<", endD), orderBy("timestamp", "desc"));
+            } else {
+                qHistory = query(waterQualityCol, where("schoolId", "==", schoolId), orderBy("timestamp", "desc"), limit(200));
+            }
 
-                const ph = !isNaN(phRaw) ? phRaw.toFixed(2) : "--";
-                const turb = !isNaN(turbRaw) ? turbRaw.toFixed(2) : "--";
-                const tds = !isNaN(tdsRaw) ? tdsRaw.toFixed(2) : "--";
+            historyUnsubscribe = onSnapshot(qHistory, (snapshot) => {
+                const tbody = document.getElementById("historyTableBody");
+                tbody.innerHTML = "";
+                const groupedData = {}; 
 
-                if (parsedDate) {
-                    const groupKey = monthValue 
-                        ? `${parsedDate.getFullYear()}-${String(parsedDate.getMonth() + 1).padStart(2, '0')}-${String(parsedDate.getDate()).padStart(2, '0')}`
-                        : `${parsedDate.getFullYear()}-${String(parsedDate.getMonth() + 1).padStart(2, '0')}`;
-                    
-                    if (!groupedData[groupKey]) {
-                        groupedData[groupKey] = { ph: [], turb: [], tds: [] };
-                    }
-                    if (!isNaN(phRaw)) groupedData[groupKey].ph.push(phRaw);
-                    if (!isNaN(turbRaw)) groupedData[groupKey].turb.push(turbRaw);
-                    if (!isNaN(tdsRaw)) groupedData[groupKey].tds.push(tdsRaw);
+                if (snapshot.empty) {
+                    tbody.innerHTML = "<tr><td colspan='5'>No history logs found for this selection.</td></tr>";
+                    if(historyChartInstance) historyChartInstance.destroy();
+                    document.getElementById("chart-container").style.display = "none";
+                    document.getElementById("exportGraphBtn").style.display = "none";
+                    document.getElementById("downloadGraphBtn").style.display = "none";
+                    return;
                 }
 
-                const tr = document.createElement("tr");
-                tr.innerHTML = `
-                    <td>${timeString}</td>
-                    <td>${ph}</td>
-                    <td>${turb}</td>
-                    <td>${tds}</td>
-                    <td>${getOverallStatus(ph, turb, tds)}</td>
-                `;
-                tbody.appendChild(tr);
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    let tStr = "Unknown"; let pDate = null;
+                    if (data.timestamp && data.timestamp.toDate) pDate = data.timestamp.toDate();
+                    else if (data.timestamp) pDate = new Date(data.timestamp);
+                    if(pDate) tStr = pDate.toLocaleString(); 
+
+                    const ph = !isNaN(parseFloat(data.phLevel)) ? parseFloat(data.phLevel).toFixed(2) : "--";
+                    const turb = !isNaN(parseFloat(data.turbidity)) ? parseFloat(data.turbidity).toFixed(2) : "--";
+                    const tds = !isNaN(parseFloat(data.tds)) ? parseFloat(data.tds).toFixed(2) : "--";
+
+                    if (pDate) {
+                        const key = (monthValue !== "") ? `${pDate.getFullYear()}-${String(pDate.getMonth() + 1).padStart(2, '0')}-${String(pDate.getDate()).padStart(2, '0')}` : `${pDate.getFullYear()}-${String(pDate.getMonth() + 1).padStart(2, '0')}`;
+                        if (!groupedData[key]) groupedData[key] = { ph: [], turb: [], tds: [] };
+                        if (!isNaN(parseFloat(ph))) groupedData[key].ph.push(parseFloat(ph));
+                        if (!isNaN(parseFloat(turb))) groupedData[key].turb.push(parseFloat(turb));
+                        if (!isNaN(parseFloat(tds))) groupedData[key].tds.push(parseFloat(tds));
+                    }
+
+                    tbody.innerHTML += `<tr><td>${tStr}</td><td>${ph}</td><td>${turb}</td><td>${tds}</td><td>${getOverallStatus(ph, turb, tds)}</td></tr>`;
+                });
+                renderHistoryChart(groupedData, monthValue !== "", 'monthlyHistoryChart');
+            }, (error) => {
+                if (error.code === 'failed-precondition') {
+                     document.getElementById("historyTableBody").innerHTML = `<tr><td colspan='5' style='color: orange; font-weight:bold; background:#fff3cd;'>⚠️ ACTION REQUIRED: Firestore requires a composite index to filter by School and Timestamp. Open your browser console (F12) and click the Firebase link provided to automatically create the index.</td></tr>`;
+                } else {
+                     document.getElementById("historyTableBody").innerHTML = `<tr><td colspan='5' style='color:red;'>Error: ${error.message}</td></tr>`;
+                }
             });
-
-            renderHistoryChart(groupedData, monthValue);
-
-        }, (error) => {
-            console.error("Error fetching history:", error);
-            if (error.code === 'failed-precondition') {
-                 tbody.innerHTML = `<tr><td colspan='5' style='color: orange; font-weight:bold; background:#fff3cd;'>
-                    ⚠️ ACTION REQUIRED: Firestore requires a composite index to filter by School and Timestamp. Open your browser console (F12) and click the Firebase link provided to automatically create the index.
-                 </td></tr>`;
-            } else {
-                 tbody.innerHTML = `<tr><td colspan='5' style='color:red;'>Error: ${error.message}</td></tr>`;
-            }
-        });
-    }
-
-    function renderHistoryChart(groupedData, isMonthlyView) {
-        const ctx = document.getElementById('monthlyHistoryChart').getContext('2d');
-        
-        if (historyChartInstance) {
-            historyChartInstance.destroy();
         }
 
-        const labels = Object.keys(groupedData).sort();
-        const avgCalc = (arr) => arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2) : 0;
+        function renderHistoryChart(groupedData, isMonthlyView, canvasId) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            if (canvasId === 'monthlyHistoryChart' && historyChartInstance) historyChartInstance.destroy();
+            else if (canvasId !== 'monthlyHistoryChart' && hiddenExportChartInstance) hiddenExportChartInstance.destroy();
 
-        const phAverages = labels.map(key => avgCalc(groupedData[key].ph));
-        const turbAverages = labels.map(key => avgCalc(groupedData[key].turb));
-        const tdsAverages = labels.map(key => avgCalc(groupedData[key].tds));
+            const labels = Object.keys(groupedData).sort();
+            const avg = (arr) => arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2) : 0;
 
-        const formattedLabels = labels.map(label => {
-            const parts = label.split('-');
-            if (parts.length === 3) { 
-                const date = new Date(parts[0], parts[1] - 1, parts[2]);
-                return date.toLocaleDateString('default', { month: 'short', day: 'numeric' });
-            } else { 
-                const date = new Date(parts[0], parts[1] - 1);
-                return date.toLocaleString('default', { month: 'short', year: 'numeric' });
+            const phAvgs = labels.map(k => avg(groupedData[k].ph));
+            const turbAvgs = labels.map(k => avg(groupedData[k].turb));
+            const tdsAvgs = labels.map(k => avg(groupedData[k].tds));
+
+            const fmtLabels = labels.map(lbl => {
+                const p = lbl.split('-');
+                if (p.length === 3) return new Date(p[0], p[1]-1, p[2]).toLocaleDateString('default', { month: 'short', day: 'numeric' });
+                return new Date(p[0], p[1]-1).toLocaleString('default', { month: 'short', year: 'numeric' });
+            });
+
+            const newChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: fmtLabels,
+                    datasets: [
+                        { label: 'Avg pH Level', data: phAvgs, borderColor: '#3182ce', backgroundColor: 'rgba(49, 130, 206, 0.1)', borderWidth: 2, tension: 0.3, fill: true, yAxisID: 'y' },
+                        { label: 'Avg Turbidity (NTU)', data: turbAvgs, borderColor: '#dd6b20', backgroundColor: 'transparent', borderWidth: 2, tension: 0.3, yAxisID: 'y' },
+                        { label: 'Avg TDS (ppm)', data: tdsAvgs, borderColor: '#805ad5', backgroundColor: 'transparent', borderWidth: 2, tension: 0.3, yAxisID: 'y1' }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, animation: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: function(c) { let l = c.dataset.label || ''; if(l) l += ': '; if(c.parsed.y !== null) l += c.parsed.y; if(c.datasetIndex === 0) l += ' pH'; if(c.datasetIndex === 1) l += ' NTU'; if(c.datasetIndex === 2) l += ' ppm'; return l; } } } },
+                    scales: {
+                        x: { title: { display: true, text: isMonthlyView ? 'Date (Day)' : 'Month', font: { weight: 'bold' } } },
+                        y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'pH & Turbidity (NTU)', font: { weight: 'bold' } }, beginAtZero: true },
+                        y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: 'TDS (ppm)', font: { weight: 'bold' } }, beginAtZero: true, grid: { drawOnChartArea: false } }
+                    }
+                }
+            });
+
+            if (canvasId === 'monthlyHistoryChart') historyChartInstance = newChart;
+            else hiddenExportChartInstance = newChart;
+        }
+
+        // --- PDF GENERATOR UTILS ---
+        window.openReportModal = function(schoolId, schoolName, schoolEmail) {
+            document.getElementById('currentSchoolId').value = schoolId; document.getElementById('currentSchoolName').value = schoolName; document.getElementById('currentSchoolEmail').value = schoolEmail; document.getElementById('reportModal').style.display = 'flex';
+        }
+        
+        let isWaitingForReturn = false;
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible" && isWaitingForReturn) {
+                isWaitingForReturn = false; 
+                setTimeout(() => {
+                    closeModal(); 
+                    showAlert("Welcome Back!", "The dashboard is ready for the next school.");
+                    const btnElement = document.querySelector('.modal .btn-primary');
+                    if(btnElement) btnElement.innerText = "Download & Open Gmail";
+                }, 500);
             }
         });
 
-        historyChartInstance = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: formattedLabels,
-                datasets: [
-                    {
-                        label: 'Avg pH Level',
-                        data: phAverages,
-                        borderColor: '#3182ce',
-                        backgroundColor: 'rgba(49, 130, 206, 0.1)',
-                        borderWidth: 2,
-                        tension: 0.3,
-                        fill: true
-                    },
-                    {
-                        label: 'Avg Turbidity (NTU)',
-                        data: turbAverages,
-                        borderColor: '#dd6b20',
-                        backgroundColor: 'transparent',
-                        borderWidth: 2,
-                        tension: 0.3
-                    },
-                    {
-                        label: 'Avg TDS (ppm)',
-                        data: tdsAverages,
-                        borderColor: '#805ad5',
-                        backgroundColor: 'transparent',
-                        borderWidth: 2,
-                        tension: 0.3
+        function addHeader(doc, orientation = 'portrait') {
+            const pW = doc.internal.pageSize.width || doc.internal.pageSize.getWidth(); const cX = pW / 2; const rX = pW - 10;
+            const imgEl = document.getElementById('pdf-logo-hidden');
+            if (imgEl && imgEl.complete && imgEl.naturalHeight !== 0) doc.addImage(imgEl, 'PNG', cX - 10, 5, 20, 20); 
+            doc.setFontSize(10); doc.text("Republic of the Philippines", cX, 30, null, null, "center"); doc.text("Department of Education", cX, 35, null, null, "center"); doc.text("Region III", cX, 40, null, null, "center");
+            doc.setFontSize(11); doc.setFont(undefined, 'bold'); doc.text("Division of Mabalacat City", cX, 45, null, null, "center");
+            doc.setLineWidth(0.5); doc.line(10, 50, rX, 50); doc.setFont(undefined, 'normal');
+        }
+
+        function addFooter(doc, pageNum, totalPages = null, orientation = 'portrait') {
+            const pW = doc.internal.pageSize.width || doc.internal.pageSize.getWidth(); const pH = doc.internal.pageSize.height || doc.internal.pageSize.getHeight(); const cX = pW / 2; const rX = pW - 10; const fY = pH - 35; 
+            doc.setFontSize(9); doc.setTextColor(50, 50, 50); doc.setFont(undefined, 'italic'); doc.text('"Serve with courtesy, act with integrity."', cX, fY, null, null, "center"); doc.setDrawColor(50, 50, 50); doc.setLineWidth(0.7); doc.line(10, fY + 2, rX, fY + 2);
+            
+            const lY = fY + 4; const lH = 12; 
+            const lDeped = document.getElementById('footer-logo-deped'); if (lDeped && lDeped.complete && lDeped.naturalHeight !== 0) doc.addImage(lDeped, 'PNG', 10, lY, 22, lH - 2); 
+            const lBagong = document.getElementById('footer-logo-bagong'); if (lBagong && lBagong.complete && lBagong.naturalHeight !== 0) doc.addImage(lBagong, 'JPEG', 34, lY, 10, 10); 
+            const lMab = document.getElementById('footer-logo-mabalacat'); if (lMab && lMab.complete && lMab.naturalHeight !== 0) doc.addImage(lMab, 'PNG', 46, lY, 10, 10); 
+
+            doc.setFont(undefined, 'normal'); doc.setFontSize(7); doc.setTextColor(0, 0, 0);
+            doc.text("P. Burgos St., Poblacion, Mabalacat City, Pampanga, 2010", rX, lY + 3, null, null, "right"); doc.text("Telephone No.: (045) 402-7534", rX, lY + 7, null, null, "right");
+            const bY = lY + 12; doc.setFillColor(66, 103, 178); doc.rect(58, bY - 2, 4, 4, 'F'); doc.setTextColor(255, 255, 255); doc.setFontSize(7); doc.text("f", 59.2, bY + 1); 
+            doc.setTextColor(0, 0, 0); doc.text("DepEd Tayo Division of Mabalacat", 64, bY + 1); doc.text("✉", 115, bY + 1); doc.text("mabalacat.city@deped.gov.ph", 118, bY + 1); doc.text("🌐", 160, bY + 1); doc.text("www.depedmabalacat.org", 164, bY + 1);
+            doc.text(totalPages ? `Page ${pageNum} of ${totalPages}` : `Page ${pageNum}`, rX, pH - 5, null, null, "right");
+        }
+
+        // --- 1. SINGLE WATER REPORT GENERATOR ---
+        window.generateAndSend = async function() {
+            const tester = document.getElementById('testerName').value;
+            const school = document.getElementById('currentSchoolName').value;
+            const email = document.getElementById('currentSchoolEmail').value;
+
+            if(!tester) return showAlert("Input Required", "Please enter the tester's name."); 
+
+            // Popup bypass hack
+            const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            let mailTab = (!isMobileDevice && email) ? window.open('about:blank', '_blank') : null;
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('portrait');
+            addHeader(doc, 'portrait');
+            
+            doc.setFontSize(12); doc.setFont(undefined, 'bold'); doc.text("I. Guide in Descriptive Values", 14, 60); doc.setFontSize(10); doc.setFont(undefined, 'normal'); doc.text(`Reference for: ${school}`, 14, 65);
+
+            doc.autoTable({
+                startY: 70, head: [['Denomination', 'pH Range']],
+                body: [ ['Ultra acidic', '< 3.5'], ['Extremely acidic', '3.5-4.4'], ['Very strongly acidic', '4.5-5.0'], ['Strongly acidic', '5.1-5.5'], ['Moderately acidic', '5.6-6.0'], ['Slightly acidic', '6.1-6.5'], ['Neutral', '6.6-7.3'], ['Slightly alkaline', '7.4-7.8'], ['Moderately alkaline', '7.9-8.4'], ['Strongly alkaline', '8.5-9.0'], ['Very strongly alkaline', '> 9.0'] ],
+                theme: 'grid', styles: { fontSize: 8, cellPadding: 1 }, tableWidth: 80, margin: { left: 14 }
+            });
+            let finalY_pH = doc.lastAutoTable.finalY;
+
+            doc.autoTable({
+                startY: 70, head: [['Level of TDS (mg/L)', 'Rating']],
+                body: [ ['<300', 'Excellent'], ['300-600', 'Good'], ['601-900', 'Fair'], ['900-1200', 'Poor'], ['>1200', 'Unacceptable'] ],
+                theme: 'grid', styles: { fontSize: 8, cellPadding: 1 }, tableWidth: 80, margin: { left: 110 } 
+            });
+            let finalY_TDS_small = doc.lastAutoTable.finalY;
+
+            doc.autoTable({
+                startY: Math.max(finalY_pH, finalY_TDS_small) + 10,
+                head: [ [{ content: 'Turbidity Level', colSpan: 3, styles: { halign: 'center', fillColor: [220, 220, 220], textColor: 0, lineWidth: 0.1, lineColor: [150, 150, 150] } }], ['Range (NTU)', 'Rating', 'Description'] ],
+                body: [ ['< 5', 'Excellent', 'Very clear'], ['5-10', 'Good', 'Clear'], ['10-25', 'Fair', 'Slightly clear'], ['25-50', 'Marginal', 'Mod. cloudy'], ['50-100', 'Poor', 'Cloudy'], ['100-500', '', 'Very cloudy'], ['500-1000', 'Unacceptable', 'Muddy'], ['>1000', '', 'Very muddy'] ],
+                theme: 'grid', styles: { fontSize: 8, cellPadding: 1.5, lineColor: [150, 150, 150], lineWidth: 0.1 }, margin: { left: 14 }, tableWidth: 80
+            });
+
+            addFooter(doc, 1, 2, 'portrait'); doc.addPage(); addHeader(doc, 'portrait');
+
+            doc.setFontSize(12); doc.setFont(undefined, 'bold'); doc.text(`II. Water Quality Test Results - ${school}`, 14, 60);
+
+            const curPh = parseFloat(document.getElementById("phValue").innerText) || 0;
+            const curTds = parseFloat(document.getElementById("tdsValue").innerText) || 0;
+            const curTurb = parseFloat(document.getElementById("turbidityValue").innerText) || 0;
+
+            try { await addDoc(waterQualityCol, { schoolId: document.getElementById('currentSchoolId').value, phLevel: isNaN(curPh) ? 0 : curPh, tds: isNaN(curTds) ? 0 : curTds, turbidity: isNaN(curTurb) ? 0 : curTurb, timestamp: new Date() }); } catch (error) { console.error("Failed to save history log:", error); }
+
+            doc.autoTable({
+                startY: 65, head: [['Parameter', 'Result', 'Descriptive Value']],
+                body: [
+                    ["pH Level", `${curPh} pH`, getPhDescription(curPh)],
+                    ["Total Dissolved Solid", `${curTds} mg/L`, getTdsDescription(curTds)],
+                    ["Turbidity Level", `${curTurb} NTU`, getTurbidityDescription(curTurb)]
+                ],
+                theme: 'grid', headStyles: { fillColor: [50, 50, 50], textColor: [255, 255, 255] }, styles: { fontSize: 10, cellPadding: 3 }
+            });
+
+            let sigY = doc.lastAutoTable.finalY + 20;
+            doc.setFont(undefined, 'normal'); doc.text("REMARKS : _________________________________________________", 14, sigY);
+            doc.setFontSize(9); doc.setFont(undefined, 'italic'); doc.setTextColor(200, 0, 0); doc.text("Disclaimer: Please note that the water is NOT intended for drinking purposes.", 14, sigY + 8);
+            doc.setTextColor(0, 0, 0); doc.setFontSize(10); doc.setFont(undefined, 'normal'); doc.text("Tested by:", 14, sigY + 25);
+            doc.setFont(undefined, 'bold'); doc.text(tester.toUpperCase(), 14, sigY + 35); doc.line(14, sigY + 36, 80, sigY + 36); 
+
+            addFooter(doc, 2, 2, 'portrait');
+
+            const filename = `${school}_Water_Report.pdf`;
+            const subject = `Water Quality Report: ${school}`;
+            const bodyText = `Hello,\n\nPlease find the attached Water Quality Report for ${school}.\n\nTested by: ${tester}`;
+
+            if (isMobileDevice && navigator.canShare) {
+                if(mailTab) mailTab.close();
+                const file = new File([doc.output('blob')], filename, { type: "application/pdf" });
+                if (email) try { await navigator.clipboard.writeText(email); } catch (e) {}
+                openShareModal(() => { navigator.share({ title: subject, text: bodyText, files: [file] }).catch(err => console.log(err)); });
+                closeModal();
+            } else {
+                doc.save(filename); 
+                isWaitingForReturn = true;
+                const gmailURL = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText + "\n\n(Note: Please attach the downloaded PDF manually)")}`;
+                if (mailTab) { mailTab.location.href = gmailURL; closeModal(); } 
+                else { window.open(gmailURL, '_blank'); closeModal(); }
+            }
+        }
+
+        // --- 2. EXPORT DETAILED GRAPH ---
+        window.openExportGraphModal = function(actionType) {
+            if(!document.getElementById("historySchoolSelect").value) return showAlert("Action Required", "Please select a school to export data.");
+            document.getElementById("exportActionType").value = actionType; document.getElementById("exportGraphModal").style.display = "flex";
+        }
+
+        window.closeExportGraphModal = function() {
+            document.getElementById("exportGraphModal").style.display = "none";
+            document.getElementById("confirmExportBtn").innerText = "Generate Report"; document.getElementById("confirmExportBtn").disabled = false;
+        }
+
+        window.processGraphExport = async function() {
+            const action = document.getElementById("exportActionType").value;
+            const year = parseInt(document.getElementById("exportYear").value);
+            const monthStr = document.getElementById("exportMonth").value;
+            const schoolId = document.getElementById("historySchoolSelect").value;
+            const schoolSelect = document.getElementById("historySchoolSelect");
+            const schoolName = schoolSelect.options[schoolSelect.selectedIndex].text;
+            const schoolEmail = schoolSelect.options[schoolSelect.selectedIndex].getAttribute("data-email") || "";
+
+            document.getElementById("confirmExportBtn").innerText = "Generating..."; document.getElementById("confirmExportBtn").disabled = true;
+
+            const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            let mailTab = (action === 'email' && !isMobileDevice) ? window.open('about:blank', '_blank') : null;
+
+            try {
+                let startDate, endDate;
+                if (monthStr !== "") { const m = parseInt(monthStr); startDate = new Date(year, m, 1); endDate = new Date(year, m + 1, 1); } 
+                else { startDate = new Date(year, 0, 1); endDate = new Date(year + 1, 0, 1); }
+
+                const qExport = query(waterQualityCol, where("schoolId", "==", schoolId), where("timestamp", ">=", startDate), where("timestamp", "<", endDate), orderBy("timestamp", "desc"));
+                const snapshot = await getDocs(qExport);
+                
+                if(snapshot.empty) {
+                    if (mailTab) mailTab.close();
+                    closeExportGraphModal();
+                    return showAlert("No Data", "There is no data available for the selected timeframe to generate a report.");
+                }
+
+                const groupedData = {}; const detailedTableData = [];
+                let sumPh = 0, countPh = 0, sumTurb = 0, countTurb = 0, sumTds = 0, countTds = 0;
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    let tStr = "Unknown Time"; let pDate = null;
+                    if (data.timestamp && data.timestamp.toDate) pDate = data.timestamp.toDate();
+                    else if (data.timestamp) pDate = new Date(data.timestamp);
+                    if(pDate) tStr = pDate.toLocaleString(); 
+
+                    const phRaw = parseFloat(data.phLevel); const turbRaw = parseFloat(data.turbidity); const tdsRaw = parseFloat(data.tds);
+                    if (!isNaN(phRaw)) { sumPh += phRaw; countPh++; }
+                    if (!isNaN(turbRaw)) { sumTurb += turbRaw; countTurb++; }
+                    if (!isNaN(tdsRaw)) { sumTds += tdsRaw; countTds++; }
+
+                    const ph = !isNaN(phRaw) ? phRaw.toFixed(2) : "--"; const turb = !isNaN(turbRaw) ? turbRaw.toFixed(2) : "--"; const tds = !isNaN(tdsRaw) ? tdsRaw.toFixed(2) : "--";
+                    let statusText = ((phRaw >= 6.5 && phRaw <= 8.5) && turbRaw <= 10 && tdsRaw <= 600) ? "Normal" : "Check";
+
+                    detailedTableData.push([tStr, `${ph}\n(${getPhDescription(phRaw)})`, `${turb}\n(${getTurbidityDescription(turbRaw)})`, `${tds}\n(${getTdsDescription(tdsRaw)})`, statusText]);
+
+                    if (pDate) {
+                        const key = (monthStr !== "") ? `${pDate.getFullYear()}-${String(pDate.getMonth() + 1).padStart(2, '0')}-${String(pDate.getDate()).padStart(2, '0')}` : `${pDate.getFullYear()}-${String(pDate.getMonth() + 1).padStart(2, '0')}`;
+                        if (!groupedData[key]) groupedData[key] = { ph: [], turb: [], tds: [] };
+                        if (!isNaN(phRaw)) groupedData[key].ph.push(phRaw);
+                        if (!isNaN(turbRaw)) groupedData[key].turb.push(turbRaw);
+                        if (!isNaN(tdsRaw)) groupedData[key].tds.push(tdsRaw);
                     }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: { mode: 'index', intersect: false },
-                plugins: {
-                    legend: { position: 'top' },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) { label += ': '; }
-                                if (context.parsed.y !== null) { label += context.parsed.y; }
-                                return label;
-                            }
+                });
+
+                let avgPh = countPh > 0 ? (sumPh / countPh) : 0;
+                let avgTurb = countTurb > 0 ? (sumTurb / countTurb) : 0;
+                let avgTds = countTds > 0 ? (sumTds / countTds) : 0;
+                const mSelect = document.getElementById("exportMonth");
+                const monthTextName = monthStr !== "" ? mSelect.options[mSelect.selectedIndex].text : "the year";
+                const timeframeText = monthStr !== "" ? `the month of ${monthTextName} ${year}` : `the year ${year}`;
+                
+                let analysisText = `Data Analysis: For ${timeframeText}, the average water quality readings indicate that the water is ${getPhDescription(avgPh).toLowerCase()} (Avg pH: ${avgPh.toFixed(2)}), ${getTurbidityDescription(avgTurb).toLowerCase()} (Avg Turbidity: ${avgTurb.toFixed(2)} NTU), and has a TDS level of ${avgTds.toFixed(2)} ppm (${getTdsDescription(avgTds).toLowerCase()}).`;
+
+                renderHistoryChart(groupedData, monthStr !== "", 'hiddenExportChart');
+                
+                setTimeout(async () => {
+                    const canvas = document.getElementById('hiddenExportChart');
+                    const tempCanvas = document.createElement('canvas'); tempCanvas.width = canvas.width; tempCanvas.height = canvas.height;
+                    const tempCtx = tempCanvas.getContext('2d'); tempCtx.fillStyle = '#ffffff'; tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height); tempCtx.drawImage(canvas, 0, 0);
+                    const chartImgData = tempCanvas.toDataURL('image/jpeg', 1.0);
+
+                    const { jsPDF } = window.jspdf; const docPdf = new jsPDF('landscape');
+                    const monthText = monthStr !== "" ? mSelect.options[mSelect.selectedIndex].text : "Whole Year";
+                    
+                    addHeader(docPdf, 'landscape');
+                    docPdf.setFontSize(16); docPdf.setFont(undefined, 'bold'); docPdf.text(`Detailed Analytics Graph - ${schoolName}`, 14, 60);
+                    docPdf.setFontSize(11); docPdf.setFont(undefined, 'normal'); docPdf.text(`Timeframe: ${monthText} ${year}`, 14, 66);
+                    docPdf.addImage(chartImgData, 'JPEG', 14, 70, 269, 100);
+
+                    docPdf.addPage(); addHeader(docPdf, 'landscape');
+                    docPdf.setFontSize(14); docPdf.setFont(undefined, 'bold'); docPdf.text("Detailed Water Quality Data Logs", 14, 60);
+
+                    docPdf.setFontSize(10); docPdf.setFont(undefined, 'normal');
+                    let splitAnalysis = docPdf.splitTextToSize(analysisText, 260); docPdf.text(splitAnalysis, 14, 68);
+                    
+                    docPdf.autoTable({
+                        startY: 68 + (splitAnalysis.length * 5) + 5,
+                        head: [['Date/Time', 'pH Level', 'Turbidity (NTU)', 'TDS (ppm)', 'Overall']],
+                        body: detailedTableData,
+                        theme: 'grid', headStyles: { fillColor: [50, 50, 50], textColor: [255, 255, 255] }, styles: { fontSize: 9, cellPadding: 2 }
+                    });
+
+                    const totalPages = docPdf.internal.getNumberOfPages();
+                    for (let i = 1; i <= totalPages; i++) { docPdf.setPage(i); addFooter(docPdf, i, totalPages, 'landscape'); }
+
+                    const filename = `${schoolName.replace(/\s+/g, '_')}_Detailed_Report_${year}.pdf`;
+                    closeExportGraphModal();
+
+                    if (action === 'download') {
+                        docPdf.save(filename); if (mailTab) mailTab.close(); 
+                    } else {
+                        const subject = `Water Quality Analytics Report: ${schoolName}`;
+                        const bodyText = `Hello,\n\nPlease find the attached detailed analytical graph and data logs for ${schoolName} covering ${monthText} ${year}.`;
+                        const file = new File([docPdf.output('blob')], filename, { type: "application/pdf" });
+
+                        if (isMobileDevice && navigator.canShare) {
+                            if (mailTab) mailTab.close();
+                            if (schoolEmail) try { await navigator.clipboard.writeText(schoolEmail); } catch (e) {}
+                            openShareModal(() => { navigator.share({ title: subject, text: bodyText, files: [file] }).catch(err => console.log(err)); });
+                        } else {
+                            docPdf.save(filename); 
+                            const gmailURL = `https://mail.google.com/mail/?view=cm&fs=1&to=${schoolEmail}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText + "\n\n(Note: Please attach the downloaded PDF manually)")}`;
+                            if (mailTab) mailTab.location.href = gmailURL; else window.open(gmailURL, '_blank');
                         }
                     }
-                },
-                scales: { y: { beginAtZero: true } }
-            }
-        });
-    }
-
-    // --- 1. REAL-TIME SENSOR DATA LISTENER ---
-    const qWater = query(waterQualityCol, limit(20));
-
-    onSnapshot(qWater, (snapshot) => {
-        const readingsBody = document.getElementById("readingsTableBody");
-        readingsBody.innerHTML = ""; 
-
-        if (snapshot.empty) {
-            readingsBody.innerHTML = "<tr><td colspan='5'>No sensor data found in 'waterQuality'.</td></tr>";
-            return;
-        }
-
-        let readings = [];
-        snapshot.forEach(doc => {
-            readings.push(doc.data());
-        });
-
-        if (readings.length > 0) {
-            updateDashboardCards(readings[0]);
-        }
-
-        readings.forEach(data => {
-            let timeString = "Live Data";
-            if (data.timestamp && data.timestamp.toDate) {
-                timeString = data.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            } else if (data.timestamp) {
-                const parsedDate = new Date(data.timestamp);
-                if (!isNaN(parsedDate.getTime())) { 
-                    timeString = parsedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                }
-            } else {
-                const fallbackDate = new Date();
-                timeString = fallbackDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            }
-
-            const ph = data.phLevel !== undefined ? parseFloat(data.phLevel).toFixed(2) : "--";
-            const turb = data.turbidity !== undefined ? parseFloat(data.turbidity).toFixed(2) : "--";
-            const tds = data.tds !== undefined ? parseFloat(data.tds).toFixed(2) : "--";
-            
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td>${timeString}</td>
-                <td>${ph}</td>
-                <td>${turb}</td>
-                <td>${tds}</td>
-                <td>${getOverallStatus(ph, turb, tds)}</td>
-            `;
-            readingsBody.appendChild(tr);
-        });
-    }, (error) => {
-        console.error("Error fetching water data:", error);
-    });
-
-    function updateDashboardCards(data) {
-        const phVal = data.phLevel !== undefined ? data.phLevel : 0;
-        const turbVal = data.turbidity !== undefined ? data.turbidity : 0;
-        const tdsVal = data.tds !== undefined ? data.tds : 0;
-
-        document.getElementById("phValue").innerText = parseFloat(phVal).toFixed(2);
-        const phEl = document.getElementById("phStatus");
-        
-        if (phVal >= 6.5 && phVal <= 8.5) {
-            phEl.innerText = "● Optimal Range"; phEl.style.color = "#2f855a"; 
-        } else {
-            phEl.innerText = "● Attention Required"; phEl.style.color = "#c05621"; 
-        }
-
-        document.getElementById("turbidityValue").innerText = parseFloat(turbVal).toFixed(2);
-        const turbEl = document.getElementById("turbidityStatus");
-
-        if (turbVal < 5) {
-            turbEl.innerText = "● Clear / Excellent"; turbEl.style.color = "#2f855a";
-        } else if (turbVal < 10) {
-             turbEl.innerText = "● Good"; turbEl.style.color = "#2f855a";
-        } else {
-            turbEl.innerText = "● Cloudy / High"; turbEl.style.color = "#c05621";
-        }
-
-        document.getElementById("tdsValue").innerText = parseFloat(tdsVal).toFixed(2); 
-        const tdsEl = document.getElementById("tdsStatus");
-
-        if (tdsVal < 300) {
-            tdsEl.innerText = "● Excellent"; tdsEl.style.color = "#2f855a";
-        } else if (tdsVal < 600) {
-            tdsEl.innerText = "● Good"; tdsEl.style.color = "#2b6cb0"; 
-        } else {
-            tdsEl.innerText = "● High Solids"; tdsEl.style.color = "#c05621";
-        }
-    }
-
-    function getOverallStatus(ph, turb, tds) {
-        const p = parseFloat(ph) || 0;
-        const t = parseFloat(turb) || 0;
-        const s = parseFloat(tds) || 0;
-        if ((p >= 6.5 && p <= 8.5) && t < 10 && s < 1000) {
-            return '<span style="color: green; font-weight:bold;">Normal</span>';
-        }
-        return '<span style="color: orange; font-weight:bold;">Check</span>';
-    }
-
-    // --- 2. SCHOOLS LOGIC (PAGINATION + CLIENT-SIDE SEARCH) ---
-    let schoolsUnsubscribe = null;
-    let currentPage = 1;
-    const pageSize = 5; 
-    let firstDoc = null; 
-    let lastDoc = null;  
-    let isSearchMode = false; 
-
-    async function loadSchools(direction = 0, searchTerm = "") {
-        let q;
-
-        if (searchTerm) {
-            isSearchMode = true;
-            q = query(schoolsCol, orderBy("schoolName")); 
-        } else {
-            isSearchMode = false;
-            if (direction === 1 && lastDoc) {
-                q = query(schoolsCol, orderBy("schoolName"), startAfter(lastDoc), limit(pageSize));
-            } else if (direction === -1 && firstDoc) {
-                q = query(schoolsCol, orderBy("schoolName"), endBefore(firstDoc), limitToLast(pageSize));
-            } else {
-                q = query(schoolsCol, orderBy("schoolName"), limit(pageSize));
+                }, 400); // 400ms delay to ensure chart draws completely
+            } catch (e) {
+                if (mailTab) mailTab.close(); closeExportGraphModal(); showAlert("Export Error", e.message);
             }
         }
-
-        if (schoolsUnsubscribe) schoolsUnsubscribe();
-
-        schoolsUnsubscribe = onSnapshot(q, (snapshot) => {
-            const tbody = document.getElementById("schoolTableBody");
-            tbody.innerHTML = "";
-
-            let allDocs = [];
-            snapshot.forEach(docSnap => {
-                allDocs.push({ id: docSnap.id, data: docSnap.data(), doc: docSnap });
-            });
-
-            if (isSearchMode) {
-                const termLower = searchTerm.toLowerCase();
-                allDocs = allDocs.filter(item => {
-                    const name = item.data.schoolName ? item.data.schoolName.toLowerCase() : "";
-                    return name.includes(termLower);
-                });
-            } else {
-                if (allDocs.length > 0) {
-                    firstDoc = allDocs[0].doc;
-                    lastDoc = allDocs[allDocs.length - 1].doc;
-                }
-            }
-
-            if (allDocs.length === 0) {
-                tbody.innerHTML = "<tr><td colspan='5'>No schools found.</td></tr>";
-                if (!isSearchMode) document.getElementById("nextBtn").disabled = true;
-            } else {
-                allDocs.forEach(item => {
-                    const school = item.data;
-                    const schoolId = item.id;
-                    const statusHtml = `<td><span style="color: #a0aec0;">--</span></td>`;
-
-                    const tr = document.createElement("tr");
-                    tr.id = `row-${schoolId}`; 
-                    tr.innerHTML = `
-                        <td class="name-cell">${school.schoolName || "N/A"}</td>
-                        <td class="head-cell">${school.schoolHead || "N/A"}</td>
-                        <td class="email-cell">${school.email || "N/A"}</td>
-                        ${statusHtml}
-                        <td class="action-cell">
-                            <button class="btn btn-email" title="Send Report" onclick="openReportModal('${schoolId}', '${school.schoolName}', '${school.email}')">
-                                <img src="img/gmail.png" class="btn-icon" style="margin-right: 5px;"> Report
-                            </button>
-                            <button class="btn btn-edit" title="Edit" onclick="editSchool('${schoolId}')">
-                                <img src="img/edit.png" class="btn-icon">
-                            </button>
-                            <button class="btn btn-delete" title="Delete" onclick="openDeleteModal('${schoolId}')">
-                                <img src="img/trash.png" class="btn-icon">
-                            </button>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            }
-
-            if (isSearchMode) {
-                document.getElementById("pageIndicator").innerText = "Search Results";
-                document.getElementById("prevBtn").disabled = true;
-                document.getElementById("nextBtn").disabled = true;
-            } else {
-                document.getElementById("pageIndicator").innerText = `Page ${currentPage}`;
-                document.getElementById("prevBtn").disabled = (currentPage === 1);
-                document.getElementById("nextBtn").disabled = (snapshot.docs.length < pageSize);
-            }
-
-        }, (error) => {
-            console.error("Data Error:", error);
-            document.getElementById("schoolTableBody").innerHTML = `<tr><td colspan='5' style='color: red;'>Error: ${error.message}</td></tr>`;
-        });
-    }
-
-    // --- SEARCH FUNCTIONS ---
-    let debounceTimeout = null;
-
-    window.handleSearch = function(value) {
-        clearTimeout(debounceTimeout);
-        debounceTimeout = setTimeout(() => {
-            const term = value.trim();
-            if (term) {
-                currentPage = 1;
-                loadSchools(0, term);
-            } else {
-                clearSearch();
-            }
-        }, 300);
-    }
-
-    window.searchSchools = function() {
-        const term = document.getElementById("searchInput").value.trim();
-        if (!term) {
-            showAlert("Input Required", "Please enter a school name to search.");
-            return;
-        }
-        currentPage = 1;
-        loadSchools(0, term);
-    }
-
-    window.clearSearch = function() {
-        document.getElementById("searchInput").value = "";
-        isSearchMode = false;
-        currentPage = 1;
-        loadSchools(0); 
-    }
-
-    window.changePage = function(step) {
-        if (isSearchMode) return; 
-        if (currentPage + step < 1) return;
-        currentPage += step;
-        loadSchools(step);
-    };
-
-    // Initial Load
-    loadSchools(0);
-
-    // --- 3. UTILITY FUNCTIONS ---
-    window.showAlert = function(title, message) {
-        document.getElementById('alertTitle').innerText = title;
-        document.getElementById('alertMessage').innerText = message;
-        document.getElementById('alertModal').style.display = 'flex';
-    }
-    
-    window.closeAlert = function() {
-        document.getElementById('alertModal').style.display = 'none';
-    }
-
-    window.openShareModal = function(shareFunction) {
-        document.getElementById('shareModal').style.display = 'flex';
-        const shareBtn = document.getElementById('shareBtnAction');
-        const newBtn = shareBtn.cloneNode(true);
-        shareBtn.parentNode.replaceChild(newBtn, shareBtn);
-        newBtn.onclick = async () => {
-            await shareFunction();
-            document.getElementById('shareModal').style.display = 'none';
-        };
-    }
-
-    window.closeShareModal = function() {
-        document.getElementById('shareModal').style.display = 'none';
-    }
-
-    // EDIT SCHOOL FUNCTIONS
-    let originalData = {}; 
-
-    window.editSchool = function(id) {
-        const row = document.getElementById(`row-${id}`);
-        if(!row) return;
-
-        const nameCell = row.querySelector('.name-cell');
-        const headCell = row.querySelector('.head-cell');
-        const emailCell = row.querySelector('.email-cell');
-        const actionsCell = row.querySelector('.action-cell');
-
-        originalData[id] = {
-            name: nameCell.innerText,
-            head: headCell.innerText,
-            email: emailCell.innerText,
-            actions: actionsCell.innerHTML
-        };
-
-        nameCell.innerHTML = `<input type="text" id="edit-name-${id}" value="${originalData[id].name}" class="edit-input">`;
-        headCell.innerHTML = `<input type="text" id="edit-head-${id}" value="${originalData[id].head === "N/A" ? "" : originalData[id].head}" class="edit-input">`;
-        emailCell.innerHTML = `<input type="email" id="edit-email-${id}" value="${originalData[id].email === "N/A" ? "" : originalData[id].email}" class="edit-input">`;
-
-        actionsCell.innerHTML = `
-            <button class="btn btn-save" onclick="saveSchool('${id}')">💾 Save</button>
-            <button class="btn btn-cancel" onclick="cancelEdit('${id}')">❌</button>
-        `;
-    }
-
-    window.saveSchool = async function(id) {
-        const newName = document.getElementById(`edit-name-${id}`).value.trim();
-        const newHead = document.getElementById(`edit-head-${id}`).value.trim();
-        const newEmail = document.getElementById(`edit-email-${id}`).value.trim();
-
-        if(!newName) {
-            showAlert("Validation Error", "School Name cannot be empty.");
-            return;
-        }
-
-        try {
-            await updateDoc(doc(db, "Schools", id), {
-                schoolName: newName,
-                schoolHead: newHead,
-                email: newEmail
-            });
-            loadSchools(0);
-        } catch (e) {
-            showAlert("Error", "Could not update school: " + e.message);
-        }
-    }
-
-    window.cancelEdit = function(id) {
-        const row = document.getElementById(`row-${id}`);
-        if(!row || !originalData[id]) return;
-        row.querySelector('.name-cell').innerText = originalData[id].name;
-        row.querySelector('.head-cell').innerText = originalData[id].head;
-        row.querySelector('.email-cell').innerText = originalData[id].email;
-        row.querySelector('.action-cell').innerHTML = originalData[id].actions;
-        delete originalData[id];
-    }
-
-    // ADD SCHOOL FUNCTION
-    window.addSchoolToDB = async function() {
-        const name = document.getElementById('newSchoolName').value.trim();
-        const head = document.getElementById('newSchoolHead').value.trim();
-        const email = document.getElementById('newSchoolEmail').value.trim();
-
-        if(!name) { 
-            showAlert("Missing Information", "Please enter the School Name."); 
-            return; 
-        }
-
-        try {
-            await addDoc(schoolsCol, {
-                schoolName: name, schoolHead: head, email: email, createdAt: new Date()
-            });
-            document.getElementById('newSchoolName').value = "";
-            document.getElementById('newSchoolHead').value = "";
-            document.getElementById('newSchoolEmail').value = "";
-            showAlert("Success", "School added successfully!");
-            
-            currentPage = 1;
-            loadSchools(0);
-
-        } catch (e) {
-            showAlert("Database Error", "Error saving to database: " + e.message);
-        }
-    }
-
-    // REUSE CONFIRM MODAL FOR DELETION
-    let pendingDeleteId = null;
-
-    window.openDeleteModal = function(docId) {
-        pendingDeleteId = docId;
-        document.getElementById('confirmModal').style.display = 'flex';
-    }
-
-    window.closeConfirm = function() {
-        pendingDeleteId = null;
-        document.getElementById('confirmModal').style.display = 'none';
-    }
-
-    window.confirmDeleteAction = async function() {
-        if(pendingDeleteId) {
-            try { 
-                await deleteDoc(doc(db, "Schools", pendingDeleteId)); 
-                closeConfirm();
-                loadSchools(0);
-            } 
-            catch (e) { 
-                closeConfirm();
-                showAlert("Error", "Failed to delete: " + e.message); 
-            }
-        }
-    }
-
-    // REPORT GENERATION
-    let isWaitingForReturn = false; 
-
-    window.openReportModal = function(schoolId, schoolName, schoolEmail) {
-        document.getElementById('currentSchoolId').value = schoolId;
-        document.getElementById('currentSchoolName').value = schoolName;
-        document.getElementById('currentSchoolEmail').value = schoolEmail;
-        document.getElementById('reportModal').style.display = 'flex';
-    }
-
-    window.closeModal = function() {
-        document.getElementById('reportModal').style.display = 'none';
-        document.getElementById('testerName').value = ''; 
-    }
-
-    document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "visible" && isWaitingForReturn) {
-            isWaitingForReturn = false; 
-            setTimeout(() => {
-                closeModal(); 
-                showAlert("Welcome Back!", "The dashboard is ready for the next school.");
-                const btnElement = document.querySelector('.modal .btn-primary');
-                if(btnElement) btnElement.innerText = "Download & Open Gmail";
-            }, 500);
-        }
-    });
-
-    function addHeader(doc) {
-        const imgElement = document.getElementById('pdf-logo-hidden');
-        if (imgElement && imgElement.complete && imgElement.naturalHeight !== 0) {
-            doc.addImage(imgElement, 'PNG', 95, 5, 20, 20); 
-        }
-        doc.setFontSize(10);
-        doc.text("Republic of the Philippines", 105, 30, null, null, "center");
-        doc.text("Department of Education", 105, 35, null, null, "center");
-        doc.text("Region III", 105, 40, null, null, "center");
-        doc.setFontSize(11);
-        doc.setFont(undefined, 'bold');
-        doc.text("Division of Mabalacat City", 105, 45, null, null, "center");
-        doc.setLineWidth(0.5); doc.line(10, 50, 200, 50); 
-        doc.setFont(undefined, 'normal');
-    }
-
-    function addFooter(doc, pageNum) {
-        const pageHeight = doc.internal.pageSize.height || doc.internal.pageSize.getHeight();
-        const footerY = pageHeight - 35; 
-        doc.setFontSize(9);
-        doc.setTextColor(50, 50, 50); 
-        doc.setFont(undefined, 'italic');
-        doc.text('"Serve with courtesy, act with integrity."', 105, footerY, null, null, "center");
-        doc.setDrawColor(50, 50, 50); 
-        doc.setLineWidth(0.7);
-        doc.line(10, footerY + 2, 200, footerY + 2);
-        
-        const logoY = footerY + 4;
-        const logoH = 12; 
-        
-        const logoDeped = document.getElementById('footer-logo-deped');
-        if (logoDeped && logoDeped.complete && logoDeped.naturalHeight !== 0) {
-            doc.addImage(logoDeped, 'PNG', 10, logoY, 22, logoH - 2); 
-        }
-        const logoBagong = document.getElementById('footer-logo-bagong');
-        if (logoBagong && logoBagong.complete && logoBagong.naturalHeight !== 0) {
-            doc.addImage(logoBagong, 'JPEG', 34, logoY, 10, 10); 
-        }
-        const logoMabalacat = document.getElementById('footer-logo-mabalacat');
-        if (logoMabalacat && logoMabalacat.complete && logoMabalacat.naturalHeight !== 0) {
-            doc.addImage(logoMabalacat, 'PNG', 46, logoY, 10, 10); 
-        }
-
-        doc.setFont(undefined, 'normal');
-        doc.setFontSize(7);
-        doc.setTextColor(0, 0, 0);
-
-        doc.text("P. Burgos St., Poblacion, Mabalacat City, Pampanga, 2010", 200, logoY + 3, null, null, "right");
-        doc.text("Telephone No.: (045) 402-7534", 200, logoY + 7, null, null, "right");
-
-        const bottomRowY = logoY + 12; 
-        doc.setFillColor(66, 103, 178); 
-        doc.rect(58, bottomRowY - 2, 4, 4, 'F');
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(7);
-        doc.text("f", 59.2, bottomRowY + 1); 
-        
-        doc.setTextColor(0, 0, 0);
-        doc.setFontSize(7);
-        doc.text("DepEd Tayo Division of Mabalacat", 64, bottomRowY + 1);
-        doc.text("✉", 115, bottomRowY + 1); 
-        doc.text("mabalacat.city@deped.gov.ph", 118, bottomRowY + 1);
-        doc.text("🌐", 160, bottomRowY + 1);
-        doc.text("www.depedmabalacat.org", 164, bottomRowY + 1);
-        doc.text("Page " + pageNum + " of 3", 200, pageHeight - 5, null, null, "right");
-    }
-
-    window.generateAndSend = async function() {
-        const tester = document.getElementById('testerName').value;
-        const school = document.getElementById('currentSchoolName').value;
-        const email = document.getElementById('currentSchoolEmail').value;
-
-        if(!tester) { 
-            showAlert("Input Required", "Please enter the tester's name."); 
-            return; 
-        }
-
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-
-        addHeader(doc);
-        
-        doc.setFontSize(12);
-        doc.setFont(undefined, 'bold');
-        doc.text("I. Guide in Descriptive Values", 14, 60);
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'normal');
-        doc.text(`Reference for: ${school}`, 14, 65);
-
-        // TABLE 1: pH Range (Top Left)
-        doc.autoTable({
-            startY: 70,
-            head: [['Denomination', 'pH Range']],
-            body: [
-                ['Ultra acidic', '< 3.5'], ['Extremely acidic', '3.5-4.4'], ['Very strongly acidic', '4.5-5.0'],
-                ['Strongly acidic', '5.1-5.5'], ['Moderately acidic', '5.6-6.0'], ['Slightly acidic', '6.1-6.5'],
-                ['Neutral', '6.6-7.3'], ['Slightly alkaline', '7.4-7.8'], ['Moderately alkaline', '7.9-8.4'],
-                ['Strongly alkaline', '8.5-9.0'], ['Very strongly alkaline', '> 9.0'],
-            ],
-            theme: 'grid',
-            styles: { fontSize: 8, cellPadding: 1 },
-            tableWidth: 80,
-            margin: { left: 14 }
-        });
-        let finalY_pH = doc.lastAutoTable.finalY;
-
-        // TABLE 2: TDS Level (Top Right)
-        doc.autoTable({
-            startY: 70, 
-            head: [['Level of TDS (mg/L)', 'Rating']],
-            body: [
-                ['<300', 'Excellent'], ['300-600', 'Good'], ['601-900', 'Fair'],
-                ['900-1200', 'Poor'], ['>1200', 'Unacceptable'],
-            ],
-            theme: 'grid',
-            styles: { fontSize: 8, cellPadding: 1 },
-            tableWidth: 80,
-            margin: { left: 110 } 
-        });
-        let finalY_TDS_small = doc.lastAutoTable.finalY;
-
-        let bottomStartY = Math.max(finalY_pH, finalY_TDS_small) + 10;
-
-        // TABLE 3: Turbidity & Hardness (Bottom)
-        doc.autoTable({
-            startY: bottomStartY,
-            head: [
-                [
-                    { content: 'Turbidity Level', colSpan: 3, styles: { halign: 'center', fillColor: [220, 220, 220], textColor: 0 } }, 
-                    { content: 'TDS Level', colSpan: 2, styles: { halign: 'center', fillColor: [220, 220, 220], textColor: 0 } },
-                    { content: 'Hardness Level', colSpan: 2, styles: { halign: 'center', fillColor: [220, 220, 220], textColor: 0 } }
-                ],
-                ['Range (NTU)', 'Rating', 'Description', 'Range (mg/L)', 'Rating', 'Range (mg/L)', 'Rating']
-            ],
-            body: [
-                ['< 5', 'Excellent', 'Very clear', '<300', 'Excellent', '0-25', 'Very soft'],
-                ['5-10', 'Good', 'Clear', '300-600', 'Good', '25-50', 'Soft'],
-                ['10-25', 'Fair', 'Slightly clear', '600-900', 'Fair', '50-100', 'Mod. soft'],
-                ['25-50', 'Marginal', 'Mod. cloudy', '900-1,200', 'Marginal', '100-150', 'Slightly hard'],
-                ['50-100', 'Poor', 'Cloudy', '1,200-1,500', 'Poor', '150-200', 'Mod. hard'],
-                ['100-500', '', 'Very cloudy', '>1,500', 'Unacceptable', '200-300', 'Hard'],
-                ['500-1000', 'Unacceptable', 'Muddy', '', '', '300-600', 'Very hard'],
-                ['>1000', '', 'Very muddy', '', '', '>600', 'Ext. hard']
-            ],
-            theme: 'grid',
-            styles: { fontSize: 7, cellPadding: 1.5 },
-            margin: { left: 10, right: 10 }
-        });
-
-        addFooter(doc, 1);
-        doc.addPage();
-        addHeader(doc);
-
-        doc.setFontSize(12);
-        doc.setFont(undefined, 'bold');
-        doc.text(`II. Water Quality Test Results - ${school}`, 14, 60);
-
-        const curPh = parseFloat(document.getElementById("phValue").innerText) || 0;
-        const curTds = parseFloat(document.getElementById("tdsValue").innerText) || 0;
-        const curTurb = parseFloat(document.getElementById("turbidityValue").innerText) || 0;
-
-        // --- SAVE DATA TO FIRESTORE HISTORY LOG ---
-        const schoolId = document.getElementById('currentSchoolId').value;
-        try {
-            await addDoc(waterQualityCol, {
-                schoolId: schoolId,
-                phLevel: isNaN(curPh) ? 0 : curPh,
-                tds: isNaN(curTds) ? 0 : curTds,
-                turbidity: isNaN(curTurb) ? 0 : curTurb,
-                timestamp: new Date() // Forces accurate timestamp execution
-            });
-            console.log("History log saved successfully.");
-        } catch (error) {
-            console.error("Failed to save history log:", error);
-            showAlert("Warning", "Report generated, but failed to save history log to database.");
-        }
-        // -----------------------------------------------
-
-        const tableData = [
-            ["pH Level", `${curPh} pH`, curPh >= 6.5 && curPh <= 8.5 ? "Good" : "Check"],
-            ["Total Dissolved Solid", `${curTds} mg/L`, curTds < 600 ? "Good" : "High"],
-            ["Turbidity Level", `${curTurb} NTU`, curTurb < 5 ? "Excellent" : "Cloudy"]
-        ];
-
-        doc.autoTable({
-            startY: 65,
-            head: [['Parameter', 'Result', 'Descriptive Value']],
-            body: tableData,
-            theme: 'grid',
-            headStyles: { fillColor: [50, 50, 50], textColor: [255, 255, 255] },
-            styles: { fontSize: 10, cellPadding: 3 }
-        });
-
-        let sigY = doc.lastAutoTable.finalY + 20;
-        doc.setFont(undefined, 'normal');
-        doc.text("REMARKS : _________________________________________________", 14, sigY);
-        doc.text("Tested by:", 14, sigY + 25);
-        doc.setFont(undefined, 'bold');
-        doc.text(tester.toUpperCase(), 14, sigY + 35); 
-        doc.line(14, sigY + 36, 80, sigY + 36); 
-
-        addFooter(doc, 2);
-
-        const filename = `${school}_Water_Report.pdf`;
-        const subject = `Water Quality Report: ${school}`;
-        const bodyText = `Hello,\n\nPlease find the attached Water Quality Report for ${school}.\n\nTested by: ${tester}`;
-
-        const pdfBlob = doc.output('blob');
-        const file = new File([pdfBlob], filename, { type: "application/pdf" });
-
-        const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-        if (isMobileDevice && navigator.canShare && navigator.canShare({ files: [file] })) {
-            try { await navigator.clipboard.writeText(email); } catch (e) {}
-            closeModal(); 
-            const performShare = async () => {
-                try {
-                    await navigator.share({
-                        title: subject,
-                        text: bodyText,
-                        files: [file]
-                    });
-                } catch (err) {
-                    console.log("Share cancelled or failed", err);
-                }
-            };
-            openShareModal(performShare);
-        } else {
-            doc.save(filename); 
-            isWaitingForReturn = true;
-            const gmailURL = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText + "\n\n(Note: Please attach the downloaded PDF manually)")}`;
-            const newWindow = window.open(gmailURL, '_blank');
-            if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
-                const btnElement = document.querySelector('.modal .btn-primary');
-                if(btnElement) {
-                    btnElement.innerText = "Click here to Open Gmail";
-                    btnElement.onclick = function() { window.open(gmailURL, '_blank'); };
-                }
-            } else {
-                closeModal();
-            }
-        }
-    }
     </script>
 </body>
 </html>

@@ -356,6 +356,10 @@
 </head>
 <body>
 
+    <div id="hidden-export-container" style="position: absolute; left: -9999px; top: -9999px; width: 1000px; height: 400px; background: white;">
+        <canvas id="hiddenExportChart"></canvas>
+    </div>
+
     <div class="deped-banner">
         <div class="header-brand">
             <img src="img/depedmabalacatlogo.png" alt="Mabalacat City Logo">
@@ -500,20 +504,53 @@
 
             <div id="history-view" class="view-section">
                 <section class="data-section">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap: wrap; gap: 15px;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; flex-wrap: wrap; gap: 15px;">
                         <h3>Historical Data Logs</h3>
                         
-                        <div style="display:flex; gap: 15px; flex-wrap: wrap;">
-                            <div class="form-group" style="min-width: 200px;">
-                                <label style="margin-bottom: 5px;">Filter by Month:</label>
-                                <input type="month" id="historyMonthSelect" onchange="applyHistoryFilters()" style="padding: 8px; border-radius: 6px; border: 1px solid #cbd5e0; outline: none; background: rgba(255, 255, 255, 0.9);">
-                            </div>
-                            
+                        <div style="display:flex; gap: 15px; flex-wrap: wrap; align-items: flex-end;">
                             <div class="form-group" style="min-width: 250px;">
                                 <label style="margin-bottom: 5px;">Filter by School:</label>
                                 <select id="historySchoolSelect" onchange="applyHistoryFilters()" style="padding: 8px; border-radius: 6px; border: 1px solid #cbd5e0;">
                                     <option value="">-- Select a School --</option>
                                 </select>
+                            </div>
+
+                            <div class="form-group" style="min-width: 150px;">
+                                <label style="margin-bottom: 5px;">Year:</label>
+                                <select id="historyYearSelect" onchange="applyHistoryFilters()" style="padding: 8px; border-radius: 6px; border: 1px solid #cbd5e0;">
+                                    <option value="">-- Select Year --</option>
+                                    <option value="2024">2024</option>
+                                    <option value="2025">2025</option>
+                                    <option value="2026" selected>2026</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group" style="min-width: 150px;">
+                                <label style="margin-bottom: 5px;">Month:</label>
+                                <select id="historyMonthSelect" onchange="applyHistoryFilters()" style="padding: 8px; border-radius: 6px; border: 1px solid #cbd5e0;">
+                                    <option value="">Whole Year</option>
+                                    <option value="0">January</option>
+                                    <option value="1">February</option>
+                                    <option value="2">March</option>
+                                    <option value="3">April</option>
+                                    <option value="4">May</option>
+                                    <option value="5">June</option>
+                                    <option value="6">July</option>
+                                    <option value="7">August</option>
+                                    <option value="8">September</option>
+                                    <option value="9">October</option>
+                                    <option value="10">November</option>
+                                    <option value="11">December</option>
+                                </select>
+                            </div>
+
+                            <div style="display: flex; gap: 10px;">
+                                <button class="btn btn-save" id="downloadGraphBtn" onclick="openExportGraphModal('download')" style="display: none; height: 38px;">
+                                    <i class="ri-download-2-line"></i> Download Detailed Graph
+                                </button>
+                                <button class="btn btn-primary" id="exportGraphBtn" onclick="openExportGraphModal('email')" style="display: none; height: 38px;">
+                                    <img src="img/gmail.png" class="btn-icon" style="filter: brightness(0) invert(1);"> Email Detailed Graph
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -667,10 +704,51 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="exportGraphModal">
+        <div class="modal">
+            <h3>Export Analytics Graph</h3>
+            <p>Select the timeframe for the detailed graph and data report.</p>
+            <input type="hidden" id="exportActionType">
+            
+            <div class="form-group">
+                <label>Year</label>
+                <select id="exportYear">
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                    <option value="2026" selected>2026</option>
+                </select>
+            </div>
+            <br>
+            <div class="form-group">
+                <label>Month</label>
+                <select id="exportMonth">
+                    <option value="">Whole Year</option>
+                    <option value="0">January</option>
+                    <option value="1">February</option>
+                    <option value="2">March</option>
+                    <option value="3">April</option>
+                    <option value="4">May</option>
+                    <option value="5">June</option>
+                    <option value="6">July</option>
+                    <option value="7">August</option>
+                    <option value="8">September</option>
+                    <option value="9">October</option>
+                    <option value="10">November</option>
+                    <option value="11">December</option>
+                </select>
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="btn btn-cancel" onclick="closeExportGraphModal()">Cancel</button>
+                <button class="btn btn-primary" id="confirmExportBtn" onclick="processGraphExport()">Generate Report</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
     import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, setDoc, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy, limit, startAfter, endBefore, limitToLast, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getAuth, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, setDoc, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy, limit, startAfter, endBefore, limitToLast, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAxWmm5YsLjnwatHOVImrpIHAxicbHWYuw",
@@ -682,17 +760,14 @@
         measurementId: "G-5L40CDJPG5"
     };
 
-    // Main App
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app); 
     const db = getFirestore(app);
     
-    // COLLECTIONS
     const schoolsCol = collection(db, "Schools");
     const waterQualityCol = collection(db, "waterQuality"); 
     const usersCol = collection(db, "users");
 
-    // --- VIEW SWITCHING LOGIC ---
     window.switchView = function(viewName) {
         document.querySelectorAll('.header-nav a').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active-view'));
@@ -708,7 +783,6 @@
             document.getElementById('page-title').innerText = "History Logs";
             document.getElementById('page-subtitle').innerText = "Past water quality records";
             
-            // Populate the dropdown when the view opens
             populateSchoolDropdown(); 
         } else if (viewName === 'users') {
             document.getElementById('users-view').classList.add('active-view');
@@ -719,7 +793,6 @@
         }
     }
 
-    // --- LOGOUT FUNCTION ---
     window.handleLogout = async function() {
         if (!confirm("Are you sure you want to log out?")) return;
         try {
@@ -731,12 +804,11 @@
         }
     }
 
-    // --- HISTORY LOGS LOGIC (WITH CALENDAR FILTER) ---
     let historyUnsubscribe = null;
     let schoolDropdownUnsubscribe = null;
     let historyChartInstance = null; 
+    let hiddenExportChartInstance = null; 
 
-    // Fetch schools for the dropdown
     window.populateSchoolDropdown = function() {
         const select = document.getElementById("historySchoolSelect");
         if (schoolDropdownUnsubscribe) return; 
@@ -750,6 +822,7 @@
                 const option = document.createElement("option");
                 option.value = docSnap.id; 
                 option.textContent = school.schoolName;
+                option.setAttribute("data-email", school.email || "");
                 select.appendChild(option);
             });
 
@@ -757,9 +830,9 @@
         });
     }
 
-    // UPDATED: Central function to apply both Month and School filters
     window.applyHistoryFilters = function() {
         const schoolId = document.getElementById("historySchoolSelect").value;
+        const yearValue = document.getElementById("historyYearSelect").value;
         const monthValue = document.getElementById("historyMonthSelect").value;
         
         if (historyUnsubscribe) {
@@ -769,23 +842,36 @@
 
         const tbody = document.getElementById("historyTableBody");
         const chartContainer = document.getElementById("chart-container");
+        const exportBtn = document.getElementById("exportGraphBtn");
+        const downloadBtn = document.getElementById("downloadGraphBtn");
 
         if (!schoolId) {
             tbody.innerHTML = "<tr><td colspan='5'>Please select a school to view its history logs...</td></tr>";
             chartContainer.style.display = "none";
+            exportBtn.style.display = "none";
+            downloadBtn.style.display = "none";
             return;
         }
 
         tbody.innerHTML = "<tr><td colspan='5'>Loading logs...</td></tr>";
         chartContainer.style.display = "block"; 
+        exportBtn.style.display = "inline-flex"; 
+        downloadBtn.style.display = "inline-flex"; 
         
         let qHistory;
 
-        // If a month is selected, filter by date range
-        if (monthValue) {
-            const [year, month] = monthValue.split('-');
-            const startDate = new Date(year, month - 1, 1);
-            const endDate = new Date(year, month, 1); // 1st day of next month
+        if (yearValue) {
+            const year = parseInt(yearValue);
+            let startDate, endDate;
+
+            if (monthValue !== "") {
+                const month = parseInt(monthValue);
+                startDate = new Date(year, month, 1);
+                endDate = new Date(year, month + 1, 1); 
+            } else {
+                startDate = new Date(year, 0, 1);
+                endDate = new Date(year + 1, 0, 1);
+            }
 
             qHistory = query(
                 waterQualityCol, 
@@ -795,7 +881,6 @@
                 orderBy("timestamp", "desc")
             );
         } else {
-            // Default query: no month filter, limit to latest 200
             qHistory = query(
                 waterQualityCol, 
                 where("schoolId", "==", schoolId), 
@@ -806,12 +891,14 @@
 
         historyUnsubscribe = onSnapshot(qHistory, (snapshot) => {
             tbody.innerHTML = "";
-            const groupedData = {}; // Grouped by YYYY-MM or YYYY-MM-DD
+            const groupedData = {}; 
 
             if (snapshot.empty) {
                 tbody.innerHTML = "<tr><td colspan='5'>No history logs found for this selection.</td></tr>";
                 if(historyChartInstance) historyChartInstance.destroy();
                 chartContainer.style.display = "none";
+                exportBtn.style.display = "none";
+                downloadBtn.style.display = "none";
                 return;
             }
 
@@ -837,10 +924,9 @@
                 const turb = !isNaN(turbRaw) ? turbRaw.toFixed(2) : "--";
                 const tds = !isNaN(tdsRaw) ? tdsRaw.toFixed(2) : "--";
 
-                // --- DYNAMIC GROUPING LOGIC ---
                 if (parsedDate) {
-                    // If month is selected, group by Day (YYYY-MM-DD), else group by Month (YYYY-MM)
-                    const groupKey = monthValue 
+                    const isMonthlyView = (monthValue !== "");
+                    const groupKey = isMonthlyView 
                         ? `${parsedDate.getFullYear()}-${String(parsedDate.getMonth() + 1).padStart(2, '0')}-${String(parsedDate.getDate()).padStart(2, '0')}`
                         : `${parsedDate.getFullYear()}-${String(parsedDate.getMonth() + 1).padStart(2, '0')}`;
                     
@@ -863,8 +949,7 @@
                 tbody.appendChild(tr);
             });
 
-            // --- RENDER CHART ---
-            renderHistoryChart(groupedData, monthValue);
+            renderHistoryChart(groupedData, monthValue !== "", 'monthlyHistoryChart');
 
         }, (error) => {
             console.error("Error fetching history:", error);
@@ -878,15 +963,15 @@
         });
     }
 
-    // Function to calculate averages and render the Chart.js graph
-    function renderHistoryChart(groupedData, isMonthlyView) {
-        const ctx = document.getElementById('monthlyHistoryChart').getContext('2d');
+    function renderHistoryChart(groupedData, isMonthlyView, canvasId) {
+        const ctx = document.getElementById(canvasId).getContext('2d');
         
-        if (historyChartInstance) {
-            historyChartInstance.destroy();
+        if (canvasId === 'monthlyHistoryChart') {
+            if (historyChartInstance) historyChartInstance.destroy();
+        } else {
+            if (hiddenExportChartInstance) hiddenExportChartInstance.destroy();
         }
 
-        // Sort chronologically (oldest to newest)
         const labels = Object.keys(groupedData).sort();
         
         const avgCalc = (arr) => arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2) : 0;
@@ -895,19 +980,18 @@
         const turbAverages = labels.map(key => avgCalc(groupedData[key].turb));
         const tdsAverages = labels.map(key => avgCalc(groupedData[key].tds));
 
-        // Format labels based on the view
         const formattedLabels = labels.map(label => {
             const parts = label.split('-');
-            if (parts.length === 3) { // YYYY-MM-DD
+            if (parts.length === 3) { 
                 const date = new Date(parts[0], parts[1] - 1, parts[2]);
                 return date.toLocaleDateString('default', { month: 'short', day: 'numeric' });
-            } else { // YYYY-MM
+            } else { 
                 const date = new Date(parts[0], parts[1] - 1);
                 return date.toLocaleString('default', { month: 'short', year: 'numeric' });
             }
         });
 
-        historyChartInstance = new Chart(ctx, {
+        const newChart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: formattedLabels,
@@ -918,8 +1002,11 @@
                         borderColor: '#3182ce',
                         backgroundColor: 'rgba(49, 130, 206, 0.1)',
                         borderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
                         tension: 0.3,
-                        fill: true
+                        fill: true,
+                        yAxisID: 'y'
                     },
                     {
                         label: 'Avg Turbidity (NTU)',
@@ -927,7 +1014,10 @@
                         borderColor: '#dd6b20',
                         backgroundColor: 'transparent',
                         borderWidth: 2,
-                        tension: 0.3
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        tension: 0.3,
+                        yAxisID: 'y'
                     },
                     {
                         label: 'Avg TDS (ppm)',
@@ -935,13 +1025,17 @@
                         borderColor: '#805ad5',
                         backgroundColor: 'transparent',
                         borderWidth: 2,
-                        tension: 0.3
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        tension: 0.3,
+                        yAxisID: 'y1' 
                     }
                 ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                animation: false, 
                 interaction: {
                     mode: 'index',
                     intersect: false,
@@ -954,19 +1048,58 @@
                                 let label = context.dataset.label || '';
                                 if (label) { label += ': '; }
                                 if (context.parsed.y !== null) { label += context.parsed.y; }
+                                if (context.datasetIndex === 0) label += ' pH';
+                                if (context.datasetIndex === 1) label += ' NTU';
+                                if (context.datasetIndex === 2) label += ' ppm';
                                 return label;
                             }
                         }
                     }
                 },
                 scales: {
-                    y: { beginAtZero: true }
+                    x: {
+                        title: {
+                            display: true,
+                            text: isMonthlyView ? 'Date (Day)' : 'Month',
+                            font: { weight: 'bold' }
+                        }
+                    },
+                    y: { 
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'pH & Turbidity (NTU)',
+                            font: { weight: 'bold' }
+                        },
+                        beginAtZero: true
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: 'TDS (ppm)',
+                            font: { weight: 'bold' }
+                        },
+                        beginAtZero: true,
+                        grid: {
+                            drawOnChartArea: false
+                        }
+                    }
                 }
             }
         });
+
+        if (canvasId === 'monthlyHistoryChart') {
+            historyChartInstance = newChart;
+        } else {
+            hiddenExportChartInstance = newChart;
+        }
     }
 
-    // --- USER MANAGEMENT LOGIC ---
     let usersUnsubscribe = null;
 
     function loadUsers() {
@@ -1016,11 +1149,9 @@
         });
     }
 
-    // --- ADD USER FUNCTION ---
     window.openAddUserModal = function() {
         document.getElementById('addUserModal').style.display = 'flex';
         document.getElementById('newUserEmail').value = "";
-        document.getElementById('newUserPassword').value = "";
         document.getElementById('newUserRole').value = "user";
     }
 
@@ -1094,8 +1225,7 @@
         }
     }
 
-    // CONFIRM MODALS
-    let pendingDeleteType = ""; // 'school' or 'user'
+    let pendingDeleteType = ""; 
     let pendingDeleteId = null;
 
     window.openDeleteModal = function(docId) {
@@ -1137,7 +1267,6 @@
         }
     }
 
-    // --- 1. REAL-TIME SENSOR DATA LISTENER ---
     const qWater = query(waterQualityCol, limit(20));
 
     onSnapshot(qWater, (snapshot) => {
@@ -1240,8 +1369,6 @@
         return '<span style="color: orange; font-weight:bold;">Check</span>';
     }
 
-
-    // --- 2. SCHOOLS LOGIC (PAGINATION + CLIENT-SIDE SEARCH) ---
     let schoolsUnsubscribe = null;
     let currentPage = 1;
     const pageSize = 5; 
@@ -1338,7 +1465,6 @@
         });
     }
 
-    // --- SEARCH FUNCTIONS ---
     let debounceTimeout = null;
 
     window.handleSearch = function(value) {
@@ -1378,10 +1504,8 @@
         loadSchools(step);
     };
 
-    // Initial Load
     loadSchools(0);
 
-    // --- 3. UTILITY FUNCTIONS ---
     window.showAlert = function(title, message) {
         document.getElementById('alertTitle').innerText = title;
         document.getElementById('alertMessage').innerText = message;
@@ -1407,7 +1531,6 @@
         document.getElementById('shareModal').style.display = 'none';
     }
 
-    // EDIT SCHOOL FUNCTIONS
     let originalData = {}; 
 
     window.editSchool = function(id) {
@@ -1468,7 +1591,6 @@
         delete originalData[id];
     }
 
-    // ADD SCHOOL FUNCTION
     window.addSchoolToDB = async function() {
         const name = document.getElementById('newSchoolName').value.trim();
         const head = document.getElementById('newSchoolHead').value.trim();
@@ -1496,10 +1618,8 @@
         }
     }
 
-    // REPORT GENERATION
     let isWaitingForReturn = false; 
 
-    // UPDATED: Accepts schoolId and sets the hidden input
     window.openReportModal = function(schoolId, schoolName, schoolEmail) {
         document.getElementById('currentSchoolId').value = schoolId;
         document.getElementById('currentSchoolName').value = schoolName;
@@ -1524,32 +1644,40 @@
         }
     });
 
-    function addHeader(doc) {
+    function addHeader(doc, orientation = 'portrait') {
+        const pageWidth = doc.internal.pageSize.width || doc.internal.pageSize.getWidth();
+        const centerX = pageWidth / 2;
+        const rightX = pageWidth - 10;
+        
         const imgElement = document.getElementById('pdf-logo-hidden');
         if (imgElement && imgElement.complete && imgElement.naturalHeight !== 0) {
-            doc.addImage(imgElement, 'PNG', 95, 5, 20, 20); 
+            doc.addImage(imgElement, 'PNG', centerX - 10, 5, 20, 20); 
         }
         doc.setFontSize(10);
-        doc.text("Republic of the Philippines", 105, 30, null, null, "center");
-        doc.text("Department of Education", 105, 35, null, null, "center");
-        doc.text("Region III", 105, 40, null, null, "center");
+        doc.text("Republic of the Philippines", centerX, 30, null, null, "center");
+        doc.text("Department of Education", centerX, 35, null, null, "center");
+        doc.text("Region III", centerX, 40, null, null, "center");
         doc.setFontSize(11);
         doc.setFont(undefined, 'bold');
-        doc.text("Division of Mabalacat City", 105, 45, null, null, "center");
-        doc.setLineWidth(0.5); doc.line(10, 50, 200, 50); 
+        doc.text("Division of Mabalacat City", centerX, 45, null, null, "center");
+        doc.setLineWidth(0.5); doc.line(10, 50, rightX, 50); 
         doc.setFont(undefined, 'normal');
     }
 
-    function addFooter(doc, pageNum) {
+    function addFooter(doc, pageNum, totalPages = null, orientation = 'portrait') {
+        const pageWidth = doc.internal.pageSize.width || doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.height || doc.internal.pageSize.getHeight();
+        const centerX = pageWidth / 2;
+        const rightX = pageWidth - 10;
         const footerY = pageHeight - 35; 
+
         doc.setFontSize(9);
         doc.setTextColor(50, 50, 50); 
         doc.setFont(undefined, 'italic');
-        doc.text('"Serve with courtesy, act with integrity."', 105, footerY, null, null, "center");
+        doc.text('"Serve with courtesy, act with integrity."', centerX, footerY, null, null, "center");
         doc.setDrawColor(50, 50, 50); 
         doc.setLineWidth(0.7);
-        doc.line(10, footerY + 2, 200, footerY + 2);
+        doc.line(10, footerY + 2, rightX, footerY + 2);
         
         const logoY = footerY + 4;
         const logoH = 12; 
@@ -1571,8 +1699,8 @@
         doc.setFontSize(7);
         doc.setTextColor(0, 0, 0);
 
-        doc.text("P. Burgos St., Poblacion, Mabalacat City, Pampanga, 2010", 200, logoY + 3, null, null, "right");
-        doc.text("Telephone No.: (045) 402-7534", 200, logoY + 7, null, null, "right");
+        doc.text("P. Burgos St., Poblacion, Mabalacat City, Pampanga, 2010", rightX, logoY + 3, null, null, "right");
+        doc.text("Telephone No.: (045) 402-7534", rightX, logoY + 7, null, null, "right");
 
         const bottomRowY = logoY + 12; 
         doc.setFillColor(66, 103, 178); 
@@ -1588,10 +1716,45 @@
         doc.text("mabalacat.city@deped.gov.ph", 118, bottomRowY + 1);
         doc.text("🌐", 160, bottomRowY + 1);
         doc.text("www.depedmabalacat.org", 164, bottomRowY + 1);
-        doc.text("Page " + pageNum + " of 3", 200, pageHeight - 5, null, null, "right");
+        
+        const pageTxt = totalPages ? `Page ${pageNum} of ${totalPages}` : `Page ${pageNum}`;
+        doc.text(pageTxt, rightX, pageHeight - 5, null, null, "right");
     }
 
-    window.generateAndSend = async function() {
+    function getPhDescription(ph) {
+        if (ph < 3.5) return "Ultra acidic";
+        if (ph >= 3.5 && ph <= 4.4) return "Extremely acidic";
+        if (ph >= 4.5 && ph <= 5.0) return "Very strongly acidic";
+        if (ph >= 5.1 && ph <= 5.5) return "Strongly acidic";
+        if (ph >= 5.6 && ph <= 6.0) return "Moderately acidic";
+        if (ph >= 6.1 && ph <= 6.5) return "Slightly acidic";
+        if (ph >= 6.6 && ph <= 7.3) return "Neutral";
+        if (ph >= 7.4 && ph <= 7.8) return "Slightly alkaline";
+        if (ph >= 7.9 && ph <= 8.4) return "Moderately alkaline";
+        if (ph >= 8.5 && ph <= 9.0) return "Strongly alkaline";
+        return "Very strongly alkaline";
+    }
+
+    function getTdsDescription(tds) {
+        if (tds < 300) return "Excellent";
+        if (tds >= 300 && tds <= 600) return "Good";
+        if (tds >= 601 && tds <= 900) return "Fair";
+        if (tds >= 901 && tds <= 1200) return "Poor";
+        return "Unacceptable";
+    }
+
+    function getTurbidityDescription(turb) {
+        if (turb < 5) return "Excellent (Very clear)";
+        if (turb >= 5 && turb <= 10) return "Good (Clear)";
+        if (turb >= 11 && turb <= 25) return "Fair (Slightly clear)";
+        if (turb >= 26 && turb <= 50) return "Marginal (Mod. cloudy)";
+        if (turb >= 51 && turb <= 100) return "Poor (Cloudy)";
+        if (turb >= 101 && turb <= 500) return "Very cloudy";
+        if (turb >= 501 && turb <= 1000) return "Unacceptable (Muddy)";
+        return "Very muddy";
+    }
+
+    window.generateAndSend = function() {
         const tester = document.getElementById('testerName').value;
         const school = document.getElementById('currentSchoolName').value;
         const email = document.getElementById('currentSchoolEmail').value;
@@ -1602,9 +1765,9 @@
         }
 
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
+        const doc = new jsPDF('portrait');
 
-        addHeader(doc);
+        addHeader(doc, 'portrait');
         
         doc.setFontSize(12);
         doc.setFont(undefined, 'bold');
@@ -1613,7 +1776,6 @@
         doc.setFont(undefined, 'normal');
         doc.text(`Reference for: ${school}`, 14, 65);
 
-        // TABLE 1: pH Range (Top Left)
         doc.autoTable({
             startY: 70,
             head: [['Denomination', 'pH Range']],
@@ -1630,7 +1792,6 @@
         });
         let finalY_pH = doc.lastAutoTable.finalY;
 
-        // TABLE 2: TDS Level (Top Right)
         doc.autoTable({
             startY: 70, 
             head: [['Level of TDS (mg/L)', 'Rating']],
@@ -1646,8 +1807,7 @@
         let finalY_TDS_small = doc.lastAutoTable.finalY;
 
         let bottomStartY = Math.max(finalY_pH, finalY_TDS_small) + 10;
-
-        // TABLE 3: Turbidity (Bottom)
+        
         doc.autoTable({
             startY: bottomStartY,
             head: [
@@ -1672,9 +1832,9 @@
             tableWidth: 80
         });
 
-        addFooter(doc, 1);
+        addFooter(doc, 1, 2, 'portrait');
         doc.addPage();
-        addHeader(doc);
+        addHeader(doc, 'portrait');
 
         doc.setFontSize(12);
         doc.setFont(undefined, 'bold');
@@ -1684,15 +1844,15 @@
         const curTds = parseFloat(document.getElementById("tdsValue").innerText) || 0;
         const curTurb = parseFloat(document.getElementById("turbidityValue").innerText) || 0;
 
-        // --- NEW: SAVE DATA TO FIRESTORE HISTORY LOG ---
+        // --- SAVE DATA TO FIRESTORE HISTORY LOG ---
         const schoolId = document.getElementById('currentSchoolId').value;
         try {
-            await addDoc(waterQualityCol, {
+            addDoc(waterQualityCol, {
                 schoolId: schoolId,
                 phLevel: isNaN(curPh) ? 0 : curPh,
                 tds: isNaN(curTds) ? 0 : curTds,
                 turbidity: isNaN(curTurb) ? 0 : curTurb,
-                timestamp: new Date() // Forces accurate timestamp execution
+                timestamp: new Date() 
             });
             console.log("History log saved successfully.");
         } catch (error) {
@@ -1701,12 +1861,11 @@
         }
         // -----------------------------------------------
 
-        // Determine individual statuses for table
-        const phStatus = (curPh >= 6.5 && curPh <= 8.5) ? "Good" : "Check";
-        const tdsStatus = (curTds < 600) ? "Good" : "High";
-        const turbStatus = (curTurb < 10) ? "Good" : "Cloudy";
+        // Detailed descriptive statuses
+        const phStatus = getPhDescription(curPh);
+        const tdsStatus = getTdsDescription(curTds);
+        const turbStatus = getTurbidityDescription(curTurb);
 
-        // Ensure TDS is kept in the final results table
         const tableData = [
             ["pH Level", `${curPh} pH`, phStatus],
             ["Total Dissolved Solid", `${curTds} mg/L`, tdsStatus],
@@ -1722,7 +1881,6 @@
             styles: { fontSize: 10, cellPadding: 3 }
         });
 
-        // Determine overall safety remark
         const isSafe = (curPh >= 6.5 && curPh <= 8.5) && (curTds < 600) && (curTurb < 10);
         const remarkResult = isSafe ? "Safe to use" : "Not safe to use";
 
@@ -1730,7 +1888,6 @@
         doc.setFont(undefined, 'bold');
         doc.text(`REMARKS : ${remarkResult}`, 14, sigY);
 
-        // Non-drinkable disclaimer added here
         doc.setFontSize(9);
         doc.setFont(undefined, 'italic');
         doc.setTextColor(200, 0, 0); 
@@ -1744,7 +1901,7 @@
         doc.text(tester.toUpperCase(), 14, sigY + 35); 
         doc.line(14, sigY + 36, 80, sigY + 36); 
 
-        addFooter(doc, 2);
+        addFooter(doc, 2, 2, 'portrait');
 
         const filename = `${school}_Water_Report.pdf`;
         const subject = `Water Quality Report: ${school}`;
@@ -1756,34 +1913,267 @@
         const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
         if (isMobileDevice && navigator.canShare && navigator.canShare({ files: [file] })) {
-            try { await navigator.clipboard.writeText(email); } catch (e) {}
-            closeModal(); 
-            const performShare = async () => {
-                try {
-                    await navigator.share({
-                        title: subject,
-                        text: bodyText,
-                        files: [file]
-                    });
-                } catch (err) {
-                    console.log("Share cancelled or failed", err);
-                }
-            };
-            openShareModal(performShare);
+            if (email) {
+                navigator.clipboard.writeText(email).catch(e => {});
+            }
+            openShareModal(() => {
+                navigator.share({ title: subject, text: bodyText, files: [file] }).catch(err => console.log(err));
+            });
         } else {
             doc.save(filename); 
-            isWaitingForReturn = true;
             const gmailURL = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText + "\n\n(Note: Please attach the downloaded PDF manually)")}`;
+            
+            // This is synchronous with the click event, meaning it avoids modern popup blockers
             const newWindow = window.open(gmailURL, '_blank');
             if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
-                const btnElement = document.querySelector('.modal .btn-primary');
-                if(btnElement) {
-                    btnElement.innerText = "Click here to Open Gmail";
-                    btnElement.onclick = function() { window.open(gmailURL, '_blank'); };
-                }
+                showAlert("Popup Blocked", "The PDF downloaded, but your browser blocked Gmail from opening automatically.");
             } else {
                 closeModal();
             }
+        }
+    }
+
+    // --- GRAPH DETAILED PDF EXPORT LOGIC ---
+    window.openExportGraphModal = function(actionType) {
+        const schoolSelect = document.getElementById("historySchoolSelect");
+        if(!schoolSelect.value) {
+            showAlert("Action Required", "Please select a school to export data.");
+            return;
+        }
+        
+        document.getElementById("exportActionType").value = actionType;
+        document.getElementById("exportGraphModal").style.display = "flex";
+    }
+
+    window.closeExportGraphModal = function() {
+        document.getElementById("exportGraphModal").style.display = "none";
+        const btn = document.getElementById("confirmExportBtn");
+        btn.innerText = "Generate Report";
+        btn.disabled = false;
+    }
+
+    window.processGraphExport = async function() {
+        const action = document.getElementById("exportActionType").value;
+        const year = parseInt(document.getElementById("exportYear").value);
+        const monthStr = document.getElementById("exportMonth").value;
+        
+        const schoolSelect = document.getElementById("historySchoolSelect");
+        const schoolId = schoolSelect.value;
+        const schoolName = schoolSelect.options[schoolSelect.selectedIndex].text;
+        const schoolEmail = schoolSelect.options[schoolSelect.selectedIndex].getAttribute("data-email") || "";
+
+        const btn = document.getElementById("confirmExportBtn");
+        btn.innerText = "Generating...";
+        btn.disabled = true;
+
+        const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        // Anti-popup blocker trick: Open the tab synchronously before getting data
+        let mailTab = null;
+        if (action === 'email' && !isMobileDevice) {
+            mailTab = window.open('about:blank', '_blank');
+        }
+
+        try {
+            // 1. Fetch exact data from firestore
+            let startDate, endDate;
+            if (monthStr !== "") {
+                const m = parseInt(monthStr);
+                startDate = new Date(year, m, 1);
+                endDate = new Date(year, m + 1, 1);
+            } else {
+                startDate = new Date(year, 0, 1);
+                endDate = new Date(year + 1, 0, 1);
+            }
+
+            const qExport = query(
+                waterQualityCol, 
+                where("schoolId", "==", schoolId), 
+                where("timestamp", ">=", startDate),
+                where("timestamp", "<", endDate),
+                orderBy("timestamp", "desc")
+            );
+
+            const snapshot = await getDocs(qExport);
+            
+            if(snapshot.empty) {
+                if (mailTab) mailTab.close();
+                closeExportGraphModal();
+                showAlert("No Data", "There is no data available for the selected timeframe to generate a report.");
+                return;
+            }
+
+            const groupedData = {};
+            const detailedTableData = [];
+
+            // NEW: Variables for analysis
+            let sumPh = 0, countPh = 0;
+            let sumTurb = 0, countTurb = 0;
+            let sumTds = 0, countTds = 0;
+
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                
+                let timeString = "Unknown Time";
+                let parsedDate = null;
+                if (data.timestamp && data.timestamp.toDate) {
+                    parsedDate = data.timestamp.toDate();
+                } else if (data.timestamp) {
+                    parsedDate = new Date(data.timestamp);
+                }
+                if(parsedDate) timeString = parsedDate.toLocaleString(); 
+
+                const phRaw = parseFloat(data.phLevel);
+                const turbRaw = parseFloat(data.turbidity);
+                const tdsRaw = parseFloat(data.tds);
+
+                // NEW: Accumulate for analysis
+                if (!isNaN(phRaw)) { sumPh += phRaw; countPh++; }
+                if (!isNaN(turbRaw)) { sumTurb += turbRaw; countTurb++; }
+                if (!isNaN(tdsRaw)) { sumTds += tdsRaw; countTds++; }
+
+                const ph = !isNaN(phRaw) ? phRaw.toFixed(2) : "--";
+                const turb = !isNaN(turbRaw) ? turbRaw.toFixed(2) : "--";
+                const tds = !isNaN(tdsRaw) ? tdsRaw.toFixed(2) : "--";
+                
+                let statusText = "Check";
+                if ((phRaw >= 6.5 && phRaw <= 8.5) && turbRaw <= 10 && tdsRaw <= 600) statusText = "Normal";
+
+                detailedTableData.push([timeString, ph, turb, tds, statusText]);
+
+                if (parsedDate) {
+                    const isMonthlyView = (monthStr !== "");
+                    const groupKey = isMonthlyView 
+                        ? `${parsedDate.getFullYear()}-${String(parsedDate.getMonth() + 1).padStart(2, '0')}-${String(parsedDate.getDate()).padStart(2, '0')}`
+                        : `${parsedDate.getFullYear()}-${String(parsedDate.getMonth() + 1).padStart(2, '0')}`;
+                    
+                    if (!groupedData[groupKey]) groupedData[groupKey] = { ph: [], turb: [], tds: [] };
+                    if (!isNaN(phRaw)) groupedData[groupKey].ph.push(phRaw);
+                    if (!isNaN(turbRaw)) groupedData[groupKey].turb.push(turbRaw);
+                    if (!isNaN(tdsRaw)) groupedData[groupKey].tds.push(tdsRaw);
+                }
+            });
+
+            // NEW: Generate Analysis Text
+            let avgPh = countPh > 0 ? (sumPh / countPh) : 0;
+            let avgTurb = countTurb > 0 ? (sumTurb / countTurb) : 0;
+            let avgTds = countTds > 0 ? (sumTds / countTds) : 0;
+            
+            const mSelect = document.getElementById("exportMonth");
+            const monthTextName = monthStr !== "" ? mSelect.options[mSelect.selectedIndex].text : "the year";
+            const timeframeText = monthStr !== "" ? `the month of ${monthTextName} ${year}` : `the year ${year}`;
+            
+            let analysisText = `Data Analysis: For ${timeframeText}, the average water quality readings indicate that the water is ${getPhDescription(avgPh).toLowerCase()} (Avg pH: ${avgPh.toFixed(2)}), ${getTurbidityDescription(avgTurb).toLowerCase()} (Avg Turbidity: ${avgTurb.toFixed(2)} NTU), and has a TDS level of ${avgTds.toFixed(2)} ppm (${getTdsDescription(avgTds).toLowerCase()}).`;
+
+            // 2. Generate Chart on Hidden Canvas
+            renderHistoryChart(groupedData, monthStr !== "", 'hiddenExportChart');
+            
+            // Allow brief moment for chart.js to draw before converting to image
+            setTimeout(async () => {
+                const canvas = document.getElementById('hiddenExportChart');
+                
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = canvas.width;
+                tempCanvas.height = canvas.height;
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCtx.fillStyle = '#ffffff';
+                tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+                tempCtx.drawImage(canvas, 0, 0);
+                
+                const chartImgData = tempCanvas.toDataURL('image/jpeg', 1.0);
+
+                // 3. Build the Multi-page PDF
+                const { jsPDF } = window.jspdf;
+                const docPdf = new jsPDF('landscape');
+                
+                const monthText = monthStr !== "" ? document.getElementById("exportMonth").options[document.getElementById("exportMonth").selectedIndex].text : "Whole Year";
+                
+                // --- PAGE 1: GRAPH ---
+                addHeader(docPdf, 'landscape');
+                docPdf.setFontSize(16);
+                docPdf.setFont(undefined, 'bold');
+                docPdf.text(`Detailed Analytics Graph - ${schoolName}`, 14, 60);
+                docPdf.setFontSize(11);
+                docPdf.setFont(undefined, 'normal');
+                docPdf.text(`Timeframe: ${monthText} ${year}`, 14, 66);
+
+                docPdf.addImage(chartImgData, 'JPEG', 14, 70, 269, 100);
+
+                // --- PAGE 2+: DETAILED TABLE ---
+                docPdf.addPage();
+                addHeader(docPdf, 'landscape');
+                docPdf.setFontSize(14);
+                docPdf.setFont(undefined, 'bold');
+                docPdf.text("Detailed Water Quality Data Logs", 14, 60);
+
+                // NEW: Add Analysis Text to PDF
+                docPdf.setFontSize(10);
+                docPdf.setFont(undefined, 'normal');
+                let splitAnalysis = docPdf.splitTextToSize(analysisText, 260);
+                docPdf.text(splitAnalysis, 14, 68);
+                
+                let tableStartY = 68 + (splitAnalysis.length * 5) + 5;
+
+                docPdf.autoTable({
+                    startY: tableStartY, // Changed from 65
+                    head: [['Date/Time', 'pH Level', 'Turbidity (NTU)', 'TDS (ppm)', 'Status']],
+                    body: detailedTableData,
+                    theme: 'grid',
+                    headStyles: { fillColor: [50, 50, 50], textColor: [255, 255, 255] },
+                    styles: { fontSize: 9, cellPadding: 2 }
+                });
+
+                // Attach Footer to all Pages
+                const totalPages = docPdf.internal.getNumberOfPages();
+                for (let i = 1; i <= totalPages; i++) {
+                    docPdf.setPage(i);
+                    addFooter(docPdf, i, totalPages, 'landscape');
+                }
+
+                const filename = `${schoolName.replace(/\s+/g, '_')}_Detailed_Report_${year}.pdf`;
+
+                closeExportGraphModal();
+
+                // 4. Handle Action (Download vs Email)
+                if (action === 'download') {
+                    docPdf.save(filename);
+                    if (mailTab) mailTab.close(); // Close the blank tab if download was selected by mistake
+                } else {
+                    const subject = `Water Quality Analytics Report: ${schoolName}`;
+                    const bodyText = `Hello,\n\nPlease find the attached detailed analytical graph and data logs for ${schoolName} covering ${monthText} ${year}.`;
+
+                    const pdfBlob = docPdf.output('blob');
+                    const file = new File([pdfBlob], filename, { type: "application/pdf" });
+
+                    if (isMobileDevice && navigator.canShare && navigator.canShare({ files: [file] })) {
+                        if (schoolEmail) {
+                            try { await navigator.clipboard.writeText(schoolEmail); } catch (e) {}
+                        }
+                        const performShare = async () => {
+                            try {
+                                await navigator.share({ title: subject, text: bodyText, files: [file] });
+                            } catch (err) {
+                                console.log("Share cancelled or failed", err);
+                            }
+                        };
+                        openShareModal(performShare);
+                    } else {
+                        docPdf.save(filename); 
+                        const gmailURL = `https://mail.google.com/mail/?view=cm&fs=1&to=${schoolEmail}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText + "\n\n(Note: Please attach the downloaded PDF manually)")}`;
+                        if (mailTab) {
+                            mailTab.location.href = gmailURL;
+                        } else {
+                            window.open(gmailURL, '_blank');
+                        }
+                    }
+                }
+
+            }, 200);
+            
+        } catch (e) {
+            if (mailTab) mailTab.close();
+            closeExportGraphModal();
+            showAlert("Export Error", e.message);
         }
     }
     </script>
