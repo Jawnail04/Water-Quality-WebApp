@@ -256,7 +256,7 @@
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1); 
             margin-bottom: 30px; 
         }
-        .table-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .table-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; transition: all 0.3s ease; }
         table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 600px; }
         th, td { text-align: left; padding: 15px; border-bottom: 1px solid rgba(113, 128, 150, 0.2); }
         th { color: #4a5568; font-weight: 700; font-size: 0.9rem; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -455,8 +455,13 @@
                 </section>
 
                 <section class="data-section">
-                    <h3>Recent Sensor Readings</h3>
-                    <div class="table-wrapper">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3 style="margin: 0;">Recent Sensor Readings</h3>
+                        <button class="btn btn-cancel" onclick="toggleReadings()" id="toggleReadingsBtn" style="padding: 5px 10px; font-size: 0.85rem;">
+                            <i class="ri-arrow-up-s-line"></i> Hide
+                        </button>
+                    </div>
+                    <div class="table-wrapper" id="readingsTableWrapper">
                         <table>
                             <thead><tr><th>Time</th><th>pH Level</th><th>Turbidity (NTU)</th><th>TDS (ppm)</th><th>Status</th></tr></thead>
                             <tbody id="readingsTableBody">
@@ -748,7 +753,6 @@
     <script type="module">
     import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    // ADDED getDocs TO THE IMPORT LIST FOR EXPORT GENERATION
     import { getFirestore, collection, addDoc, setDoc, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy, limit, startAfter, endBefore, limitToLast, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -795,6 +799,20 @@
             document.getElementById('page-title').innerText = "User Management";
             document.getElementById('page-subtitle').innerText = "Manage admins and access roles";
             loadUsers(); 
+        }
+    }
+
+    // --- TOGGLE RECENT READINGS TABLE ---
+    window.toggleReadings = function() {
+        const wrapper = document.getElementById("readingsTableWrapper");
+        const btn = document.getElementById("toggleReadingsBtn");
+        
+        if (wrapper.style.display === "none") {
+            wrapper.style.display = "block";
+            btn.innerHTML = '<i class="ri-arrow-up-s-line"></i> Hide';
+        } else {
+            wrapper.style.display = "none";
+            btn.innerHTML = '<i class="ri-arrow-down-s-line"></i> Show';
         }
     }
 
@@ -1020,35 +1038,46 @@
                     {
                         label: 'Avg pH Level',
                         data: phAverages,
-                        borderColor: '#3182ce',
-                        backgroundColor: 'rgba(49, 130, 206, 0.1)',
-                        borderWidth: 2,
-                        pointRadius: 4,
-                        pointHoverRadius: 6,
-                        tension: 0.3,
-                        fill: true,
+                        borderColor: '#1a365d', // Dark blue from image
+                        backgroundColor: '#1a365d',
+                        borderWidth: 3,
+                        pointRadius: 7,
+                        pointBackgroundColor: '#1a365d',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointHoverRadius: 9,
+                        tension: 0.1, // Slight curve, mostly straight
+                        fill: false,
                         yAxisID: 'y'
                     },
                     {
                         label: 'Avg Turbidity (NTU)',
                         data: turbAverages,
-                        borderColor: '#dd6b20',
-                        backgroundColor: 'transparent',
-                        borderWidth: 2,
-                        pointRadius: 4,
-                        pointHoverRadius: 6,
-                        tension: 0.3,
+                        borderColor: '#3f6c2f', // Dark green from image
+                        backgroundColor: '#3f6c2f',
+                        borderWidth: 3,
+                        pointRadius: 7,
+                        pointBackgroundColor: '#3f6c2f',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointHoverRadius: 9,
+                        tension: 0.1,
+                        fill: false,
                         yAxisID: 'y'
                     },
                     {
                         label: 'Avg TDS (ppm)',
                         data: tdsAverages,
-                        borderColor: '#805ad5',
-                        backgroundColor: 'transparent',
-                        borderWidth: 2,
-                        pointRadius: 4,
-                        pointHoverRadius: 6,
-                        tension: 0.3,
+                        borderColor: '#d69e2e', // Golden yellow to match the 3rd highlighted color context
+                        backgroundColor: '#d69e2e',
+                        borderWidth: 3,
+                        pointRadius: 7,
+                        pointBackgroundColor: '#d69e2e',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointHoverRadius: 9,
+                        tension: 0.1,
+                        fill: false,
                         yAxisID: 'y1' 
                     }
                 ]
@@ -1062,7 +1091,13 @@
                     intersect: false,
                 },
                 plugins: {
-                    legend: { position: 'top' },
+                    legend: { 
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            boxWidth: 8
+                        }
+                    },
                     tooltip: {
                         callbacks: {
                             label: function(context) {
@@ -1080,6 +1115,7 @@
                 },
                 scales: {
                     x: {
+                        grid: { display: false }, // Cleaner look, hides vertical gridlines like the reference
                         title: {
                             display: true,
                             text: isMonthlyView ? 'Date (Day)' : 'Month',
@@ -1090,6 +1126,7 @@
                         type: 'linear',
                         display: true,
                         position: 'left',
+                        grid: { color: 'rgba(0,0,0,0.05)' }, // Faint horizontal gridlines
                         title: {
                             display: true,
                             text: 'pH & Turbidity (NTU)',
@@ -1101,15 +1138,13 @@
                         type: 'linear',
                         display: true,
                         position: 'right',
+                        grid: { drawOnChartArea: false },
                         title: {
                             display: true,
                             text: 'TDS (ppm)',
                             font: { weight: 'bold' }
                         },
-                        beginAtZero: true,
-                        grid: {
-                            drawOnChartArea: false
-                        }
+                        beginAtZero: true
                     }
                 }
             }
@@ -1292,47 +1327,56 @@
         }
     }
 
-    // --- 1. REAL-TIME SENSOR DATA LISTENER ---
-    const qWater = query(waterQualityCol, limit(20));
+    // --- 1. REAL-TIME SENSOR DATA LISTENER (OPTION 2: LOCAL MEMORY HACK) ---
+    // Added orderBy to ensure the system always pulls the newest reading
+    const qWater = query(waterQualityCol, orderBy("timestamp", "desc"), limit(1));
+    let localRecentReadings = []; // This array stores the history while the tab is open
 
     onSnapshot(qWater, (snapshot) => {
         const readingsBody = document.getElementById("readingsTableBody");
-        readingsBody.innerHTML = ""; 
 
         if (snapshot.empty) {
-            readingsBody.innerHTML = "<tr><td colspan='5'>No sensor data found in 'waterQuality'.</td></tr>";
+            readingsBody.innerHTML = "<tr><td colspan='5'>No sensor data found.</td></tr>";
             return;
         }
 
-        let readings = [];
-        snapshot.forEach(doc => {
-            readings.push(doc.data());
-        });
+        // Get the single live document
+        const docSnap = snapshot.docs[0];
+        const data = docSnap.data();
 
-        if (readings.length > 0) {
-            updateDashboardCards(readings[0]);
+        // Check to make sure we don't accidentally duplicate data if Firebase fires twice
+        const lastReading = localRecentReadings.length > 0 ? localRecentReadings[0] : null;
+        const isDuplicate = lastReading && 
+                            lastReading.phLevel === data.phLevel && 
+                            lastReading.turbidity === data.turbidity && 
+                            lastReading.tds === data.tds;
+
+        if (!isDuplicate) {
+            // Add a local javascript timestamp because the ESP32 doesn't have one
+            data.localTimestamp = new Date();
+            
+            // Add the new reading to the top of our local array
+            localRecentReadings.unshift(data);
+
+            // Limit the array to keep only the 10 most recent readings
+            if (localRecentReadings.length > 10) {
+                localRecentReadings.pop();
+            }
         }
 
-        readings.forEach(data => {
-            let timeString = "Live Data";
+        // Update the big dashboard cards using the newest data at the top of the array
+        if (localRecentReadings.length > 0) {
+            updateDashboardCards(localRecentReadings[0]);
+        }
 
-            if (data.timestamp) {
-                if (typeof data.timestamp.toDate === 'function') {
-                    timeString = data.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                } else {
-                    const parsedDate = new Date(data.timestamp);
-                    if (!isNaN(parsedDate.getTime())) { 
-                        timeString = parsedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                    }
-                }
-            } else {
-                const fallbackDate = new Date();
-                timeString = fallbackDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            }
+        // Clear the table and build it completely from our local array
+        readingsBody.innerHTML = ""; 
 
-            const ph = data.phLevel !== undefined ? parseFloat(data.phLevel).toFixed(2) : "--";
-            const turb = data.turbidity !== undefined ? parseFloat(data.turbidity).toFixed(2) : "--";
-            const tds = data.tds !== undefined ? parseFloat(data.tds).toFixed(2) : "--";
+        localRecentReadings.forEach(row => {
+            const timeString = row.localTimestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const ph = row.phLevel !== undefined ? parseFloat(row.phLevel).toFixed(2) : "--";
+            const turb = row.turbidity !== undefined ? parseFloat(row.turbidity).toFixed(2) : "--";
+            const tds = row.tds !== undefined ? parseFloat(row.tds).toFixed(2) : "--";
             
             const tr = document.createElement("tr");
             tr.innerHTML = `
@@ -1344,9 +1388,10 @@
             `;
             readingsBody.appendChild(tr);
         });
-        }, (error) => {
-            console.error("Error fetching water data:", error);
-        });
+
+    }, (error) => {
+        console.error("Error fetching water data:", error);
+    });
 
     function updateDashboardCards(data) {
         const phVal = data.phLevel !== undefined ? data.phLevel : 0;
@@ -1882,6 +1927,7 @@
         const curTurb = parseFloat(document.getElementById("turbidityValue").innerText) || 0;
 
         // --- SAVE DATA TO FIRESTORE HISTORY LOG ---
+        // Restored schoolId here so historical filters can scan it!
         const schoolId = document.getElementById('currentSchoolId').value;
         try {
             addDoc(waterQualityCol, {
